@@ -310,30 +310,48 @@
             <!-- ================= PAGE: PROMOTIONS ================= -->
             <div id="page-promo" class="page-content hidden">
                 <h1 class="text-3xl font-bold text-slate-900 mb-2">🔮 Projeção de Promoções (CAP ➡️ MAJ)</h1>
-                <p class="text-slate-500 mb-8">Simulação de promoções com base nas vagas disponíveis. Oficiais agregados não ocupam vaga no quadro de efetivos.</p>
+                <p class="text-slate-500 mb-8">Simulação baseada no Decreto n.º 6.791 de 04 de Junho de 1982. Oficiais agregados não contam vaga.</p>
                 
-                <div class="bg-white p-8 rounded-lg shadow-sm border border-slate-200 space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Left: Inputs -->
+                    <div class="bg-white p-8 rounded-lg shadow-sm border border-slate-200 space-y-6">
                         <div>
                             <label class="block text-sm font-semibold text-slate-700 mb-2">Vagas de Major Disponíveis</label>
                             <input type="number" id="promo-vacancies" value="4" min="0" class="w-full border rounded px-3 py-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none text-lg">
                         </div>
-                        <div class="md:col-span-3 bg-blue-50 p-5 rounded border border-blue-200 text-sm text-slate-700 min-h-[100px]">
-                            <span class="font-bold block text-blue-900 mb-2 text-base">📋 Resumo das Promoções Calculadas:</span>
-                            <span id="promo-summary">Informe o número de vagas ao lado para ver quem será promovido.</span>
+                        
+                        <div class="border-t pt-4 space-y-3 text-sm text-slate-600">
+                            <div>
+                                <span class="font-bold text-slate-800 block">📊 Estatísticas do Quadro:</span>
+                                <span id="promo-stat-captains">Total de Capitães: 0</span><br>
+                                <span id="promo-stat-active">Capitães Ativos: 0</span><br>
+                                <span id="promo-stat-limit">Limite Faixa de Acesso (Art. 4º): 0</span>
+                            </div>
+                            <div class="bg-slate-50 p-4 rounded border border-slate-200 space-y-1 text-xs">
+                                <span class="font-bold text-slate-800 block mb-1">⚖️ Distribuição de Vagas (Art. 38, b):</span>
+                                <span id="promo-dist-antiguidade">• Antiguidade: 0 vagas</span><br>
+                                <span id="promo-dist-merecimento">• Merecimento: 0 vagas</span>
+                            </div>
                         </div>
                     </div>
-                    
-                    <div class="bg-slate-50 p-6 rounded border border-slate-200 mt-6 text-sm text-slate-600">
-                        <h5 class="font-bold text-slate-800 mb-2">💡 Nota de Funcionamento:</h5>
-                        <ul class="list-disc pl-5 space-y-1">
-                            <li>Capitães são promovidos estritamente por ordem de antiguidade (ID original de 17 em diante).</li>
-                            <li>Os policiais com marcação de Agregado (SIM) são promovidos, porém <strong>não contam vaga</strong> (não consomem as vagas informadas na simulação).</li>
-                            <li>Na página <strong>📋 Quadro Geral</strong>, os oficiais na lista de promoção serão destacados na cor <strong>verde</strong>.</li>
-                            <li class="font-semibold text-blue-700 admin-only">Você está logado como Administrador e pode alterar a quantidade de vagas.</li>
-                            <li class="font-semibold text-amber-700 user-only">Você está logado como Usuário. A alteração de vagas está desabilitada (somente consulta).</li>
-                        </ul>
+
+                    <!-- Right: Results -->
+                    <div class="lg:col-span-2 bg-white p-8 rounded-lg shadow-sm border border-slate-200 space-y-6">
+                        <h3 class="text-lg font-bold text-slate-800 border-b pb-2">📋 Resultado da Projeção de Promoções</h3>
+                        <div id="promo-results-container" class="space-y-4">
+                            <!-- Filled by JS -->
+                        </div>
                     </div>
+                </div>
+                
+                <div class="bg-slate-100 p-6 rounded border border-slate-200 mt-8 text-sm text-slate-600">
+                    <h5 class="font-bold text-slate-800 mb-2">⚖️ Regras do Decreto Aplicadas:</h5>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li><strong>Art. 4º (Faixa de Acesso)</strong>: Limite quantitativo para o Quadro de Acesso. Se houver mais de 10 capitães ativos, o limite de aptos é 10 + 1/4 do excesso (arredondado para cima). Oficiais fora da faixa são inabilitados.</li>
+                        <li><strong>Art. 38, b (Distribuição)</strong>: Promoções a Major são divididas em proporção 1 por Antiguidade e 1 por Merecimento (1:1).</li>
+                        <li><strong>Art. 8º (Interstício)</strong>: O Capitão deve possuir no mínimo 24 meses (2 anos) no posto atual na data da promoção. Caso contrário, estará inabilitado por falta de interstício.</li>
+                        <li><strong>Agregados</strong>: São promovidos por antiguidade caso estejam na fila, porém <strong>não consomem</strong> as vagas simuladas (Art. 53/54).</li>
+                    </ul>
                 </div>
             </div>
 
@@ -386,6 +404,11 @@
                             <div>
                                 <label class="block text-sm font-semibold text-slate-700 mb-1">Data de Entrada na PMDF</label>
                                 <input type="date" id="add-entry" required class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">Data de Promoção ao Posto Atual (Opcional)</label>
+                                <input type="date" id="add-promotion-date" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                <span class="text-xs text-slate-400">Usado para o cálculo de interstício (CAP: 2 anos, MAJ: 1.5 anos)</span>
                             </div>
                         </div>
                         
@@ -468,6 +491,10 @@
                                 <label class="block text-sm font-semibold text-slate-700 mb-1">Data de Entrada na PMDF</label>
                                 <input type="date" id="edit-entry" required class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500">
                             </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">Data de Promoção ao Posto Atual (Opcional)</label>
+                                <input type="date" id="edit-promotion-date" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500">
+                            </div>
                         </div>
                         
                         <div class="space-y-6">
@@ -546,7 +573,7 @@
     <!-- Application Script (calculations engine and DB) -->
     <script>
         // Database
-        const INITIAL_OFFICERS = [{"id": 1, "rank": "MAJ", "name": "CARLOS ROBERTO DE ARAÚJO", "agregado": false, "entry_date": "01/01/1988", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [38, 7, 18], "total_time_expected": [38, 7, 18], "toll_expected": [0, 0, 0], "rr_expected": true, "missing_expected": [0, 0, 0]}, {"id": 2, "rank": "MAJ", "name": "EDSON DE ARAÚJO AGUIAR", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 3, "rank": "MAJ", "name": "ARNALDO JOSÉ NEVES", "agregado": false, "entry_date": "12/08/1996", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [30, 0, 7], "total_time_expected": [30, 0, 7], "toll_expected": [1, 1, 16], "rr_expected": false, "missing_expected": [1, 1, 9]}, {"id": 4, "rank": "MAJ", "name": "JULIANA ALVES FERNANDES DE MELO", "agregado": true, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 5, "rank": "MAJ", "name": "MAIRA MRAD TEIXEIRA SILVA", "agregado": true, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 6, "rank": "MAJ", "name": "RODRIGO CASTRO DE FREITAS", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 7, "rank": "MAJ", "name": "GILMAR JOSÉ RODRIGUES", "agregado": false, "entry_date": "12/08/1996", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [30, 0, 7], "total_time_expected": [30, 0, 7], "toll_expected": [1, 1, 16], "rr_expected": false, "missing_expected": [1, 1, 9]}, {"id": 8, "rank": "MAJ", "name": "GILDÉSIO ALVES DE OLIVEIRA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [2, 4, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [29, 2, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [2, 5, 13]}, {"id": 9, "rank": "MAJ", "name": "GUSTAVO CANDEIA COSTA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 10, "rank": "MAJ", "name": "JONAS APARECIDO DIAS", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 11, "rank": "MAJ", "name": "RODRIGO PRETEL PARENTE CORREIA", "agregado": true, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 11, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [27, 9, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [3, 10, 13]}, {"id": 12, "rank": "MAJ", "name": "JEISSON ANTÔNIO DA SILVA", "agregado": true, "entry_date": "15/05/1996", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [30, 3, 4], "total_time_expected": [30, 3, 4], "toll_expected": [1, 1, 1], "rr_expected": false, "missing_expected": [0, 9, 27]}, {"id": 13, "rank": "MAJ", "name": "LEONARDO ANTUNES E SILVA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 14, "rank": "MAJ", "name": "ADRIANO GOMES DUARTE", "agregado": false, "entry_date": "15/05/1996", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [30, 3, 4], "total_time_expected": [30, 3, 4], "toll_expected": [1, 1, 1], "rr_expected": false, "missing_expected": [0, 9, 27]}, {"id": 15, "rank": "MAJ", "name": "JOÃO TIELLES DAMASCENO", "agregado": true, "entry_date": "15/05/1996", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [30, 3, 4], "total_time_expected": [30, 3, 4], "toll_expected": [1, 1, 1], "rr_expected": false, "missing_expected": [0, 9, 27]}, {"id": 16, "rank": "MAJ", "name": "JEAN KARTER SOUZA DE OLIVEIRA", "agregado": false, "entry_date": "15/05/1996", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [30, 3, 4], "total_time_expected": [30, 3, 4], "toll_expected": [1, 1, 1], "rr_expected": false, "missing_expected": [0, 9, 27]}, {"id": 17, "rank": "CAP", "name": "ADRIANO ROSA EDUARDO", "agregado": true, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [1, 11, 15], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [28, 10, 3], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [2, 9, 28]}, {"id": 18, "rank": "CAP", "name": "CIDCLAY COSTA DE ABREU", "agregado": false, "entry_date": "15/05/1996", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [1, 0, 8], "pmdf_time_expected": [30, 3, 4], "total_time_expected": [31, 3, 12], "toll_expected": [1, 1, 1], "rr_expected": true, "missing_expected": [0, 0, 0]}, {"id": 19, "rank": "CAP", "name": "DAVI GERMANO", "agregado": false, "entry_date": "01/08/1993", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [33, 0, 18], "total_time_expected": [33, 0, 18], "toll_expected": [0, 7, 13], "rr_expected": true, "missing_expected": [0, 0, 0]}, {"id": 20, "rank": "CAP", "name": "HUADSON FABRÍCIO BESERRA TEIXEIRA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 21, "rank": "CAP", "name": "PAULO DE TARSO ARAÚJO NOGUEIRA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 6, 2], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [27, 4, 20], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 3, 11]}, {"id": 22, "rank": "CAP", "name": "MÁRCIO PEREIRA COIMBRA", "agregado": true, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [1, 6, 1], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [28, 4, 19], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [3, 3, 12]}, {"id": 23, "rank": "CAP", "name": "RONAN CASTILHO GONÇALVES", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [5, 2, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [32, 0, 18], "toll_expected": [1, 8, 1], "rr_expected": true, "missing_expected": [0, 0, 0]}, {"id": 24, "rank": "CAP", "name": "DJALMA GOMES MENDES JUNIOR", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 25, "rank": "CAP", "name": "EDUARDO ALVES DINIZ", "agregado": true, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 26, "rank": "CAP", "name": "ELIAS PEREIRA DE OLIVEIRA JUNIOR", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 27, "rank": "CAP", "name": "WARLLEY LIMA DA SILVA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 28, "rank": "CAP", "name": "JOVINIANO DA SILVA MELO", "agregado": false, "entry_date": "07/03/1995", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [31, 5, 12], "total_time_expected": [31, 5, 12], "toll_expected": [0, 10, 22], "rr_expected": true, "missing_expected": [0, 0, 0]}, {"id": 29, "rank": "CAP", "name": "CLAUBERT NEVES SÁ ABREU", "agregado": false, "entry_date": "15/05/1996", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 3, 9], "pmdf_time_expected": [30, 3, 4], "total_time_expected": [30, 6, 13], "toll_expected": [1, 1, 1], "rr_expected": false, "missing_expected": [0, 6, 18]}, {"id": 30, "rank": "CAP", "name": "VANDERLEY ALMEIDA BANDEIRA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 31, "rank": "CAP", "name": "NÉLITON LÚCIO ALVES", "agregado": false, "entry_date": "15/05/1995", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [31, 3, 4], "total_time_expected": [31, 3, 4], "toll_expected": [0, 11, 4], "rr_expected": true, "missing_expected": [0, 0, 0]}, {"id": 32, "rank": "CAP", "name": "NILS NILSON CORRÊA PINHEIRO", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 33, "rank": "CAP", "name": "MAURICIO JUNIOR PERPETUO SALES", "agregado": false, "entry_date": "07/03/1995", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [31, 5, 12], "total_time_expected": [31, 5, 12], "toll_expected": [0, 10, 22], "rr_expected": true, "missing_expected": [0, 0, 0]}, {"id": 34, "rank": "CAP", "name": "EUCIMAR DIOGENES DE MEDEIROS", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 35, "rank": "CAP", "name": "FERNANDO DIAS MARTINS", "agregado": false, "entry_date": "15/05/1995", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 10, 0], "pmdf_time_expected": [31, 3, 4], "total_time_expected": [32, 1, 4], "toll_expected": [0, 11, 4], "rr_expected": true, "missing_expected": [0, 0, 0]}, {"id": 36, "rank": "CAP", "name": "RIVAN PINTO BONIFÁCIO", "agregado": false, "entry_date": "01/04/1988", "current_date": "19/08/2026", "ffaa_time": [1, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [38, 4, 18], "total_time_expected": [39, 4, 18], "toll_expected": [0, 0, 0], "rr_expected": true, "missing_expected": [0, 0, 0]}, {"id": 37, "rank": "CAP", "name": "JOSE WELLINGTON DE OLIVEIRA BARROS JR", "agregado": true, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [5, 1, 29], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [31, 11, 17], "toll_expected": [1, 8, 1], "rr_expected": true, "missing_expected": [0, 0, 0]}, {"id": 38, "rank": "CAP", "name": "FABIO JUNIO OLIVEIRA RAMOS", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 39, "rank": "CAP", "name": "ARLAN CHARLES DE SOUSA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [2, 2, 17], "civil_time": [0, 11, 29], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [30, 1, 4], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [1, 6, 27]}, {"id": 40, "rank": "CAP", "name": "EDSON PINTO GOMES", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [2, 7, 29], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [29, 6, 17], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [2, 1, 14]}, {"id": 41, "rank": "CAP", "name": "GLAUCO SOARES DE ALMEIDA", "agregado": false, "entry_date": "10/03/1997", "current_date": "19/08/2026", "ffaa_time": [2, 1, 1], "civil_time": [0, 0, 0], "pmdf_time_expected": [29, 5, 9], "total_time_expected": [31, 5, 10], "toll_expected": [1, 2, 21], "rr_expected": true, "missing_expected": [0, 0, 0]}, {"id": 42, "rank": "CAP", "name": "CLEUTER GODINHO DO NASCIMENTO", "agregado": false, "entry_date": "15/05/1996", "current_date": "19/08/2026", "ffaa_time": [0, 8, 23], "civil_time": [1, 0, 27], "pmdf_time_expected": [30, 3, 4], "total_time_expected": [32, 0, 24], "toll_expected": [1, 1, 1], "rr_expected": true, "missing_expected": [0, 0, 0]}, {"id": 43, "rank": "CAP", "name": "WELLINGTON LEITE DE SOUZA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [1, 1, 10], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [27, 10, 28], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [3, 9, 3]}, {"id": 44, "rank": "CAP", "name": "LEURIMAR DE SOUZA DUTRA", "agregado": false, "entry_date": "12/08/1996", "current_date": "19/08/2026", "ffaa_time": [1, 0, 4], "civil_time": [0, 0, 0], "pmdf_time_expected": [30, 0, 7], "total_time_expected": [31, 0, 11], "toll_expected": [1, 1, 16], "rr_expected": false, "missing_expected": [0, 1, 5]}, {"id": 45, "rank": "CAP", "name": "CLAUDIO JEAN DA SILVA PIRES", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [1, 1, 15], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [27, 11, 3], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [3, 8, 28]}, {"id": 46, "rank": "CAP", "name": "ANTÔNIO ARAÚJO MESQUITA FILHO", "agregado": true, "entry_date": "01/08/1993", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [33, 0, 18], "total_time_expected": [33, 0, 18], "toll_expected": [0, 7, 13], "rr_expected": true, "missing_expected": [0, 0, 0]}, {"id": 47, "rank": "CAP", "name": "ANDERSON AUGUSTO CAVALCANTI BATISTA", "agregado": false, "entry_date": "15/05/1996", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [30, 3, 4], "total_time_expected": [30, 3, 4], "toll_expected": [1, 1, 1], "rr_expected": false, "missing_expected": [0, 9, 27]}, {"id": 48, "rank": "CAP", "name": "URSULLA PRISCYLLA RABELO", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 49, "rank": "CAP", "name": "IURE DA SILVA CUNHA", "agregado": false, "entry_date": "01/03/1994", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 11, 0], "pmdf_time_expected": [32, 5, 18], "total_time_expected": [33, 4, 18], "toll_expected": [0, 8, 19], "rr_expected": true, "missing_expected": [0, 0, 0]}, {"id": 50, "rank": "CAP", "name": "ALECIO DE SOUSA LEMOS", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [5, 6, 2], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [32, 4, 20], "toll_expected": [1, 8, 1], "rr_expected": true, "missing_expected": [0, 0, 0]}, {"id": 51, "rank": "CAP", "name": "ADILSON ARAUJO LIMA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [2, 8, 26], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [29, 7, 14], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [2, 0, 17]}, {"id": 52, "rank": "CAP", "name": "JULIO EMANUEL DANTAS DE MOURA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [3, 2, 7], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [30, 0, 25], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [1, 7, 6]}, {"id": 53, "rank": "CAP", "name": "CLEBER CARVALHO DOS ANJOS", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 54, "rank": "CAP", "name": "ANA PAULA MARQUES MOURA DA CRUZ", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 55, "rank": "CAP", "name": "SAULO JOAQUIM NEIVA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 56, "rank": "CAP", "name": "FABIANO AUGUSTO DE SOUZA MOREIRA", "agregado": true, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [1, 5, 6], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [28, 3, 24], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [3, 4, 7]}, {"id": 57, "rank": "CAP", "name": "RONALDO RODRIGUES DA SILVA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 58, "rank": "CAP", "name": "ALEXANDRE HONORIO DA SILVA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 59, "rank": "CAP", "name": "JOAQUIM MANOEL DO NASCIMENTO FILHO", "agregado": false, "entry_date": "01/08/1996", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [30, 0, 18], "total_time_expected": [30, 0, 18], "toll_expected": [1, 1, 14], "rr_expected": false, "missing_expected": [1, 0, 26]}, {"id": 60, "rank": "CAP", "name": "MOISES LOPES VIEIRA", "agregado": false, "entry_date": "01/06/1998", "current_date": "19/08/2026", "ffaa_time": [3, 4, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [28, 2, 18], "total_time_expected": [31, 6, 18], "toll_expected": [1, 5, 8], "rr_expected": true, "missing_expected": [0, 0, 0]}, {"id": 61, "rank": "CAP", "name": "WAGNER GOMES DA COSTA", "agregado": false, "entry_date": "15/05/1996", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 9, 21], "pmdf_time_expected": [30, 3, 4], "total_time_expected": [31, 0, 25], "toll_expected": [1, 1, 1], "rr_expected": false, "missing_expected": [0, 0, 6]}, {"id": 62, "rank": "CAP", "name": "ADERIVALDO MARTINS CARDOSO", "agregado": true, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 63, "rank": "CAP", "name": "WENDERSON RODRIGUES RAMOS", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 64, "rank": "CAP", "name": "LEANDRO GONÇALVES DE SOUZA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 65, "rank": "CAP", "name": "VALTENCIR DAS CHAGAS SILVA", "agregado": false, "entry_date": "15/04/1991", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [35, 4, 4], "total_time_expected": [35, 4, 4], "toll_expected": [0, 2, 20], "rr_expected": true, "missing_expected": [0, 0, 0]}, {"id": 66, "rank": "CAP", "name": "JADSON ALVES BAIÃO SOUSA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 67, "rank": "CAP", "name": "CLEBSON NOGUEIRA DE OLIVEIRA", "agregado": false, "entry_date": "01/04/2003", "current_date": "19/08/2026", "ffaa_time": [6, 0, 5], "civil_time": [0, 0, 0], "pmdf_time_expected": [23, 4, 18], "total_time_expected": [29, 4, 23], "toll_expected": [2, 3, 3], "rr_expected": false, "missing_expected": [2, 10, 10]}, {"id": 68, "rank": "CAP", "name": "THENYSON DA SILVA BISPO", "agregado": false, "entry_date": "10/03/1997", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 8, 23], "pmdf_time_expected": [29, 5, 9], "total_time_expected": [30, 2, 2], "toll_expected": [1, 2, 21], "rr_expected": false, "missing_expected": [1, 0, 19]}];
+        const INITIAL_OFFICERS = [{"id": 1, "rank": "MAJ", "name": "CARLOS ROBERTO DE ARAÚJO", "agregado": false, "entry_date": "01/01/1988", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [38, 7, 18], "total_time_expected": [38, 7, 18], "toll_expected": [0, 0, 0], "rr_expected": true, "missing_expected": [0, 0, 0], "promotion_date": ""}, {"id": 2, "rank": "MAJ", "name": "EDSON DE ARAÚJO AGUIAR", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13], "promotion_date": ""}, {"id": 3, "rank": "MAJ", "name": "ARNALDO JOSÉ NEVES", "agregado": false, "entry_date": "12/08/1996", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [30, 0, 7], "total_time_expected": [30, 0, 7], "toll_expected": [1, 1, 16], "rr_expected": false, "missing_expected": [1, 1, 9], "promotion_date": ""}, {"id": 4, "rank": "MAJ", "name": "JULIANA ALVES FERNANDES DE MELO", "agregado": true, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13], "promotion_date": ""}, {"id": 5, "rank": "MAJ", "name": "MAIRA MRAD TEIXEIRA SILVA", "agregado": true, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13], "promotion_date": ""}, {"id": 6, "rank": "MAJ", "name": "RODRIGO CASTRO DE FREITAS", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13], "promotion_date": ""}, {"id": 7, "rank": "MAJ", "name": "GILMAR JOSÉ RODRIGUES", "agregado": false, "entry_date": "12/08/1996", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [30, 0, 7], "total_time_expected": [30, 0, 7], "toll_expected": [1, 1, 16], "rr_expected": false, "missing_expected": [1, 1, 9], "promotion_date": ""}, {"id": 8, "rank": "MAJ", "name": "GILDÉSIO ALVES DE OLIVEIRA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [2, 4, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [29, 2, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [2, 5, 13], "promotion_date": ""}, {"id": 9, "rank": "MAJ", "name": "GUSTAVO CANDEIA COSTA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13], "promotion_date": ""}, {"id": 10, "rank": "MAJ", "name": "JONAS APARECIDO DIAS", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13], "promotion_date": ""}, {"id": 11, "rank": "MAJ", "name": "RODRIGO PRETEL PARENTE CORREIA", "agregado": true, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 11, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [27, 9, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [3, 10, 13], "promotion_date": ""}, {"id": 12, "rank": "MAJ", "name": "JEISSON ANTÔNIO DA SILVA", "agregado": true, "entry_date": "15/05/1996", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [30, 3, 4], "total_time_expected": [30, 3, 4], "toll_expected": [1, 1, 1], "rr_expected": false, "missing_expected": [0, 9, 27], "promotion_date": ""}, {"id": 13, "rank": "MAJ", "name": "LEONARDO ANTUNES E SILVA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13], "promotion_date": ""}, {"id": 14, "rank": "MAJ", "name": "ADRIANO GOMES DUARTE", "agregado": false, "entry_date": "15/05/1996", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [30, 3, 4], "total_time_expected": [30, 3, 4], "toll_expected": [1, 1, 1], "rr_expected": false, "missing_expected": [0, 9, 27], "promotion_date": ""}, {"id": 15, "rank": "MAJ", "name": "JOÃO TIELLES DAMASCENO", "agregado": true, "entry_date": "15/05/1996", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [30, 3, 4], "total_time_expected": [30, 3, 4], "toll_expected": [1, 1, 1], "rr_expected": false, "missing_expected": [0, 9, 27], "promotion_date": ""}, {"id": 16, "rank": "MAJ", "name": "JEAN KARTER SOUZA DE OLIVEIRA", "agregado": false, "entry_date": "15/05/1996", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [30, 3, 4], "total_time_expected": [30, 3, 4], "toll_expected": [1, 1, 1], "rr_expected": false, "missing_expected": [0, 9, 27], "promotion_date": ""}, {"id": 17, "rank": "CAP", "name": "ADRIANO ROSA EDUARDO", "agregado": true, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [1, 11, 15], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [28, 10, 3], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [2, 9, 28], "promotion_date": ""}, {"id": 18, "rank": "CAP", "name": "CIDCLAY COSTA DE ABREU", "agregado": false, "entry_date": "15/05/1996", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [1, 0, 8], "pmdf_time_expected": [30, 3, 4], "total_time_expected": [31, 3, 12], "toll_expected": [1, 1, 1], "rr_expected": true, "missing_expected": [0, 0, 0], "promotion_date": ""}, {"id": 19, "rank": "CAP", "name": "DAVI GERMANO", "agregado": false, "entry_date": "01/08/1993", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [33, 0, 18], "total_time_expected": [33, 0, 18], "toll_expected": [0, 7, 13], "rr_expected": true, "missing_expected": [0, 0, 0], "promotion_date": ""}, {"id": 20, "rank": "CAP", "name": "HUADSON FABRÍCIO BESERRA TEIXEIRA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13], "promotion_date": ""}, {"id": 21, "rank": "CAP", "name": "PAULO DE TARSO ARAÚJO NOGUEIRA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 6, 2], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [27, 4, 20], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 3, 11], "promotion_date": ""}, {"id": 22, "rank": "CAP", "name": "MÁRCIO PEREIRA COIMBRA", "agregado": true, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [1, 6, 1], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [28, 4, 19], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [3, 3, 12], "promotion_date": ""}, {"id": 23, "rank": "CAP", "name": "RONAN CASTILHO GONÇALVES", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [5, 2, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [32, 0, 18], "toll_expected": [1, 8, 1], "rr_expected": true, "missing_expected": [0, 0, 0], "promotion_date": ""}, {"id": 24, "rank": "CAP", "name": "DJALMA GOMES MENDES JUNIOR", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13], "promotion_date": ""}, {"id": 25, "rank": "CAP", "name": "EDUARDO ALVES DINIZ", "agregado": true, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13], "promotion_date": ""}, {"id": 26, "rank": "CAP", "name": "ELIAS PEREIRA DE OLIVEIRA JUNIOR", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13], "promotion_date": ""}, {"id": 27, "rank": "CAP", "name": "WARLLEY LIMA DA SILVA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13], "promotion_date": ""}, {"id": 28, "rank": "CAP", "name": "JOVINIANO DA SILVA MELO", "agregado": false, "entry_date": "07/03/1995", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [31, 5, 12], "total_time_expected": [31, 5, 12], "toll_expected": [0, 10, 22], "rr_expected": true, "missing_expected": [0, 0, 0], "promotion_date": ""}, {"id": 29, "rank": "CAP", "name": "CLAUBERT NEVES SÁ ABREU", "agregado": false, "entry_date": "15/05/1996", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 3, 9], "pmdf_time_expected": [30, 3, 4], "total_time_expected": [30, 6, 13], "toll_expected": [1, 1, 1], "rr_expected": false, "missing_expected": [0, 6, 18], "promotion_date": ""}, {"id": 30, "rank": "CAP", "name": "VANDERLEY ALMEIDA BANDEIRA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13], "promotion_date": ""}, {"id": 31, "rank": "CAP", "name": "NÉLITON LÚCIO ALVES", "agregado": false, "entry_date": "15/05/1995", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [31, 3, 4], "total_time_expected": [31, 3, 4], "toll_expected": [0, 11, 4], "rr_expected": true, "missing_expected": [0, 0, 0], "promotion_date": ""}, {"id": 32, "rank": "CAP", "name": "NILS NILSON CORRÊA PINHEIRO", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13], "promotion_date": ""}, {"id": 33, "rank": "CAP", "name": "MAURICIO JUNIOR PERPETUO SALES", "agregado": false, "entry_date": "07/03/1995", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [31, 5, 12], "total_time_expected": [31, 5, 12], "toll_expected": [0, 10, 22], "rr_expected": true, "missing_expected": [0, 0, 0], "promotion_date": ""}, {"id": 34, "rank": "CAP", "name": "EUCIMAR DIOGENES DE MEDEIROS", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13], "promotion_date": ""}, {"id": 35, "rank": "CAP", "name": "FERNANDO DIAS MARTINS", "agregado": false, "entry_date": "15/05/1995", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 10, 0], "pmdf_time_expected": [31, 3, 4], "total_time_expected": [32, 1, 4], "toll_expected": [0, 11, 4], "rr_expected": true, "missing_expected": [0, 0, 0], "promotion_date": ""}, {"id": 36, "rank": "CAP", "name": "RIVAN PINTO BONIFÁCIO", "agregado": false, "entry_date": "01/04/1988", "current_date": "19/08/2026", "ffaa_time": [1, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [38, 4, 18], "total_time_expected": [39, 4, 18], "toll_expected": [0, 0, 0], "rr_expected": true, "missing_expected": [0, 0, 0], "promotion_date": ""}, {"id": 37, "rank": "CAP", "name": "JOSE WELLINGTON DE OLIVEIRA BARROS JR", "agregado": true, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [5, 1, 29], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [31, 11, 17], "toll_expected": [1, 8, 1], "rr_expected": true, "missing_expected": [0, 0, 0], "promotion_date": ""}, {"id": 38, "rank": "CAP", "name": "FABIO JUNIO OLIVEIRA RAMOS", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13], "promotion_date": ""}, {"id": 39, "rank": "CAP", "name": "ARLAN CHARLES DE SOUSA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [2, 2, 17], "civil_time": [0, 11, 29], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [30, 1, 4], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [1, 6, 27], "promotion_date": ""}, {"id": 40, "rank": "CAP", "name": "EDSON PINTO GOMES", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [2, 7, 29], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [29, 6, 17], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [2, 1, 14], "promotion_date": ""}, {"id": 41, "rank": "CAP", "name": "GLAUCO SOARES DE ALMEIDA", "agregado": false, "entry_date": "10/03/1997", "current_date": "19/08/2026", "ffaa_time": [2, 1, 1], "civil_time": [0, 0, 0], "pmdf_time_expected": [29, 5, 9], "total_time_expected": [31, 5, 10], "toll_expected": [1, 2, 21], "rr_expected": true, "missing_expected": [0, 0, 0], "promotion_date": ""}, {"id": 42, "rank": "CAP", "name": "CLEUTER GODINHO DO NASCIMENTO", "agregado": false, "entry_date": "15/05/1996", "current_date": "19/08/2026", "ffaa_time": [0, 8, 23], "civil_time": [1, 0, 27], "pmdf_time_expected": [30, 3, 4], "total_time_expected": [32, 0, 24], "toll_expected": [1, 1, 1], "rr_expected": true, "missing_expected": [0, 0, 0], "promotion_date": ""}, {"id": 43, "rank": "CAP", "name": "WELLINGTON LEITE DE SOUZA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [1, 1, 10], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [27, 10, 28], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [3, 9, 3], "promotion_date": ""}, {"id": 44, "rank": "CAP", "name": "LEURIMAR DE SOUZA DUTRA", "agregado": false, "entry_date": "12/08/1996", "current_date": "19/08/2026", "ffaa_time": [1, 0, 4], "civil_time": [0, 0, 0], "pmdf_time_expected": [30, 0, 7], "total_time_expected": [31, 0, 11], "toll_expected": [1, 1, 16], "rr_expected": false, "missing_expected": [0, 1, 5], "promotion_date": ""}, {"id": 45, "rank": "CAP", "name": "CLAUDIO JEAN DA SILVA PIRES", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [1, 1, 15], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [27, 11, 3], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [3, 8, 28], "promotion_date": ""}, {"id": 46, "rank": "CAP", "name": "ANTÔNIO ARAÚJO MESQUITA FILHO", "agregado": true, "entry_date": "01/08/1993", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [33, 0, 18], "total_time_expected": [33, 0, 18], "toll_expected": [0, 7, 13], "rr_expected": true, "missing_expected": [0, 0, 0], "promotion_date": ""}, {"id": 47, "rank": "CAP", "name": "ANDERSON AUGUSTO CAVALCANTI BATISTA", "agregado": false, "entry_date": "15/05/1996", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [30, 3, 4], "total_time_expected": [30, 3, 4], "toll_expected": [1, 1, 1], "rr_expected": false, "missing_expected": [0, 9, 27], "promotion_date": ""}, {"id": 48, "rank": "CAP", "name": "URSULLA PRISCYLLA RABELO", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13], "promotion_date": ""}, {"id": 49, "rank": "CAP", "name": "IURE DA SILVA CUNHA", "agregado": false, "entry_date": "01/03/1994", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 11, 0], "pmdf_time_expected": [32, 5, 18], "total_time_expected": [33, 4, 18], "toll_expected": [0, 8, 19], "rr_expected": true, "missing_expected": [0, 0, 0], "promotion_date": ""}, {"id": 50, "rank": "CAP", "name": "ALECIO DE SOUSA LEMOS", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [5, 6, 2], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [32, 4, 20], "toll_expected": [1, 8, 1], "rr_expected": true, "missing_expected": [0, 0, 0], "promotion_date": ""}, {"id": 51, "rank": "CAP", "name": "ADILSON ARAUJO LIMA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [2, 8, 26], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [29, 7, 14], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [2, 0, 17], "promotion_date": ""}, {"id": 52, "rank": "CAP", "name": "JULIO EMANUEL DANTAS DE MOURA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [3, 2, 7], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [30, 0, 25], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [1, 7, 6], "promotion_date": ""}, {"id": 53, "rank": "CAP", "name": "CLEBER CARVALHO DOS ANJOS", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13], "promotion_date": ""}, {"id": 54, "rank": "CAP", "name": "ANA PAULA MARQUES MOURA DA CRUZ", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13], "promotion_date": ""}, {"id": 55, "rank": "CAP", "name": "SAULO JOAQUIM NEIVA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13], "promotion_date": ""}, {"id": 56, "rank": "CAP", "name": "FABIANO AUGUSTO DE SOUZA MOREIRA", "agregado": true, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [1, 5, 6], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [28, 3, 24], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [3, 4, 7], "promotion_date": ""}, {"id": 57, "rank": "CAP", "name": "RONALDO RODRIGUES DA SILVA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13], "promotion_date": ""}, {"id": 58, "rank": "CAP", "name": "ALEXANDRE HONORIO DA SILVA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13], "promotion_date": ""}, {"id": 59, "rank": "CAP", "name": "JOAQUIM MANOEL DO NASCIMENTO FILHO", "agregado": false, "entry_date": "01/08/1996", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [30, 0, 18], "total_time_expected": [30, 0, 18], "toll_expected": [1, 1, 14], "rr_expected": false, "missing_expected": [1, 0, 26], "promotion_date": ""}, {"id": 60, "rank": "CAP", "name": "MOISES LOPES VIEIRA", "agregado": false, "entry_date": "01/06/1998", "current_date": "19/08/2026", "ffaa_time": [3, 4, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [28, 2, 18], "total_time_expected": [31, 6, 18], "toll_expected": [1, 5, 8], "rr_expected": true, "missing_expected": [0, 0, 0], "promotion_date": ""}, {"id": 61, "rank": "CAP", "name": "WAGNER GOMES DA COSTA", "agregado": false, "entry_date": "15/05/1996", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 9, 21], "pmdf_time_expected": [30, 3, 4], "total_time_expected": [31, 0, 25], "toll_expected": [1, 1, 1], "rr_expected": false, "missing_expected": [0, 0, 6], "promotion_date": ""}, {"id": 62, "rank": "CAP", "name": "ADERIVALDO MARTINS CARDOSO", "agregado": true, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13], "promotion_date": ""}, {"id": 63, "rank": "CAP", "name": "WENDERSON RODRIGUES RAMOS", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13], "promotion_date": ""}, {"id": 64, "rank": "CAP", "name": "LEANDRO GONÇALVES DE SOUZA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13], "promotion_date": ""}, {"id": 65, "rank": "CAP", "name": "VALTENCIR DAS CHAGAS SILVA", "agregado": false, "entry_date": "15/04/1991", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [35, 4, 4], "total_time_expected": [35, 4, 4], "toll_expected": [0, 2, 20], "rr_expected": true, "missing_expected": [0, 0, 0], "promotion_date": ""}, {"id": 66, "rank": "CAP", "name": "JADSON ALVES BAIÃO SOUSA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13], "promotion_date": ""}, {"id": 67, "rank": "CAP", "name": "CLEBSON NOGUEIRA DE OLIVEIRA", "agregado": false, "entry_date": "01/04/2003", "current_date": "19/08/2026", "ffaa_time": [6, 0, 5], "civil_time": [0, 0, 0], "pmdf_time_expected": [23, 4, 18], "total_time_expected": [29, 4, 23], "toll_expected": [2, 3, 3], "rr_expected": false, "missing_expected": [2, 10, 10], "promotion_date": ""}, {"id": 68, "rank": "CAP", "name": "THENYSON DA SILVA BISPO", "agregado": false, "entry_date": "10/03/1997", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 8, 23], "pmdf_time_expected": [29, 5, 9], "total_time_expected": [30, 2, 2], "toll_expected": [1, 2, 21], "rr_expected": false, "missing_expected": [1, 0, 19], "promotion_date": ""}];
         
         // Initial Default Users database is empty now
         const DEFAULT_USERS = [];
@@ -700,7 +727,6 @@
             if (!targetUser) return;
             
             if (targetUser.profile === "admin") {
-                // Safety check: protect the last remaining admin
                 const adminCount = users.filter(u => u.profile === "admin").length;
                 if (adminCount <= 1) {
                     alert("Você não pode rebaixar o único administrador do sistema!");
@@ -723,7 +749,6 @@
             if (!targetUser) return;
             
             if (targetUser.profile === "admin") {
-                // Safety check: protect the last remaining admin
                 const adminCount = users.filter(u => u.profile === "admin").length;
                 if (adminCount <= 1) {
                     alert("Você não pode excluir o único administrador do sistema!");
@@ -746,6 +771,8 @@
                 officers = JSON.parse(saved);
             } else {
                 officers = JSON.parse(JSON.stringify(INITIAL_OFFICERS));
+                // Add promotion_date attribute to original load
+                officers.forEach(o => o.promotion_date = "");
                 saveToStorage();
             }
         }
@@ -800,7 +827,6 @@
             return [years, months, days];
         }
 
-        // Add YMD time
         function addYmd(t1, t2) {
             let d = t1[2] + t2[2];
             let d_rem = d % 30;
@@ -814,7 +840,6 @@
             return [y, m_rem, d_rem];
         }
 
-        // Subtract YMD time
         function subYmd(t1, t2) {
             if (compareYmd(t1, t2) <= 0) return [0, 0, 0];
             
@@ -916,6 +941,29 @@
             return parts[0];
         }
 
+        // Check if officer has completed interstício (minimum rank time)
+        function checkIntersticio(rank, promoDateStr, currentDateStr) {
+            if (!promoDateStr) return { ok: true, reason: "" }; // default to true if blank
+            const promoDate = parseDate(promoDateStr);
+            const currentDate = parseDate(currentDateStr);
+            
+            const diff = dateDiffCalendar(promoDate, currentDate);
+            const months = diff[0] * 12 + diff[1];
+            
+            if (rank === "CAP") {
+                // CAP -> MAJ requires 24 months (2 years)
+                if (months < 24) {
+                    return { ok: false, reason: `Possui apenas ${months} meses no posto de CAP (Exigido: 24 meses / Art. 8º)` };
+                }
+            } else if (rank === "MAJ") {
+                // MAJ -> TC requires 18 months (1.5 years)
+                if (months < 18) {
+                    return { ok: false, reason: `Possui apenas ${months} meses no posto de MAJ (Exigido: 18 meses / Art. 8º)` };
+                }
+            }
+            return { ok: true, reason: "" };
+        }
+
         // Page Router
         function switchPage(pageId) {
             // Check authorization
@@ -956,13 +1004,46 @@
             const [y, m, d] = projInput.split("-").map(Number);
             const currentDateStr = `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y}`;
             
-            // Update all calculations
+            // Update all calculations and interstício status
             officers.forEach(off => {
                 const calcs = calculateRetirement(off.entry_date, off.ffaa_time, off.civil_time, currentDateStr);
                 Object.assign(off, calcs);
+                
+                const inst = checkIntersticio(off.rank, off.promotion_date, currentDateStr);
+                off.intersticio_ok = inst.ok;
+                off.intersticio_reason = inst.reason;
             });
 
-            // 1. Calculate promotions (CAP -> MAJ)
+            // ================= DECREE 6.791 RULES =================
+            // 1. Get all Captains, sorted by seniority (ID)
+            let captains = officers.filter(o => o.rank === "CAP").sort((a, b) => a.id - b.id);
+            let activeCaptains = captains.filter(c => !c.agregado);
+            
+            const N = activeCaptains.length;
+            const L = N <= 10 ? N : 10 + Math.ceil((N - 10) / 4);
+            
+            // Mark active Captains within the quantitative limit (Art. 4)
+            // Identify the ID cutoff of the L-th active Captain
+            let maxActiveId = 99999;
+            if (activeCaptains.length >= L && L > 0) {
+                maxActiveId = activeCaptains[L - 1].id;
+            }
+            
+            // Set access limits and check flags
+            captains.forEach(cap => {
+                cap.within_limit = cap.id <= maxActiveId;
+            });
+            
+            // Update stats displays
+            const capCountEl = document.getElementById("promo-stat-captains");
+            const capActiveEl = document.getElementById("promo-stat-active");
+            const capLimitEl = document.getElementById("promo-stat-limit");
+            
+            if (capCountEl) capCountEl.innerText = `Total de Capitães: ${captains.length}`;
+            if (capActiveEl) capActiveEl.innerText = `Capitães Efetivos (Ativos): ${N}`;
+            if (capLimitEl) capLimitEl.innerText = `Limite Faixa de Acesso (Art. 4º): ${L}`;
+            
+            // 2. Calculate promotion vacancies split (Art. 38, b: 1:1)
             const vacanciesInput = parseInt(document.getElementById("promo-vacancies").value) || 0;
             
             // Save global vacancies to storage if changed by admin
@@ -970,35 +1051,106 @@
                 localStorage.setItem("qopma_global_vacancies", String(vacanciesInput));
             }
             
-            let captains = officers.filter(o => o.rank === "CAP").sort((a, b) => a.id - b.id);
+            const v_ant = Math.ceil(vacanciesInput / 2);
+            const v_mer = Math.floor(vacanciesInput / 2);
             
+            const antDistEl = document.getElementById("promo-dist-antiguidade");
+            const merDistEl = document.getElementById("promo-dist-merecimento");
+            if (antDistEl) antDistEl.innerText = `• Antiguidade: ${v_ant} vaga(s)`;
+            if (merDistEl) merDistEl.innerText = `• Merecimento: ${v_mer} vaga(s)`;
+            
+            // 3. Process promotions (Seniority & Merit)
             let promotedIds = new Set();
-            let consumedVacancies = 0;
-            let promoLog = [];
+            let promotedSeniority = [];
+            let promotedMeritPool = [];
+            let ineligiblesList = [];
             
-            for (let cap of captains) {
-                if (consumedVacancies >= vacanciesInput) {
-                    break;
+            // Build the queue of eligible Captains (within limit and with interstício)
+            let eligibleQueue = captains.filter(c => c.within_limit && c.intersticio_ok);
+            
+            // Collect ineligibles for report
+            captains.forEach(c => {
+                if (!c.intersticio_ok) {
+                    ineligiblesList.push(`${c.name} (Inabilitado por falta de interstício: ${c.intersticio_reason})`);
+                } else if (!c.within_limit) {
+                    ineligiblesList.push(`${c.name} (Excedente ao limite quantitativo do Art. 4º)`);
                 }
+            });
+
+            // Promote by Seniority (Antiguidade)
+            let seniorityVacsConsumed = 0;
+            for (let cap of eligibleQueue) {
+                if (seniorityVacsConsumed >= v_ant) break;
+                
                 promotedIds.add(cap.id);
                 if (cap.agregado) {
-                    promoLog.push(`<span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-semibold text-xs border border-slate-300">${cap.name} (Agregado - não ocupa vaga)</span>`);
+                    promotedSeniority.push(`${cap.name} (Agregado - não consome vaga)`);
                 } else {
-                    consumedVacancies++;
-                    promoLog.push(`<span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded font-semibold text-xs border border-blue-300">${cap.name} (Ocupa vaga ${consumedVacancies}/${vacanciesInput})</span>`);
+                    seniorityVacsConsumed++;
+                    promotedSeniority.push(`${cap.name} (Consome vaga ${seniorityVacsConsumed}/${v_ant})`);
                 }
             }
             
-            const promoSummaryEl = document.getElementById("promo-summary");
-            if (vacanciesInput === 0) {
-                promoSummaryEl.innerHTML = "<span class='text-gray-500'>Nenhuma vaga informada para promoção.</span>";
-            } else {
-                promoSummaryEl.innerHTML = `
-                    <div class="mb-2"><strong>Total Promovidos:</strong> ${promotedIds.size} oficial(ais) (${consumedVacancies} ocupando vaga, ${promotedIds.size - consumedVacancies} agregados)</div>
-                    <div class="flex flex-wrap gap-2 mt-1">${promoLog.length > 0 ? promoLog.join("") : "<span class='text-gray-500'>Nenhum Capitão na fila.</span>"}</div>
-                `;
-            }
+            // Eligible candidates remaining for Merit (Merecimento)
+            let remainingForMerit = eligibleQueue.filter(c => !promotedIds.has(c.id));
             
+            // Build Results HTML for Promotions Page
+            const resultsContainer = document.getElementById("promo-results-container");
+            if (resultsContainer) {
+                if (vacanciesInput === 0) {
+                    resultsContainer.innerHTML = "<p class='text-slate-500 font-medium italic'>Nenhuma vaga de Major definida para simulação.</p>";
+                } else {
+                    let html = "";
+                    
+                    // Seniority Section
+                    html += `
+                        <div class="p-4 bg-emerald-50 rounded border border-emerald-200">
+                            <h4 class="font-bold text-emerald-900 text-sm mb-2">⭐ PROMOÇÕES POR ANTIGUIDADE (${promotedSeniority.length} oficiais):</h4>
+                            ${promotedSeniority.length > 0 ? 
+                                `<ul class="list-decimal pl-5 space-y-1 text-slate-700 text-xs font-semibold">
+                                    ${promotedSeniority.map(name => `<li>${name}</li>`).join("")}
+                                </ul>` : 
+                                `<p class="text-slate-500 text-xs italic">Nenhum oficial promovido por Antiguidade.</p>`
+                            }
+                        </div>
+                    `;
+                    
+                    // Merit Section
+                    html += `
+                        <div class="p-4 bg-indigo-50 rounded border border-indigo-200">
+                            <h4 class="font-bold text-indigo-900 text-sm mb-2">⚖️ PROMOÇÕES POR MERECIMENTO (${v_mer} vaga(s)):</h4>
+                            <p class="text-xs text-indigo-700 mb-3 font-medium">As vagas de merecimento serão decididas pela CPO. Com base na antiguidade restante da Faixa de Acesso (Art. 46), os seguintes oficiais estão habilitados a concorrer:</p>
+                            ${remainingForMerit.length > 0 ? 
+                                `<ul class="list-disc pl-5 space-y-1 text-slate-700 text-xs">
+                                    ${remainingForMerit.map((c, idx) => {
+                                        let note = "";
+                                        if (idx < 3) {
+                                            note = ` <span class="bg-indigo-100 text-indigo-800 px-1 py-0.2 rounded font-bold text-[9px]">Top 3 da vaga</span>`;
+                                        }
+                                        return `<li><strong>${c.name}</strong> ${c.agregado ? '(Agregado - não ocupa vaga)' : ''} ${note}</li>`;
+                                    }).join("")}
+                                </ul>` : 
+                                `<p class="text-slate-500 text-xs italic">Nenhum candidato restante habilitado na faixa de acesso.</p>`
+                            }
+                        </div>
+                    `;
+
+                    // Ineligibles Section
+                    if (ineligiblesList.length > 0) {
+                        html += `
+                            <div class="p-4 bg-slate-50 rounded border border-slate-200">
+                                <h4 class="font-semibold text-slate-700 text-xs mb-2">🚫 OFICIAIS INABILITADOS NESSA PROJEÇÃO (${ineligiblesList.length} oficiais):</h4>
+                                <ul class="list-disc pl-5 space-y-1 text-slate-500 text-[11px]">
+                                    ${ineligiblesList.map(item => `<li>${item}</li>`).join("")}
+                                </ul>
+                            </div>
+                        `;
+                    }
+                    
+                    resultsContainer.innerHTML = html;
+                }
+            }
+
             // Apply filters
             const filterName = document.getElementById("filter-name").value.toLowerCase().trim();
             const filterRank = document.getElementById("filter-rank").value;
@@ -1093,11 +1245,27 @@
             filtered.forEach(o => {
                 const isPromoted = promotedIds.has(o.id) && o.rank === "CAP";
                 const tr = document.createElement("tr");
-                tr.className = isPromoted ? "bg-green-50 hover:bg-green-100 transition" : "hover:bg-gray-50 transition";
+                
+                let rowBg = "hover:bg-gray-50 transition";
+                if (isPromoted) {
+                    rowBg = "bg-green-50 hover:bg-green-100 transition";
+                } else if (o.rank === "CAP" && !o.within_limit) {
+                    rowBg = "bg-red-50/30 hover:bg-red-100/30 transition text-slate-400";
+                }
+                
+                tr.className = rowBg;
                 
                 let rankCell = o.rank;
                 if (isPromoted) {
-                    rankCell = `<div class="font-bold text-green-700">${o.rank} ➡️ MAJ</div><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 border border-green-300">⭐ Promovido</span>`;
+                    rankCell = `<div class="font-bold text-green-700">${o.rank} ➡️ MAJ</div><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 border border-green-300">⭐ Promovido (Antiguidade)</span>`;
+                } else if (o.rank === "CAP") {
+                    if (!o.intersticio_ok) {
+                        rankCell = `<div class="font-semibold text-red-600">${o.rank}</div><span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-bold bg-red-100 text-red-800 border border-red-300">🚫 Sem Interstício</span>`;
+                    } else if (o.within_limit) {
+                        rankCell = `<div class="font-semibold text-slate-700">${o.rank}</div><span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">✔️ Faixa de Acesso</span>`;
+                    } else {
+                        rankCell = `<div class="font-semibold text-slate-500">${o.rank}</div><span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">⚠️ Excedente Art. 4º</span>`;
+                    }
                 }
 
                 tr.innerHTML = `
@@ -1223,6 +1391,21 @@
                 `;
             }
             
+            let promotionDateHtml = "";
+            if (o.promotion_date) {
+                const check = checkIntersticio(o.rank, o.promotion_date, currentDateStr);
+                promotionDateHtml = `
+                    <li>📅 <strong>Data de Promoção ao Posto:</strong> ${formatDate(parseDate(o.promotion_date))} 
+                        ${check.ok ? 
+                            `<span class="text-xs text-green-600 font-bold ml-2">(✔️ Interstício Cumprido)</span>` : 
+                            `<span class="text-xs text-red-600 font-bold ml-2">(🚫 Incompleto: ${check.reason})</span>`
+                        }
+                    </li>
+                `;
+            } else {
+                promotionDateHtml = `<li>📅 <strong>Data de Promoção ao Posto:</strong> Não informada <span class="text-xs text-gray-400 italic">(Interstício assumido como cumprido)</span></li>`;
+            }
+            
             container.innerHTML = `
                 ${anomalyHtml}
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -1230,6 +1413,7 @@
                         <h5 class="font-bold text-gray-800 text-lg mb-3">1. Composição do Tempo de Serviço</h5>
                         <ul class="space-y-2 text-gray-600">
                             <li>📅 <strong>Data de Entrada na PMDF:</strong> ${o.entry_date}</li>
+                            ${promotionDateHtml}
                             <li>🔹 <strong>Tempo PMDF (Calendário exato):</strong> ${formatYmd(o.pmdf_time)} <span class="text-xs text-gray-400">(de ${o.entry_date} a ${currentDateStr})</span></li>
                             <li>🔹 <strong>Tempo de FFAA (Forças Armadas):</strong> ${formatYmd(o.ffaa_time)}</li>
                             <li>🔹 <strong>Tempo de Serviço Civil:</strong> ${formatYmd(o.civil_time)}</li>
@@ -1276,6 +1460,13 @@
             const [y, m, d] = entryInput.split("-");
             const entry_date = `${d}/${m}/${y}`;
             
+            const promoDateInput = document.getElementById("add-promotion-date").value;
+            let promotion_date = "";
+            if (promoDateInput) {
+                const [py, pm, pd] = promoDateInput.split("-");
+                promotion_date = `${pd}/${pm}/${py}`;
+            }
+            
             const ffaa_y = parseInt(document.getElementById("add-ffaa-y").value) || 0;
             const ffaa_m = parseInt(document.getElementById("add-ffaa-m").value) || 0;
             const ffaa_d = parseInt(document.getElementById("add-ffaa-d").value) || 0;
@@ -1295,6 +1486,7 @@
                 name,
                 agregado,
                 entry_date,
+                promotion_date,
                 ffaa_time: [ffaa_y, ffaa_m, ffaa_d],
                 civil_time: [civil_y, civil_m, civil_d]
             };
@@ -1326,6 +1518,13 @@
             const [d, m, y] = o.entry_date.split("/");
             document.getElementById("edit-entry").value = `${y}-${m}-${d}`;
             
+            if (o.promotion_date) {
+                const [pd, pm, py] = o.promotion_date.split("/");
+                document.getElementById("edit-promotion-date").value = `${py}-${pm}-${pd}`;
+            } else {
+                document.getElementById("edit-promotion-date").value = "";
+            }
+            
             document.getElementById("edit-ffaa-y").value = o.ffaa_time[0];
             document.getElementById("edit-ffaa-m").value = o.ffaa_time[1];
             document.getElementById("edit-ffaa-d").value = o.ffaa_time[2];
@@ -1351,6 +1550,13 @@
             const [y, m, d] = entryInput.split("-");
             const entry_date = `${d}/${m}/${y}`;
             
+            const promoDateInput = document.getElementById("edit-promotion-date").value;
+            let promotion_date = "";
+            if (promoDateInput) {
+                const [py, pm, pd] = promoDateInput.split("-");
+                promotion_date = `${pd}/${pm}/${py}`;
+            }
+            
             const ffaa_y = parseInt(document.getElementById("edit-ffaa-y").value) || 0;
             const ffaa_m = parseInt(document.getElementById("edit-ffaa-m").value) || 0;
             const ffaa_d = parseInt(document.getElementById("edit-ffaa-d").value) || 0;
@@ -1365,6 +1571,7 @@
                 name,
                 agregado,
                 entry_date,
+                promotion_date,
                 ffaa_time: [ffaa_y, ffaa_m, ffaa_d],
                 civil_time: [civil_y, civil_m, civil_d]
             };
