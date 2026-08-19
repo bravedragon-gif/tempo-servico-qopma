@@ -317,7 +317,10 @@
                     <div class="bg-white p-8 rounded-lg shadow-sm border border-slate-200 space-y-6">
                         <div>
                             <label class="block text-sm font-semibold text-slate-700 mb-2">Vagas de Major Disponíveis</label>
-                            <input type="number" id="promo-vacancies" value="4" min="0" class="w-full border rounded px-3 py-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none text-lg">
+                            <div class="flex gap-2">
+                                <input type="number" id="promo-vacancies" value="4" min="0" class="w-full border rounded px-3 py-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none text-lg">
+                                <button onclick="saveVacancyConfig()" id="save-vacancy-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded shadow transition text-sm">Salvar</button>
+                            </div>
                         </div>
                         
                         <div class="border-t pt-4 space-y-3 text-sm text-slate-600">
@@ -337,7 +340,10 @@
 
                     <!-- Right: Results -->
                     <div class="lg:col-span-2 bg-white p-8 rounded-lg shadow-sm border border-slate-200 space-y-6">
-                        <h3 class="text-lg font-bold text-slate-800 border-b pb-2">📋 Resultado da Projeção de Promoções</h3>
+                        <div class="flex justify-between items-center border-b pb-2 flex-wrap gap-4">
+                            <h3 class="text-lg font-bold text-slate-800">📋 Resultado da Projeção de Promoções</h3>
+                            <button id="commit-promo-btn" onclick="commitPromotions()" class="admin-only bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2.5 rounded shadow transition text-sm">Efetivar Promoções</button>
+                        </div>
                         <div id="promo-results-container" class="space-y-4">
                             <!-- Filled by JS -->
                         </div>
@@ -395,7 +401,7 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold text-slate-700 mb-1">Nome Completo</label>
-                                <input type="text" id="add-name" required class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                <input type="text" id="add-name" required class="w-full border rounded px-3 py-2 mt-1 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                             </div>
                             <div class="flex items-center gap-2 pt-2">
                                 <input type="checkbox" id="add-agregado" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
@@ -403,7 +409,7 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold text-slate-700 mb-1">Data de Entrada na PMDF</label>
-                                <input type="date" id="add-entry" required class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                <input type="date" id="add-entry" required class="w-full border rounded px-3 py-2 mt-1 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold text-slate-700 mb-1">Data de Promoção ao Posto Atual (Opcional)</label>
@@ -630,8 +636,10 @@
                 const vacInput = document.getElementById("promo-vacancies");
                 if (vacInput) {
                     vacInput.disabled = false;
-                    vacInput.className = "w-full border rounded px-3 py-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none text-lg";
+                    vacInput.className = "w-full border rounded-l px-3 py-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none text-lg";
                 }
+                const saveBtn = document.getElementById("save-vacancy-btn");
+                if (saveBtn) saveBtn.classList.remove("hidden");
             } else {
                 // Regular User
                 document.querySelectorAll(".admin-only").forEach(el => el.classList.add("hidden"));
@@ -643,6 +651,8 @@
                     vacInput.disabled = true;
                     vacInput.className = "w-full border rounded px-3 py-2.5 text-lg bg-slate-100 text-slate-500 cursor-not-allowed";
                 }
+                const saveBtn = document.getElementById("save-vacancy-btn");
+                if (saveBtn) saveBtn.classList.add("hidden");
             }
             
             // Save global promotion vacancies default if not saved
@@ -764,6 +774,99 @@
             }
         }
 
+        // Save Vacancy Configuration (Explicit Save button next to input)
+        function saveVacancyConfig() {
+            if (currentUser && currentUser.profile !== "admin") {
+                alert("Apenas administradores podem salvar a configuração de vagas!");
+                return;
+            }
+            const vacanciesInput = parseInt(document.getElementById("promo-vacancies").value) || 0;
+            localStorage.setItem("qopma_global_vacancies", String(vacanciesInput));
+            alert(`Configuração salva: O padrão de vagas para promoção agora é ${vacanciesInput}.`);
+        }
+
+        // Commit Promotions permanently to the local database
+        function commitPromotions() {
+            if (currentUser.profile !== "admin") {
+                alert("Apenas administradores podem efetivar as promoções!");
+                return;
+            }
+            
+            const vacanciesInput = parseInt(document.getElementById("promo-vacancies").value) || 0;
+            if (vacanciesInput === 0) {
+                alert("Defina pelo menos 1 vaga para efetivar promoções!");
+                return;
+            }
+            
+            // Get eligible queue for Antiguidade
+            const projInput = document.getElementById("projection-date").value;
+            const [y, m, d] = projInput.split("-").map(Number);
+            const currentDateStr = `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y}`;
+            
+            // Recalculate inside execution context
+            officers.forEach(off => {
+                const calcs = calculateRetirement(off.entry_date, off.ffaa_time, off.civil_time, currentDateStr);
+                Object.assign(off, calcs);
+                const inst = checkIntersticio(off.rank, off.promotion_date, currentDateStr);
+                off.intersticio_ok = inst.ok;
+            });
+            
+            let captains = officers.filter(o => o.rank === "CAP").sort((a, b) => a.id - b.id);
+            let activeCaptains = captains.filter(c => !c.agregado);
+            const N = activeCaptains.length;
+            const L = N <= 10 ? N : 10 + Math.ceil((N - 10) / 4);
+            
+            let maxActiveId = 99999;
+            if (activeCaptains.length >= L && L > 0) {
+                maxActiveId = activeCaptains[L - 1].id;
+            }
+            
+            captains.forEach(cap => {
+                cap.within_limit = cap.id <= maxActiveId;
+            });
+            
+            let eligibleQueue = captains.filter(c => c.within_limit && c.intersticio_ok);
+            const v_ant = Math.ceil(vacanciesInput / 2);
+            
+            let promotedAntiguidade = [];
+            let seniorityVacsConsumed = 0;
+            
+            for (let cap of eligibleQueue) {
+                if (seniorityVacsConsumed >= v_ant) break;
+                promotedAntiguidade.push(cap);
+                if (!cap.agregado) {
+                    seniorityVacsConsumed++;
+                }
+            }
+            
+            if (promotedAntiguidade.length === 0) {
+                alert("Nenhum oficial apto na fila de Antiguidade para ser promovido.");
+                return;
+            }
+            
+            const namesList = promotedAntiguidade.map(o => `• CAP ${o.name} (ID: ${o.id})`).join("\n");
+            const msg = `Confirma a PROMOÇÃO HIERÁRQUICA dos seguintes oficiais para MAJOR (MAJ)?\n\n${namesList}\n\nEsta alteração será salva no banco local e a data de promoção será configurada para ${currentDateStr}.`;
+            
+            if (confirm(msg)) {
+                promotedAntiguidade.forEach(promoOff => {
+                    const idx = officers.findIndex(o => o.id === promoOff.id);
+                    if (idx !== -1) {
+                        officers[idx].rank = "MAJ";
+                        officers[idx].promotion_date = projInput.split("-").reverse().join("/"); // DD/MM/YYYY
+                    }
+                });
+                
+                saveToStorage();
+                
+                // Reset simulated vacancies count to 0
+                document.getElementById("promo-vacancies").value = 0;
+                localStorage.setItem("qopma_global_vacancies", "0");
+                
+                alert("Promoções efetivadas com sucesso! Os oficiais agora constam no posto de Major (MAJ).");
+                switchPage('dashboard');
+            }
+        }
+
         // DATABASE LOADER
         function initDB() {
             const saved = localStorage.getItem("qopma_officers_db");
@@ -771,7 +874,6 @@
                 officers = JSON.parse(saved);
             } else {
                 officers = JSON.parse(JSON.stringify(INITIAL_OFFICERS));
-                // Add promotion_date attribute to original load
                 officers.forEach(o => o.promotion_date = "");
                 saveToStorage();
             }
@@ -928,22 +1030,9 @@
             };
         }
 
-        // Formatter helper
-        function formatYmd(ymd) {
-            const [y, m, d] = ymd;
-            let parts = [];
-            if (y > 0) parts.push(y === 1 ? "1 ano" : `${y} anos`);
-            if (m > 0) parts.push(m === 1 ? "1 mês" : `${m} meses`);
-            if (d > 0 || parts.length === 0) parts.push(d === 1 ? "1 dia" : `${d} dias`);
-            
-            if (parts.length === 3) return `${parts[0]}, ${parts[1]} e ${parts[2]}`;
-            if (parts.length === 2) return `${parts[0]} e ${parts[1]}`;
-            return parts[0];
-        }
-
         // Check if officer has completed interstício (minimum rank time)
         function checkIntersticio(rank, promoDateStr, currentDateStr) {
-            if (!promoDateStr) return { ok: true, reason: "" }; // default to true if blank
+            if (!promoDateStr) return { ok: true, reason: "" };
             const promoDate = parseDate(promoDateStr);
             const currentDate = parseDate(currentDateStr);
             
@@ -951,12 +1040,10 @@
             const months = diff[0] * 12 + diff[1];
             
             if (rank === "CAP") {
-                // CAP -> MAJ requires 24 months (2 years)
                 if (months < 24) {
                     return { ok: false, reason: `Possui apenas ${months} meses no posto de CAP (Exigido: 24 meses / Art. 8º)` };
                 }
             } else if (rank === "MAJ") {
-                // MAJ -> TC requires 18 months (1.5 years)
                 if (months < 18) {
                     return { ok: false, reason: `Possui apenas ${months} meses no posto de MAJ (Exigido: 18 meses / Art. 8º)` };
                 }
@@ -966,7 +1053,6 @@
 
         // Page Router
         function switchPage(pageId) {
-            // Check authorization
             if (currentUser && currentUser.profile === "usuario") {
                 const adminPages = ["detail", "add", "edit", "users"];
                 if (adminPages.includes(pageId)) {
@@ -1004,7 +1090,7 @@
             const [y, m, d] = projInput.split("-").map(Number);
             const currentDateStr = `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y}`;
             
-            // Update all calculations and interstício status
+            // Update all calculations
             officers.forEach(off => {
                 const calcs = calculateRetirement(off.entry_date, off.ffaa_time, off.civil_time, currentDateStr);
                 Object.assign(off, calcs);
@@ -1014,7 +1100,6 @@
                 off.intersticio_reason = inst.reason;
             });
 
-            // ================= DECREE 6.791 RULES =================
             // 1. Get all Captains, sorted by seniority (ID)
             let captains = officers.filter(o => o.rank === "CAP").sort((a, b) => a.id - b.id);
             let activeCaptains = captains.filter(c => !c.agregado);
@@ -1022,14 +1107,12 @@
             const N = activeCaptains.length;
             const L = N <= 10 ? N : 10 + Math.ceil((N - 10) / 4);
             
-            // Mark active Captains within the quantitative limit (Art. 4)
             // Identify the ID cutoff of the L-th active Captain
             let maxActiveId = 99999;
             if (activeCaptains.length >= L && L > 0) {
                 maxActiveId = activeCaptains[L - 1].id;
             }
             
-            // Set access limits and check flags
             captains.forEach(cap => {
                 cap.within_limit = cap.id <= maxActiveId;
             });
@@ -1043,13 +1126,8 @@
             if (capActiveEl) capActiveEl.innerText = `Capitães Efetivos (Ativos): ${N}`;
             if (capLimitEl) capLimitEl.innerText = `Limite Faixa de Acesso (Art. 4º): ${L}`;
             
-            // 2. Calculate promotion vacancies split (Art. 38, b: 1:1)
+            // 2. Calculate promotion vacancies split
             const vacanciesInput = parseInt(document.getElementById("promo-vacancies").value) || 0;
-            
-            // Save global vacancies to storage if changed by admin
-            if (currentUser && currentUser.profile === "admin") {
-                localStorage.setItem("qopma_global_vacancies", String(vacanciesInput));
-            }
             
             const v_ant = Math.ceil(vacanciesInput / 2);
             const v_mer = Math.floor(vacanciesInput / 2);
@@ -1065,10 +1143,8 @@
             let promotedMeritPool = [];
             let ineligiblesList = [];
             
-            // Build the queue of eligible Captains (within limit and with interstício)
             let eligibleQueue = captains.filter(c => c.within_limit && c.intersticio_ok);
             
-            // Collect ineligibles for report
             captains.forEach(c => {
                 if (!c.intersticio_ok) {
                     ineligiblesList.push(`${c.name} (Inabilitado por falta de interstício: ${c.intersticio_reason})`);
@@ -1077,7 +1153,6 @@
                 }
             });
 
-            // Promote by Seniority (Antiguidade)
             let seniorityVacsConsumed = 0;
             for (let cap of eligibleQueue) {
                 if (seniorityVacsConsumed >= v_ant) break;
@@ -1091,10 +1166,8 @@
                 }
             }
             
-            // Eligible candidates remaining for Merit (Merecimento)
             let remainingForMerit = eligibleQueue.filter(c => !promotedIds.has(c.id));
             
-            // Build Results HTML for Promotions Page
             const resultsContainer = document.getElementById("promo-results-container");
             if (resultsContainer) {
                 if (vacanciesInput === 0) {
@@ -1102,7 +1175,6 @@
                 } else {
                     let html = "";
                     
-                    // Seniority Section
                     html += `
                         <div class="p-4 bg-emerald-50 rounded border border-emerald-200">
                             <h4 class="font-bold text-emerald-900 text-sm mb-2">⭐ PROMOÇÕES POR ANTIGUIDADE (${promotedSeniority.length} oficiais):</h4>
@@ -1115,7 +1187,6 @@
                         </div>
                     `;
                     
-                    // Merit Section
                     html += `
                         <div class="p-4 bg-indigo-50 rounded border border-indigo-200">
                             <h4 class="font-bold text-indigo-900 text-sm mb-2">⚖️ PROMOÇÕES POR MERECIMENTO (${v_mer} vaga(s)):</h4>
@@ -1135,7 +1206,6 @@
                         </div>
                     `;
 
-                    // Ineligibles Section
                     if (ineligiblesList.length > 0) {
                         html += `
                             <div class="p-4 bg-slate-50 rounded border border-slate-200">
@@ -1581,6 +1651,7 @@
             switchPage('dashboard');
         }
 
+        // Delete officer
         function handleDelete() {
             const select = document.getElementById("edit-select");
             const id = parseInt(select.value);
