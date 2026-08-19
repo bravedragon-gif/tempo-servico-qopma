@@ -1,0 +1,2654 @@
+[
+  {
+    "id": 1,
+    "rank": "MAJ",
+    "name": "CARLOS ROBERTO DE ARAÚJO",
+    "agregado": false,
+    "entry_date": "01/01/1988",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      38,
+      7,
+      18
+    ],
+    "total_time_expected": [
+      38,
+      7,
+      18
+    ],
+    "toll_expected": [
+      0,
+      0,
+      0
+    ],
+    "rr_expected": true,
+    "missing_expected": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "id": 2,
+    "rank": "MAJ",
+    "name": "EDSON DE ARAÚJO AGUIAR",
+    "agregado": false,
+    "entry_date": "01/10/1999",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "total_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "toll_expected": [
+      1,
+      8,
+      1
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      4,
+      9,
+      13
+    ]
+  },
+  {
+    "id": 3,
+    "rank": "MAJ",
+    "name": "ARNALDO JOSÉ NEVES",
+    "agregado": false,
+    "entry_date": "12/08/1996",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      30,
+      0,
+      7
+    ],
+    "total_time_expected": [
+      30,
+      0,
+      7
+    ],
+    "toll_expected": [
+      1,
+      1,
+      16
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      1,
+      1,
+      9
+    ]
+  },
+  {
+    "id": 4,
+    "rank": "MAJ",
+    "name": "JULIANA ALVES FERNANDES DE MELO",
+    "agregado": true,
+    "entry_date": "01/10/1999",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "total_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "toll_expected": [
+      1,
+      8,
+      1
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      4,
+      9,
+      13
+    ]
+  },
+  {
+    "id": 5,
+    "rank": "MAJ",
+    "name": "MAIRA MRAD TEIXEIRA SILVA",
+    "agregado": true,
+    "entry_date": "01/10/1999",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "total_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "toll_expected": [
+      1,
+      8,
+      1
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      4,
+      9,
+      13
+    ]
+  },
+  {
+    "id": 6,
+    "rank": "MAJ",
+    "name": "RODRIGO CASTRO DE FREITAS",
+    "agregado": false,
+    "entry_date": "01/10/1999",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "total_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "toll_expected": [
+      1,
+      8,
+      1
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      4,
+      9,
+      13
+    ]
+  },
+  {
+    "id": 7,
+    "rank": "MAJ",
+    "name": "GILMAR JOSÉ RODRIGUES",
+    "agregado": false,
+    "entry_date": "12/08/1996",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      30,
+      0,
+      7
+    ],
+    "total_time_expected": [
+      30,
+      0,
+      7
+    ],
+    "toll_expected": [
+      1,
+      1,
+      16
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      1,
+      1,
+      9
+    ]
+  },
+  {
+    "id": 8,
+    "rank": "MAJ",
+    "name": "GILDÉSIO ALVES DE OLIVEIRA",
+    "agregado": false,
+    "entry_date": "01/10/1999",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      2,
+      4,
+      0
+    ],
+    "pmdf_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "total_time_expected": [
+      29,
+      2,
+      18
+    ],
+    "toll_expected": [
+      1,
+      8,
+      1
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      2,
+      5,
+      13
+    ]
+  },
+  {
+    "id": 9,
+    "rank": "MAJ",
+    "name": "GUSTAVO CANDEIA COSTA",
+    "agregado": false,
+    "entry_date": "01/10/1999",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "total_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "toll_expected": [
+      1,
+      8,
+      1
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      4,
+      9,
+      13
+    ]
+  },
+  {
+    "id": 10,
+    "rank": "MAJ",
+    "name": "JONAS APARECIDO DIAS",
+    "agregado": false,
+    "entry_date": "01/10/1999",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "total_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "toll_expected": [
+      1,
+      8,
+      1
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      4,
+      9,
+      13
+    ]
+  },
+  {
+    "id": 11,
+    "rank": "MAJ",
+    "name": "RODRIGO PRETEL PARENTE CORREIA",
+    "agregado": true,
+    "entry_date": "01/10/1999",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      11,
+      0
+    ],
+    "pmdf_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "total_time_expected": [
+      27,
+      9,
+      18
+    ],
+    "toll_expected": [
+      1,
+      8,
+      1
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      3,
+      10,
+      13
+    ]
+  },
+  {
+    "id": 12,
+    "rank": "MAJ",
+    "name": "JEISSON ANTÔNIO DA SILVA",
+    "agregado": true,
+    "entry_date": "15/05/1996",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      30,
+      3,
+      4
+    ],
+    "total_time_expected": [
+      30,
+      3,
+      4
+    ],
+    "toll_expected": [
+      1,
+      1,
+      1
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      0,
+      9,
+      27
+    ]
+  },
+  {
+    "id": 13,
+    "rank": "MAJ",
+    "name": "LEONARDO ANTUNES E SILVA",
+    "agregado": false,
+    "entry_date": "01/10/1999",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "total_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "toll_expected": [
+      1,
+      8,
+      1
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      4,
+      9,
+      13
+    ]
+  },
+  {
+    "id": 14,
+    "rank": "MAJ",
+    "name": "ADRIANO GOMES DUARTE",
+    "agregado": false,
+    "entry_date": "15/05/1996",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      30,
+      3,
+      4
+    ],
+    "total_time_expected": [
+      30,
+      3,
+      4
+    ],
+    "toll_expected": [
+      1,
+      1,
+      1
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      0,
+      9,
+      27
+    ]
+  },
+  {
+    "id": 15,
+    "rank": "MAJ",
+    "name": "JOÃO TIELLES DAMASCENO",
+    "agregado": true,
+    "entry_date": "15/05/1996",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      30,
+      3,
+      4
+    ],
+    "total_time_expected": [
+      30,
+      3,
+      4
+    ],
+    "toll_expected": [
+      1,
+      1,
+      1
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      0,
+      9,
+      27
+    ]
+  },
+  {
+    "id": 16,
+    "rank": "MAJ",
+    "name": "JEAN KARTER SOUZA DE OLIVEIRA",
+    "agregado": false,
+    "entry_date": "15/05/1996",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      30,
+      3,
+      4
+    ],
+    "total_time_expected": [
+      30,
+      3,
+      4
+    ],
+    "toll_expected": [
+      1,
+      1,
+      1
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      0,
+      9,
+      27
+    ]
+  },
+  {
+    "id": 17,
+    "rank": "CAP",
+    "name": "ADRIANO ROSA EDUARDO",
+    "agregado": true,
+    "entry_date": "01/10/1999",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      1,
+      11,
+      15
+    ],
+    "pmdf_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "total_time_expected": [
+      28,
+      10,
+      3
+    ],
+    "toll_expected": [
+      1,
+      8,
+      1
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      2,
+      9,
+      28
+    ]
+  },
+  {
+    "id": 18,
+    "rank": "CAP",
+    "name": "CIDCLAY COSTA DE ABREU",
+    "agregado": false,
+    "entry_date": "15/05/1996",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      1,
+      0,
+      8
+    ],
+    "pmdf_time_expected": [
+      30,
+      3,
+      4
+    ],
+    "total_time_expected": [
+      31,
+      3,
+      12
+    ],
+    "toll_expected": [
+      1,
+      1,
+      1
+    ],
+    "rr_expected": true,
+    "missing_expected": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "id": 19,
+    "rank": "CAP",
+    "name": "DAVI GERMANO",
+    "agregado": false,
+    "entry_date": "01/08/1993",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      33,
+      0,
+      18
+    ],
+    "total_time_expected": [
+      33,
+      0,
+      18
+    ],
+    "toll_expected": [
+      0,
+      7,
+      13
+    ],
+    "rr_expected": true,
+    "missing_expected": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "id": 20,
+    "rank": "CAP",
+    "name": "HUADSON FABRÍCIO BESERRA TEIXEIRA",
+    "agregado": false,
+    "entry_date": "01/10/1999",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "total_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "toll_expected": [
+      1,
+      8,
+      1
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      4,
+      9,
+      13
+    ]
+  },
+  {
+    "id": 21,
+    "rank": "CAP",
+    "name": "PAULO DE TARSO ARAÚJO NOGUEIRA",
+    "agregado": false,
+    "entry_date": "01/10/1999",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      6,
+      2
+    ],
+    "pmdf_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "total_time_expected": [
+      27,
+      4,
+      20
+    ],
+    "toll_expected": [
+      1,
+      8,
+      1
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      4,
+      3,
+      11
+    ]
+  },
+  {
+    "id": 22,
+    "rank": "CAP",
+    "name": "MÁRCIO PEREIRA COIMBRA",
+    "agregado": true,
+    "entry_date": "01/10/1999",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      1,
+      6,
+      1
+    ],
+    "pmdf_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "total_time_expected": [
+      28,
+      4,
+      19
+    ],
+    "toll_expected": [
+      1,
+      8,
+      1
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      3,
+      3,
+      12
+    ]
+  },
+  {
+    "id": 23,
+    "rank": "CAP",
+    "name": "RONAN CASTILHO GONÇALVES",
+    "agregado": false,
+    "entry_date": "01/10/1999",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      5,
+      2,
+      0
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "total_time_expected": [
+      32,
+      0,
+      18
+    ],
+    "toll_expected": [
+      1,
+      8,
+      1
+    ],
+    "rr_expected": true,
+    "missing_expected": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "id": 24,
+    "rank": "CAP",
+    "name": "DJALMA GOMES MENDES JUNIOR",
+    "agregado": false,
+    "entry_date": "01/10/1999",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "total_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "toll_expected": [
+      1,
+      8,
+      1
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      4,
+      9,
+      13
+    ]
+  },
+  {
+    "id": 25,
+    "rank": "CAP",
+    "name": "EDUARDO ALVES DINIZ",
+    "agregado": true,
+    "entry_date": "01/10/1999",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "total_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "toll_expected": [
+      1,
+      8,
+      1
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      4,
+      9,
+      13
+    ]
+  },
+  {
+    "id": 26,
+    "rank": "CAP",
+    "name": "ELIAS PEREIRA DE OLIVEIRA JUNIOR",
+    "agregado": false,
+    "entry_date": "01/10/1999",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "total_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "toll_expected": [
+      1,
+      8,
+      1
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      4,
+      9,
+      13
+    ]
+  },
+  {
+    "id": 27,
+    "rank": "CAP",
+    "name": "WARLLEY LIMA DA SILVA",
+    "agregado": false,
+    "entry_date": "01/10/1999",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "total_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "toll_expected": [
+      1,
+      8,
+      1
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      4,
+      9,
+      13
+    ]
+  },
+  {
+    "id": 28,
+    "rank": "CAP",
+    "name": "JOVINIANO DA SILVA MELO",
+    "agregado": false,
+    "entry_date": "07/03/1995",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      31,
+      5,
+      12
+    ],
+    "total_time_expected": [
+      31,
+      5,
+      12
+    ],
+    "toll_expected": [
+      0,
+      10,
+      22
+    ],
+    "rr_expected": true,
+    "missing_expected": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "id": 29,
+    "rank": "CAP",
+    "name": "CLAUBERT NEVES SÁ ABREU",
+    "agregado": false,
+    "entry_date": "15/05/1996",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      3,
+      9
+    ],
+    "pmdf_time_expected": [
+      30,
+      3,
+      4
+    ],
+    "total_time_expected": [
+      30,
+      6,
+      13
+    ],
+    "toll_expected": [
+      1,
+      1,
+      1
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      0,
+      6,
+      18
+    ]
+  },
+  {
+    "id": 30,
+    "rank": "CAP",
+    "name": "VANDERLEY ALMEIDA BANDEIRA",
+    "agregado": false,
+    "entry_date": "01/10/1999",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "total_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "toll_expected": [
+      1,
+      8,
+      1
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      4,
+      9,
+      13
+    ]
+  },
+  {
+    "id": 31,
+    "rank": "CAP",
+    "name": "NÉLITON LÚCIO ALVES",
+    "agregado": false,
+    "entry_date": "15/05/1995",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      31,
+      3,
+      4
+    ],
+    "total_time_expected": [
+      31,
+      3,
+      4
+    ],
+    "toll_expected": [
+      0,
+      11,
+      4
+    ],
+    "rr_expected": true,
+    "missing_expected": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "id": 32,
+    "rank": "CAP",
+    "name": "NILS NILSON CORRÊA PINHEIRO",
+    "agregado": false,
+    "entry_date": "01/10/1999",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "total_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "toll_expected": [
+      1,
+      8,
+      1
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      4,
+      9,
+      13
+    ]
+  },
+  {
+    "id": 33,
+    "rank": "CAP",
+    "name": "MAURICIO JUNIOR PERPETUO SALES",
+    "agregado": false,
+    "entry_date": "07/03/1995",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      31,
+      5,
+      12
+    ],
+    "total_time_expected": [
+      31,
+      5,
+      12
+    ],
+    "toll_expected": [
+      0,
+      10,
+      22
+    ],
+    "rr_expected": true,
+    "missing_expected": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "id": 34,
+    "rank": "CAP",
+    "name": "EUCIMAR DIOGENES DE MEDEIROS",
+    "agregado": false,
+    "entry_date": "01/10/1999",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "total_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "toll_expected": [
+      1,
+      8,
+      1
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      4,
+      9,
+      13
+    ]
+  },
+  {
+    "id": 35,
+    "rank": "CAP",
+    "name": "FERNANDO DIAS MARTINS",
+    "agregado": false,
+    "entry_date": "15/05/1995",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      10,
+      0
+    ],
+    "pmdf_time_expected": [
+      31,
+      3,
+      4
+    ],
+    "total_time_expected": [
+      32,
+      1,
+      4
+    ],
+    "toll_expected": [
+      0,
+      11,
+      4
+    ],
+    "rr_expected": true,
+    "missing_expected": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "id": 36,
+    "rank": "CAP",
+    "name": "RIVAN PINTO BONIFÁCIO",
+    "agregado": false,
+    "entry_date": "01/04/1988",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      1,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      38,
+      4,
+      18
+    ],
+    "total_time_expected": [
+      39,
+      4,
+      18
+    ],
+    "toll_expected": [
+      0,
+      0,
+      0
+    ],
+    "rr_expected": true,
+    "missing_expected": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "id": 37,
+    "rank": "CAP",
+    "name": "JOSE WELLINGTON DE OLIVEIRA BARROS JR",
+    "agregado": true,
+    "entry_date": "01/10/1999",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      5,
+      1,
+      29
+    ],
+    "pmdf_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "total_time_expected": [
+      31,
+      11,
+      17
+    ],
+    "toll_expected": [
+      1,
+      8,
+      1
+    ],
+    "rr_expected": true,
+    "missing_expected": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "id": 38,
+    "rank": "CAP",
+    "name": "FABIO JUNIO OLIVEIRA RAMOS",
+    "agregado": false,
+    "entry_date": "01/10/1999",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "total_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "toll_expected": [
+      1,
+      8,
+      1
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      4,
+      9,
+      13
+    ]
+  },
+  {
+    "id": 39,
+    "rank": "CAP",
+    "name": "ARLAN CHARLES DE SOUSA",
+    "agregado": false,
+    "entry_date": "01/10/1999",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      2,
+      2,
+      17
+    ],
+    "civil_time": [
+      0,
+      11,
+      29
+    ],
+    "pmdf_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "total_time_expected": [
+      30,
+      1,
+      4
+    ],
+    "toll_expected": [
+      1,
+      8,
+      1
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      1,
+      6,
+      27
+    ]
+  },
+  {
+    "id": 40,
+    "rank": "CAP",
+    "name": "EDSON PINTO GOMES",
+    "agregado": false,
+    "entry_date": "01/10/1999",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      2,
+      7,
+      29
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "total_time_expected": [
+      29,
+      6,
+      17
+    ],
+    "toll_expected": [
+      1,
+      8,
+      1
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      2,
+      1,
+      14
+    ]
+  },
+  {
+    "id": 41,
+    "rank": "CAP",
+    "name": "GLAUCO SOARES DE ALMEIDA",
+    "agregado": false,
+    "entry_date": "10/03/1997",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      2,
+      1,
+      1
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      29,
+      5,
+      9
+    ],
+    "total_time_expected": [
+      31,
+      5,
+      10
+    ],
+    "toll_expected": [
+      1,
+      2,
+      21
+    ],
+    "rr_expected": true,
+    "missing_expected": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "id": 42,
+    "rank": "CAP",
+    "name": "CLEUTER GODINHO DO NASCIMENTO",
+    "agregado": false,
+    "entry_date": "15/05/1996",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      8,
+      23
+    ],
+    "civil_time": [
+      1,
+      0,
+      27
+    ],
+    "pmdf_time_expected": [
+      30,
+      3,
+      4
+    ],
+    "total_time_expected": [
+      32,
+      0,
+      24
+    ],
+    "toll_expected": [
+      1,
+      1,
+      1
+    ],
+    "rr_expected": true,
+    "missing_expected": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "id": 43,
+    "rank": "CAP",
+    "name": "WELLINGTON LEITE DE SOUZA",
+    "agregado": false,
+    "entry_date": "01/10/1999",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      1,
+      1,
+      10
+    ],
+    "pmdf_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "total_time_expected": [
+      27,
+      10,
+      28
+    ],
+    "toll_expected": [
+      1,
+      8,
+      1
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      3,
+      9,
+      3
+    ]
+  },
+  {
+    "id": 44,
+    "rank": "CAP",
+    "name": "LEURIMAR DE SOUZA DUTRA",
+    "agregado": false,
+    "entry_date": "12/08/1996",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      1,
+      0,
+      4
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      30,
+      0,
+      7
+    ],
+    "total_time_expected": [
+      31,
+      0,
+      11
+    ],
+    "toll_expected": [
+      1,
+      1,
+      16
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      0,
+      1,
+      5
+    ]
+  },
+  {
+    "id": 45,
+    "rank": "CAP",
+    "name": "CLAUDIO JEAN DA SILVA PIRES",
+    "agregado": false,
+    "entry_date": "01/10/1999",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      1,
+      1,
+      15
+    ],
+    "pmdf_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "total_time_expected": [
+      27,
+      11,
+      3
+    ],
+    "toll_expected": [
+      1,
+      8,
+      1
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      3,
+      8,
+      28
+    ]
+  },
+  {
+    "id": 46,
+    "rank": "CAP",
+    "name": "ANTÔNIO ARAÚJO MESQUITA FILHO",
+    "agregado": true,
+    "entry_date": "01/08/1993",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      33,
+      0,
+      18
+    ],
+    "total_time_expected": [
+      33,
+      0,
+      18
+    ],
+    "toll_expected": [
+      0,
+      7,
+      13
+    ],
+    "rr_expected": true,
+    "missing_expected": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "id": 47,
+    "rank": "CAP",
+    "name": "ANDERSON AUGUSTO CAVALCANTI BATISTA",
+    "agregado": false,
+    "entry_date": "15/05/1996",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      30,
+      3,
+      4
+    ],
+    "total_time_expected": [
+      30,
+      3,
+      4
+    ],
+    "toll_expected": [
+      1,
+      1,
+      1
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      0,
+      9,
+      27
+    ]
+  },
+  {
+    "id": 48,
+    "rank": "CAP",
+    "name": "URSULLA PRISCYLLA RABELO",
+    "agregado": false,
+    "entry_date": "01/10/1999",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "total_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "toll_expected": [
+      1,
+      8,
+      1
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      4,
+      9,
+      13
+    ]
+  },
+  {
+    "id": 49,
+    "rank": "CAP",
+    "name": "IURE DA SILVA CUNHA",
+    "agregado": false,
+    "entry_date": "01/03/1994",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      11,
+      0
+    ],
+    "pmdf_time_expected": [
+      32,
+      5,
+      18
+    ],
+    "total_time_expected": [
+      33,
+      4,
+      18
+    ],
+    "toll_expected": [
+      0,
+      8,
+      19
+    ],
+    "rr_expected": true,
+    "missing_expected": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "id": 50,
+    "rank": "CAP",
+    "name": "ALECIO DE SOUSA LEMOS",
+    "agregado": false,
+    "entry_date": "01/10/1999",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      5,
+      6,
+      2
+    ],
+    "pmdf_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "total_time_expected": [
+      32,
+      4,
+      20
+    ],
+    "toll_expected": [
+      1,
+      8,
+      1
+    ],
+    "rr_expected": true,
+    "missing_expected": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "id": 51,
+    "rank": "CAP",
+    "name": "ADILSON ARAUJO LIMA",
+    "agregado": false,
+    "entry_date": "01/10/1999",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      2,
+      8,
+      26
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "total_time_expected": [
+      29,
+      7,
+      14
+    ],
+    "toll_expected": [
+      1,
+      8,
+      1
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      2,
+      0,
+      17
+    ]
+  },
+  {
+    "id": 52,
+    "rank": "CAP",
+    "name": "JULIO EMANUEL DANTAS DE MOURA",
+    "agregado": false,
+    "entry_date": "01/10/1999",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      3,
+      2,
+      7
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "total_time_expected": [
+      30,
+      0,
+      25
+    ],
+    "toll_expected": [
+      1,
+      8,
+      1
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      1,
+      7,
+      6
+    ]
+  },
+  {
+    "id": 53,
+    "rank": "CAP",
+    "name": "CLEBER CARVALHO DOS ANJOS",
+    "agregado": false,
+    "entry_date": "01/10/1999",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "total_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "toll_expected": [
+      1,
+      8,
+      1
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      4,
+      9,
+      13
+    ]
+  },
+  {
+    "id": 54,
+    "rank": "CAP",
+    "name": "ANA PAULA MARQUES MOURA DA CRUZ",
+    "agregado": false,
+    "entry_date": "01/10/1999",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "total_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "toll_expected": [
+      1,
+      8,
+      1
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      4,
+      9,
+      13
+    ]
+  },
+  {
+    "id": 55,
+    "rank": "CAP",
+    "name": "SAULO JOAQUIM NEIVA",
+    "agregado": false,
+    "entry_date": "01/10/1999",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "total_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "toll_expected": [
+      1,
+      8,
+      1
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      4,
+      9,
+      13
+    ]
+  },
+  {
+    "id": 56,
+    "rank": "CAP",
+    "name": "FABIANO AUGUSTO DE SOUZA MOREIRA",
+    "agregado": true,
+    "entry_date": "01/10/1999",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      1,
+      5,
+      6
+    ],
+    "pmdf_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "total_time_expected": [
+      28,
+      3,
+      24
+    ],
+    "toll_expected": [
+      1,
+      8,
+      1
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      3,
+      4,
+      7
+    ]
+  },
+  {
+    "id": 57,
+    "rank": "CAP",
+    "name": "RONALDO RODRIGUES DA SILVA",
+    "agregado": false,
+    "entry_date": "01/10/1999",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "total_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "toll_expected": [
+      1,
+      8,
+      1
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      4,
+      9,
+      13
+    ]
+  },
+  {
+    "id": 58,
+    "rank": "CAP",
+    "name": "ALEXANDRE HONORIO DA SILVA",
+    "agregado": false,
+    "entry_date": "01/10/1999",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "total_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "toll_expected": [
+      1,
+      8,
+      1
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      4,
+      9,
+      13
+    ]
+  },
+  {
+    "id": 59,
+    "rank": "CAP",
+    "name": "JOAQUIM MANOEL DO NASCIMENTO FILHO",
+    "agregado": false,
+    "entry_date": "01/08/1996",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      30,
+      0,
+      18
+    ],
+    "total_time_expected": [
+      30,
+      0,
+      18
+    ],
+    "toll_expected": [
+      1,
+      1,
+      14
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      1,
+      0,
+      26
+    ]
+  },
+  {
+    "id": 60,
+    "rank": "CAP",
+    "name": "MOISES LOPES VIEIRA",
+    "agregado": false,
+    "entry_date": "01/06/1998",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      3,
+      4,
+      0
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      28,
+      2,
+      18
+    ],
+    "total_time_expected": [
+      31,
+      6,
+      18
+    ],
+    "toll_expected": [
+      1,
+      5,
+      8
+    ],
+    "rr_expected": true,
+    "missing_expected": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "id": 61,
+    "rank": "CAP",
+    "name": "WAGNER GOMES DA COSTA",
+    "agregado": false,
+    "entry_date": "15/05/1996",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      9,
+      21
+    ],
+    "pmdf_time_expected": [
+      30,
+      3,
+      4
+    ],
+    "total_time_expected": [
+      31,
+      0,
+      25
+    ],
+    "toll_expected": [
+      1,
+      1,
+      1
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      0,
+      0,
+      6
+    ]
+  },
+  {
+    "id": 62,
+    "rank": "CAP",
+    "name": "ADERIVALDO MARTINS CARDOSO",
+    "agregado": true,
+    "entry_date": "01/10/1999",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "total_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "toll_expected": [
+      1,
+      8,
+      1
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      4,
+      9,
+      13
+    ]
+  },
+  {
+    "id": 63,
+    "rank": "CAP",
+    "name": "WENDERSON RODRIGUES RAMOS",
+    "agregado": false,
+    "entry_date": "01/10/1999",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "total_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "toll_expected": [
+      1,
+      8,
+      1
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      4,
+      9,
+      13
+    ]
+  },
+  {
+    "id": 64,
+    "rank": "CAP",
+    "name": "LEANDRO GONÇALVES DE SOUZA",
+    "agregado": false,
+    "entry_date": "01/10/1999",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "total_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "toll_expected": [
+      1,
+      8,
+      1
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      4,
+      9,
+      13
+    ]
+  },
+  {
+    "id": 65,
+    "rank": "CAP",
+    "name": "VALTENCIR DAS CHAGAS SILVA",
+    "agregado": false,
+    "entry_date": "15/04/1991",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      35,
+      4,
+      4
+    ],
+    "total_time_expected": [
+      35,
+      4,
+      4
+    ],
+    "toll_expected": [
+      0,
+      2,
+      20
+    ],
+    "rr_expected": true,
+    "missing_expected": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "id": 66,
+    "rank": "CAP",
+    "name": "JADSON ALVES BAIÃO SOUSA",
+    "agregado": false,
+    "entry_date": "01/10/1999",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "total_time_expected": [
+      26,
+      10,
+      18
+    ],
+    "toll_expected": [
+      1,
+      8,
+      1
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      4,
+      9,
+      13
+    ]
+  },
+  {
+    "id": 67,
+    "rank": "CAP",
+    "name": "CLEBSON NOGUEIRA DE OLIVEIRA",
+    "agregado": false,
+    "entry_date": "01/04/2003",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      6,
+      0,
+      5
+    ],
+    "civil_time": [
+      0,
+      0,
+      0
+    ],
+    "pmdf_time_expected": [
+      23,
+      4,
+      18
+    ],
+    "total_time_expected": [
+      29,
+      4,
+      23
+    ],
+    "toll_expected": [
+      2,
+      3,
+      3
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      2,
+      10,
+      10
+    ]
+  },
+  {
+    "id": 68,
+    "rank": "CAP",
+    "name": "THENYSON DA SILVA BISPO",
+    "agregado": false,
+    "entry_date": "10/03/1997",
+    "current_date": "19/08/2026",
+    "ffaa_time": [
+      0,
+      0,
+      0
+    ],
+    "civil_time": [
+      0,
+      8,
+      23
+    ],
+    "pmdf_time_expected": [
+      29,
+      5,
+      9
+    ],
+    "total_time_expected": [
+      30,
+      2,
+      2
+    ],
+    "toll_expected": [
+      1,
+      2,
+      21
+    ],
+    "rr_expected": false,
+    "missing_expected": [
+      1,
+      0,
+      19
+    ]
+  }
+]

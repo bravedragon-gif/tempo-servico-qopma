@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Tempo de Serviço - QOPMA</title>
+    <!-- Tailwind CSS (CDN for modern styles, works online) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Fallback offline basic styling in case Tailwind CDN is blocked by corporate firewall */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+            margin: 0;
+            padding: 0;
+        }
+        .sidebar {
+            width: 260px;
+            background-color: #1e293b;
+            color: #f8fafc;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+        .main-content {
+            margin-left: 260px;
+            padding: 40px;
+            min-height: 100vh;
+            background-color: #f8fafc;
+        }
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 24px;
+            color: #cbd5e1;
+            text-decoration: none;
+            font-weight: 500;
+            border-left: 4px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .menu-item:hover {
+            background-color: #334155;
+            color: #f8fafc;
+        }
+        .menu-item.active {
+            background-color: #3b82f6;
+            color: white;
+            border-left-color: #60a5fa;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        th {
+            background-color: #f9fafb;
+            font-weight: 600;
+        }
+        .sortable-header {
+            cursor: pointer;
+            user-select: none;
+        }
+        .sortable-header:hover {
+            background-color: #e5e7eb;
+        }
+        .login-tab-btn {
+            cursor: pointer;
+            padding: 10px 0;
+            text-align: center;
+            font-weight: bold;
+            border-bottom: 2px solid transparent;
+        }
+        .login-tab-btn.active {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+        }
+    </style>
+</head>
+<body class="bg-slate-900">
+
+    <!-- ================= LOGIN SCREEN ================= -->
+    <div id="login-container" class="min-h-screen flex items-center justify-center bg-slate-900 px-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden">
+            <!-- Header -->
+            <div class="bg-slate-800 p-6 text-white text-center border-b border-slate-700">
+                <h2 class="text-2xl font-bold tracking-wider">🎖️ QOPMA Gestão</h2>
+                <p class="text-xs text-slate-400 mt-1">Controle de Tempo de Serviço e Promoções</p>
+            </div>
+            
+            <!-- Tabs -->
+            <div class="grid grid-cols-2 border-b">
+                <div onclick="switchLoginTab('login')" id="login-tab-btn-login" class="login-tab-btn active">Entrar</div>
+                <div onclick="switchLoginTab('register')" id="login-tab-btn-register" class="login-tab-btn">Criar Conta</div>
+            </div>
+            
+            <div class="p-6">
+                <!-- FORM: LOGIN -->
+                <form id="form-login" onsubmit="handleLoginSubmit(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700">Nome de Usuário</label>
+                        <input type="text" id="login-user" required class="w-full border rounded px-3 py-2 mt-1 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700">Senha</label>
+                        <input type="password" id="login-pass" required class="w-full border rounded px-3 py-2 mt-1 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded transition">Acessar Painel</button>
+                    <p class="text-xs text-slate-500 text-center mt-4">Padrão de Teste: admin/admin ou usuario/user</p>
+                </form>
+
+                <!-- FORM: REGISTER -->
+                <form id="form-register" onsubmit="handleRegisterSubmit(event)" class="space-y-4 hidden">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700">Nome Completo</label>
+                        <input type="text" id="reg-fullname" required class="w-full border rounded px-3 py-2 mt-1 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700">Nome de Usuário</label>
+                        <input type="text" id="reg-user" required class="w-full border rounded px-3 py-2 mt-1 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700">Senha</label>
+                        <input type="password" id="reg-pass" required class="w-full border rounded px-3 py-2 mt-1 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                    <div class="bg-slate-50 p-3 rounded border border-slate-200 text-xs text-slate-500">
+                        🔒 Novos cadastros são criados como <strong>Usuário (Consulta)</strong> por padrão. Somente administradores podem alterar perfis de acesso após a criação.
+                    </div>
+                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded transition">Cadastrar Conta</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MAIN APP CONTAINER ================= -->
+    <div id="app-container" class="hidden">
+        
+        <!-- Sidebar Navigation -->
+        <div class="sidebar">
+            <!-- Logo -->
+            <div class="p-6 border-b border-slate-700">
+                <h2 class="text-xl font-bold tracking-wider flex items-center gap-2">🎖️ QOPMA Gestão</h2>
+                <div class="text-xs text-slate-400 mt-1 flex flex-col gap-0.5">
+                    <span id="user-display-name">Carregando...</span>
+                    <span id="user-display-role" class="text-[10px] uppercase font-bold text-blue-400">Perfil</span>
+                </div>
+            </div>
+            
+            <!-- Navigation Menu -->
+            <div class="flex-1 py-6 space-y-1">
+                <div onclick="switchPage('dashboard')" id="menu-item-dashboard" class="menu-item active">
+                    <span>📋 Quadro Geral</span>
+                </div>
+                <div onclick="switchPage('promo')" id="menu-item-promo" class="menu-item">
+                    <span>🔮 Projeção de Promoções</span>
+                </div>
+                <div onclick="switchPage('detail')" id="menu-item-detail" class="menu-item admin-only">
+                    <span>🔍 Memorial de Cálculo</span>
+                </div>
+                <div onclick="switchPage('add')" id="menu-item-add" class="menu-item admin-only">
+                    <span>➕ Cadastrar Oficial</span>
+                </div>
+                <div onclick="switchPage('edit')" id="menu-item-edit" class="menu-item admin-only">
+                    <span>⚙️ Editar / Excluir</span>
+                </div>
+                <div onclick="switchPage('users')" id="menu-item-users" class="menu-item admin-only">
+                    <span>👥 Gerenciar Contas</span>
+                </div>
+            </div>
+            
+            <!-- Global Settings Panel in Sidebar -->
+            <div class="p-6 border-t border-slate-700 bg-slate-900 space-y-4">
+                <div>
+                    <label for="projection-date" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Data de Projeção</label>
+                    <input type="date" id="projection-date" value="2026-08-19" class="w-full border-0 bg-slate-800 text-white rounded px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <button id="admin-reset-btn" onclick="restoreOriginalDB()" class="admin-only w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium px-4 py-2 rounded text-xs transition border border-slate-700">
+                    🔄 Restaurar Banco Original
+                </button>
+                <button onclick="handleLogout()" class="w-full bg-red-950/40 hover:bg-red-950/60 text-red-300 font-medium px-4 py-2 rounded text-xs transition border border-red-900/60">
+                    🚪 Sair da Conta
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="main-content">
+            
+            <!-- ================= PAGE: DASHBOARD ================= -->
+            <div id="page-dashboard" class="page-content">
+                <div class="flex justify-between items-center mb-8 flex-wrap gap-4">
+                    <div>
+                        <h1 class="text-3xl font-bold text-slate-900">📋 Quadro Geral de Tempo de Serviço</h1>
+                        <p class="text-slate-500 mt-1">Estatísticas, consultas e listagem completa dos oficiais do quadro.</p>
+                    </div>
+                </div>
+
+                <!-- KPIs -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 text-center">
+                        <div class="text-slate-400 text-sm font-semibold uppercase tracking-wider">Total de Oficiais</div>
+                        <div id="kpi-total" class="text-3xl font-bold text-blue-600 mt-1">0</div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 text-center">
+                        <div class="text-slate-400 text-sm font-semibold uppercase tracking-wider">Apto para Reserva (RR)</div>
+                        <div id="kpi-apto" class="text-3xl font-bold text-emerald-600 mt-1">0</div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 text-center">
+                        <div class="text-slate-400 text-sm font-semibold uppercase tracking-wider">Não Apto Faltando Tempo</div>
+                        <div id="kpi-nao-apto" class="text-3xl font-bold text-orange-500 mt-1">0</div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 text-center">
+                        <div class="text-slate-400 text-sm font-semibold uppercase tracking-wider">Taxa de Elegibilidade</div>
+                        <div id="kpi-taxa" class="text-3xl font-bold text-indigo-600 mt-1">0%</div>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 mb-8">
+                    <h3 class="text-lg font-bold mb-4 text-slate-800">🔍 Filtros de Busca</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Nome</label>
+                            <input type="text" id="filter-name" placeholder="Buscar por nome..." class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Posto</label>
+                            <select id="filter-rank" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                <option value="Todos">Todos</option>
+                                <option value="MAJ">MAJ</option>
+                                <option value="CAP">CAP</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Apto RR?</label>
+                            <select id="filter-rr" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                <option value="Todos">Todos</option>
+                                <option value="SIM">SIM</option>
+                                <option value="NÃO">NÃO</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Agregado?</label>
+                            <select id="filter-agregado" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                <option value="Todos">Todos</option>
+                                <option value="SIM">SIM</option>
+                                <option value="NÃO">NÃO</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Tempo Faltante</label>
+                            <select id="filter-missing" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                <option value="Todos">Todos</option>
+                                <option value="apto">Já Apto</option>
+                                <option value="sub1">Menos de 1 ano</option>
+                                <option value="1a3">Entre 1 e 3 anos</option>
+                                <option value="over3">Mais de 3 anos</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Table Card -->
+                <div class="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden mb-8">
+                    <div class="p-6 border-b border-slate-200 flex justify-between items-center flex-wrap gap-4 bg-slate-50">
+                        <h3 class="text-lg font-bold text-slate-800">📋 Quadro Geral (Clique nas colunas para ordenar)</h3>
+                        <button onclick="exportCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 py-2 rounded shadow transition text-sm">📥 Exportar Planilha (CSV)</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 m-0 shadow-none border-none">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th onclick="setSort('id')" class="sortable-header px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">N.º<span id="sort-icon-id"></span></th>
+                                    <th onclick="setSort('rank')" class="sortable-header px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Posto<span id="sort-icon-rank"></span></th>
+                                    <th onclick="setSort('name')" class="sortable-header px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Nome<span id="sort-icon-name"></span></th>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Agr.</th>
+                                    <th onclick="setSort('entry_date')" class="sortable-header px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Entrada PMDF<span id="sort-icon-entry_date"></span></th>
+                                    <th onclick="setSort('pmdf_time')" class="sortable-header px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Tempo PMDF<span id="sort-icon-pmdf_time"></span></th>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">FFAA</th>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Civil</th>
+                                    <th onclick="setSort('total_time')" class="sortable-header px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Tempo Total<span id="sort-icon-total_time"></span></th>
+                                    <th onclick="setSort('toll_time')" class="sortable-header px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Pedágio<span id="sort-icon-toll_time"></span></th>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Apto RR</th>
+                                    <th onclick="setSort('missing_time')" class="sortable-header px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Tempo Faltante<span id="sort-icon-missing_time"></span></th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body" class="bg-white divide-y divide-gray-200">
+                                <!-- Filled by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= PAGE: PROMOTIONS ================= -->
+            <div id="page-promo" class="page-content hidden">
+                <h1 class="text-3xl font-bold text-slate-900 mb-2">🔮 Projeção de Promoções (CAP ➡️ MAJ)</h1>
+                <p class="text-slate-500 mb-8">Simulação de promoções com base nas vagas disponíveis. Oficiais agregados não ocupam vaga no quadro de efetivos.</p>
+                
+                <div class="bg-white p-8 rounded-lg shadow-sm border border-slate-200 space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Vagas de Major Disponíveis</label>
+                            <input type="number" id="promo-vacancies" value="4" min="0" class="w-full border rounded px-3 py-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none text-lg">
+                        </div>
+                        <div class="md:col-span-3 bg-blue-50 p-5 rounded border border-blue-200 text-sm text-slate-700 min-h-[100px]">
+                            <span class="font-bold block text-blue-900 mb-2 text-base">📋 Resumo das Promoções Calculadas:</span>
+                            <span id="promo-summary">Informe o número de vagas ao lado para ver quem será promovido.</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-50 p-6 rounded border border-slate-200 mt-6 text-sm text-slate-600">
+                        <h5 class="font-bold text-slate-800 mb-2">💡 Nota de Funcionamento:</h5>
+                        <ul class="list-disc pl-5 space-y-1">
+                            <li>Capitães são promovidos estritamente por ordem de antiguidade (ID original de 17 em diante).</li>
+                            <li>Os policiais com marcação de Agregado (SIM) são promovidos, porém <strong>não contam vaga</strong> (não consomem as vagas informadas na simulação).</li>
+                            <li>Na página <strong>📋 Quadro Geral</strong>, os oficiais na lista de promoção serão destacados na cor <strong>verde</strong>.</li>
+                            <li class="font-semibold text-blue-700 admin-only">Você está logado como Administrador e pode alterar a quantidade de vagas.</li>
+                            <li class="font-semibold text-amber-700 user-only">Você está logado como Usuário. A alteração de vagas está desabilitada (somente consulta).</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= PAGE: MEMORIAL ================= -->
+            <div id="page-detail" class="page-content hidden">
+                <h1 class="text-3xl font-bold text-slate-900 mb-2">🔍 Memorial de Cálculo</h1>
+                <p class="text-slate-500 mb-8">Auditoria detalhada do tempo de serviço, pedágio e elegibilidade por oficial.</p>
+                
+                <div class="bg-white p-8 rounded-lg shadow-sm border border-slate-200">
+                    <div class="mb-6 max-w-md">
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Selecione o Oficial:</label>
+                        <select id="detail-select" onchange="renderMemorial()" class="w-full border rounded px-3 py-2.5 bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            <!-- Filled by JS -->
+                        </select>
+                    </div>
+                    
+                    <div id="memorial-container" class="mt-8 border-t pt-8">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= PAGE: ADD OFFICER ================= -->
+            <div id="page-add" class="page-content hidden">
+                <h1 class="text-3xl font-bold text-slate-900 mb-2">➕ Cadastrar Novo Oficial</h1>
+                <p class="text-slate-500 mb-8">Insira as informações básicas e tempos externos para inserir um oficial no banco de dados local.</p>
+                
+                <div class="bg-white p-8 rounded-lg shadow-sm border border-slate-200">
+                    <form onsubmit="handleAdd(event)" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">N.º (Identificador de Antiguidade)</label>
+                                <input type="number" id="add-id" required class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">Posto</label>
+                                <select id="add-rank" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                    <option value="MAJ">MAJ</option>
+                                    <option value="CAP">CAP</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">Nome Completo</label>
+                                <input type="text" id="add-name" required class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            </div>
+                            <div class="flex items-center gap-2 pt-2">
+                                <input type="checkbox" id="add-agregado" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                <label for="add-agregado" class="text-sm font-semibold text-slate-700">Agregado (SIM)</label>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">Data de Entrada na PMDF</label>
+                                <input type="date" id="add-entry" required class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-6">
+                            <div>
+                                <h5 class="font-bold text-slate-800 border-b border-slate-200 pb-2 text-base">Tempo Externo de Forças Armadas (FFAA)</h5>
+                                <div class="grid grid-cols-3 gap-3 mt-3">
+                                    <div>
+                                        <label class="text-xs font-semibold text-slate-400 uppercase">Anos</label>
+                                        <input type="number" id="add-ffaa-y" value="0" min="0" class="w-full border rounded px-3 py-2 mt-1 focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                    <div>
+                                        <label class="text-xs font-semibold text-slate-400 uppercase">Meses</label>
+                                        <input type="number" id="add-ffaa-m" value="0" min="0" max="11" class="w-full border rounded px-3 py-2 mt-1 focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                    <div>
+                                        <label class="text-xs font-semibold text-slate-400 uppercase">Dias</label>
+                                        <input type="number" id="add-ffaa-d" value="0" min="0" max="29" class="w-full border rounded px-3 py-2 mt-1 focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h5 class="font-bold text-slate-800 border-b border-slate-200 pb-2 text-base">Tempo Externo de Serviço Civil</h5>
+                                <div class="grid grid-cols-3 gap-3 mt-3">
+                                    <div>
+                                        <label class="text-xs font-semibold text-slate-400 uppercase">Anos</label>
+                                        <input type="number" id="add-civil-y" value="0" min="0" class="w-full border rounded px-3 py-2 mt-1 focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                    <div>
+                                        <label class="text-xs font-semibold text-slate-400 uppercase">Meses</label>
+                                        <input type="number" id="add-civil-m" value="0" min="0" max="11" class="w-full border rounded px-3 py-2 mt-1 focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                    <div>
+                                        <label class="text-xs font-semibold text-slate-400 uppercase">Dias</label>
+                                        <input type="number" id="add-civil-d" value="0" min="0" max="29" class="w-full border rounded px-3 py-2 mt-1 focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="pt-6">
+                                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded shadow transition">💾 Cadastrar Policial</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- ================= PAGE: EDIT / DELETE ================= -->
+            <div id="page-edit" class="page-content hidden">
+                <h1 class="text-3xl font-bold text-slate-900 mb-2">⚙️ Editar / Excluir Oficial</h1>
+                <p class="text-slate-500 mb-8">Selecione um oficial para atualizar seus registros ou excluí-lo definitivamente do banco local.</p>
+                
+                <div class="bg-white p-8 rounded-lg shadow-sm border border-slate-200">
+                    <div class="mb-8 max-w-md">
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Selecione o Oficial:</label>
+                        <select id="edit-select" onchange="fillEditForm()" class="w-full border rounded px-3 py-2.5 bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            <!-- Filled by JS -->
+                        </select>
+                    </div>
+                    
+                    <form id="edit-form" onsubmit="handleEditSave(event)" class="grid grid-cols-1 md:grid-cols-2 gap-8 hidden border-t pt-8">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">Posto</label>
+                                <select id="edit-rank" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500">
+                                    <option value="MAJ">MAJ</option>
+                                    <option value="CAP">CAP</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">Nome Completo</label>
+                                <input type="text" id="edit-name" required class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div class="flex items-center gap-2 pt-2">
+                                <input type="checkbox" id="edit-agregado" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                <label for="edit-agregado" class="text-sm font-semibold text-slate-700">Agregado (SIM)</label>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">Data de Entrada na PMDF</label>
+                                <input type="date" id="edit-entry" required class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500">
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-6">
+                            <div>
+                                <h5 class="font-bold text-slate-800 border-b border-slate-200 pb-2 text-base">Tempo Externo de Forças Armadas (FFAA)</h5>
+                                <div class="grid grid-cols-3 gap-3 mt-3">
+                                    <div>
+                                        <label class="text-xs font-semibold text-slate-400 uppercase">Anos</label>
+                                        <input type="number" id="edit-ffaa-y" min="0" class="w-full border rounded px-3 py-2 mt-1 focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                    <div>
+                                        <label class="text-xs font-semibold text-slate-400 uppercase">Meses</label>
+                                        <input type="number" id="edit-ffaa-m" min="0" max="11" class="w-full border rounded px-3 py-2 mt-1 focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                    <div>
+                                        <label class="text-xs font-semibold text-slate-400 uppercase">Dias</label>
+                                        <input type="number" id="edit-ffaa-d" min="0" max="29" class="w-full border rounded px-3 py-2 mt-1 focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h5 class="font-bold text-slate-800 border-b border-slate-200 pb-2 text-base">Tempo Externo de Serviço Civil</h5>
+                                <div class="grid grid-cols-3 gap-3 mt-3">
+                                    <div>
+                                        <label class="text-xs font-semibold text-slate-400 uppercase">Anos</label>
+                                        <input type="number" id="edit-civil-y" min="0" class="w-full border rounded px-3 py-2 mt-1 focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                    <div>
+                                        <label class="text-xs font-semibold text-slate-400 uppercase">Meses</label>
+                                        <input type="number" id="edit-civil-m" min="0" max="11" class="w-full border rounded px-3 py-2 mt-1 focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                    <div>
+                                        <label class="text-xs font-semibold text-slate-400 uppercase">Dias</label>
+                                        <input type="number" id="edit-civil-d" min="0" max="29" class="w-full border rounded px-3 py-2 mt-1 focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="pt-6 flex gap-4">
+                                <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded shadow transition">💾 Salvar Alterações</button>
+                                <button type="button" onclick="handleDelete()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded shadow transition">❌ Excluir Registro</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- ================= PAGE: MANAGE ACCOUNTS (ADMIN ONLY) ================= -->
+            <div id="page-users" class="page-content hidden">
+                <h1 class="text-3xl font-bold text-slate-900 mb-2">👥 Gerenciar Contas de Acesso</h1>
+                <p class="text-slate-500 mb-8">Administre as credenciais registradas localmente. Apenas administradores podem promover usuários ou excluir contas.</p>
+                
+                <div class="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 m-0 shadow-none border-none">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Nome Completo</th>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Usuário</th>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Perfil</th>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-table-body" class="bg-white divide-y divide-gray-200">
+                                <!-- Filled by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Application Script (calculations engine and DB) -->
+    <script>
+        // Database
+        const INITIAL_OFFICERS = [{"id": 1, "rank": "MAJ", "name": "CARLOS ROBERTO DE ARAÚJO", "agregado": false, "entry_date": "01/01/1988", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [38, 7, 18], "total_time_expected": [38, 7, 18], "toll_expected": [0, 0, 0], "rr_expected": true, "missing_expected": [0, 0, 0]}, {"id": 2, "rank": "MAJ", "name": "EDSON DE ARAÚJO AGUIAR", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 3, "rank": "MAJ", "name": "ARNALDO JOSÉ NEVES", "agregado": false, "entry_date": "12/08/1996", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [30, 0, 7], "total_time_expected": [30, 0, 7], "toll_expected": [1, 1, 16], "rr_expected": false, "missing_expected": [1, 1, 9]}, {"id": 4, "rank": "MAJ", "name": "JULIANA ALVES FERNANDES DE MELO", "agregado": true, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 5, "rank": "MAJ", "name": "MAIRA MRAD TEIXEIRA SILVA", "agregado": true, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 6, "rank": "MAJ", "name": "RODRIGO CASTRO DE FREITAS", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 7, "rank": "MAJ", "name": "GILMAR JOSÉ RODRIGUES", "agregado": false, "entry_date": "12/08/1996", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [30, 0, 7], "total_time_expected": [30, 0, 7], "toll_expected": [1, 1, 16], "rr_expected": false, "missing_expected": [1, 1, 9]}, {"id": 8, "rank": "MAJ", "name": "GILDÉSIO ALVES DE OLIVEIRA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [2, 4, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [29, 2, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [2, 5, 13]}, {"id": 9, "rank": "MAJ", "name": "GUSTAVO CANDEIA COSTA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 10, "rank": "MAJ", "name": "JONAS APARECIDO DIAS", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 11, "rank": "MAJ", "name": "RODRIGO PRETEL PARENTE CORREIA", "agregado": true, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 11, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [27, 9, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [3, 10, 13]}, {"id": 12, "rank": "MAJ", "name": "JEISSON ANTÔNIO DA SILVA", "agregado": true, "entry_date": "15/05/1996", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [30, 3, 4], "total_time_expected": [30, 3, 4], "toll_expected": [1, 1, 1], "rr_expected": false, "missing_expected": [0, 9, 27]}, {"id": 13, "rank": "MAJ", "name": "LEONARDO ANTUNES E SILVA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 14, "rank": "MAJ", "name": "ADRIANO GOMES DUARTE", "agregado": false, "entry_date": "15/05/1996", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [30, 3, 4], "total_time_expected": [30, 3, 4], "toll_expected": [1, 1, 1], "rr_expected": false, "missing_expected": [0, 9, 27]}, {"id": 15, "rank": "MAJ", "name": "JOÃO TIELLES DAMASCENO", "agregado": true, "entry_date": "15/05/1996", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [30, 3, 4], "total_time_expected": [30, 3, 4], "toll_expected": [1, 1, 1], "rr_expected": false, "missing_expected": [0, 9, 27]}, {"id": 16, "rank": "MAJ", "name": "JEAN KARTER SOUZA DE OLIVEIRA", "agregado": false, "entry_date": "15/05/1996", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [30, 3, 4], "total_time_expected": [30, 3, 4], "toll_expected": [1, 1, 1], "rr_expected": false, "missing_expected": [0, 9, 27]}, {"id": 17, "rank": "CAP", "name": "ADRIANO ROSA EDUARDO", "agregado": true, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [1, 11, 15], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [28, 10, 3], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [2, 9, 28]}, {"id": 18, "rank": "CAP", "name": "CIDCLAY COSTA DE ABREU", "agregado": false, "entry_date": "15/05/1996", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [1, 0, 8], "pmdf_time_expected": [30, 3, 4], "total_time_expected": [31, 3, 12], "toll_expected": [1, 1, 1], "rr_expected": true, "missing_expected": [0, 0, 0]}, {"id": 19, "rank": "CAP", "name": "DAVI GERMANO", "agregado": false, "entry_date": "01/08/1993", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [33, 0, 18], "total_time_expected": [33, 0, 18], "toll_expected": [0, 7, 13], "rr_expected": true, "missing_expected": [0, 0, 0]}, {"id": 20, "rank": "CAP", "name": "HUADSON FABRÍCIO BESERRA TEIXEIRA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 21, "rank": "CAP", "name": "PAULO DE TARSO ARAÚJO NOGUEIRA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 6, 2], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [27, 4, 20], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 3, 11]}, {"id": 22, "rank": "CAP", "name": "MÁRCIO PEREIRA COIMBRA", "agregado": true, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [1, 6, 1], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [28, 4, 19], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [3, 3, 12]}, {"id": 23, "rank": "CAP", "name": "RONAN CASTILHO GONÇALVES", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [5, 2, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [32, 0, 18], "toll_expected": [1, 8, 1], "rr_expected": true, "missing_expected": [0, 0, 0]}, {"id": 24, "rank": "CAP", "name": "DJALMA GOMES MENDES JUNIOR", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 25, "rank": "CAP", "name": "EDUARDO ALVES DINIZ", "agregado": true, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 26, "rank": "CAP", "name": "ELIAS PEREIRA DE OLIVEIRA JUNIOR", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 27, "rank": "CAP", "name": "WARLLEY LIMA DA SILVA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 28, "rank": "CAP", "name": "JOVINIANO DA SILVA MELO", "agregado": false, "entry_date": "07/03/1995", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [31, 5, 12], "total_time_expected": [31, 5, 12], "toll_expected": [0, 10, 22], "rr_expected": true, "missing_expected": [0, 0, 0]}, {"id": 29, "rank": "CAP", "name": "CLAUBERT NEVES SÁ ABREU", "agregado": false, "entry_date": "15/05/1996", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 3, 9], "pmdf_time_expected": [30, 3, 4], "total_time_expected": [30, 6, 13], "toll_expected": [1, 1, 1], "rr_expected": false, "missing_expected": [0, 6, 18]}, {"id": 30, "rank": "CAP", "name": "VANDERLEY ALMEIDA BANDEIRA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 31, "rank": "CAP", "name": "NÉLITON LÚCIO ALVES", "agregado": false, "entry_date": "15/05/1995", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [31, 3, 4], "total_time_expected": [31, 3, 4], "toll_expected": [0, 11, 4], "rr_expected": true, "missing_expected": [0, 0, 0]}, {"id": 32, "rank": "CAP", "name": "NILS NILSON CORRÊA PINHEIRO", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 33, "rank": "CAP", "name": "MAURICIO JUNIOR PERPETUO SALES", "agregado": false, "entry_date": "07/03/1995", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [31, 5, 12], "total_time_expected": [31, 5, 12], "toll_expected": [0, 10, 22], "rr_expected": true, "missing_expected": [0, 0, 0]}, {"id": 34, "rank": "CAP", "name": "EUCIMAR DIOGENES DE MEDEIROS", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 35, "rank": "CAP", "name": "FERNANDO DIAS MARTINS", "agregado": false, "entry_date": "15/05/1995", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 10, 0], "pmdf_time_expected": [31, 3, 4], "total_time_expected": [32, 1, 4], "toll_expected": [0, 11, 4], "rr_expected": true, "missing_expected": [0, 0, 0]}, {"id": 36, "rank": "CAP", "name": "RIVAN PINTO BONIFÁCIO", "agregado": false, "entry_date": "01/04/1988", "current_date": "19/08/2026", "ffaa_time": [1, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [38, 4, 18], "total_time_expected": [39, 4, 18], "toll_expected": [0, 0, 0], "rr_expected": true, "missing_expected": [0, 0, 0]}, {"id": 37, "rank": "CAP", "name": "JOSE WELLINGTON DE OLIVEIRA BARROS JR", "agregado": true, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [5, 1, 29], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [31, 11, 17], "toll_expected": [1, 8, 1], "rr_expected": true, "missing_expected": [0, 0, 0]}, {"id": 38, "rank": "CAP", "name": "FABIO JUNIO OLIVEIRA RAMOS", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 39, "rank": "CAP", "name": "ARLAN CHARLES DE SOUSA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [2, 2, 17], "civil_time": [0, 11, 29], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [30, 1, 4], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [1, 6, 27]}, {"id": 40, "rank": "CAP", "name": "EDSON PINTO GOMES", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [2, 7, 29], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [29, 6, 17], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [2, 1, 14]}, {"id": 41, "rank": "CAP", "name": "GLAUCO SOARES DE ALMEIDA", "agregado": false, "entry_date": "10/03/1997", "current_date": "19/08/2026", "ffaa_time": [2, 1, 1], "civil_time": [0, 0, 0], "pmdf_time_expected": [29, 5, 9], "total_time_expected": [31, 5, 10], "toll_expected": [1, 2, 21], "rr_expected": true, "missing_expected": [0, 0, 0]}, {"id": 42, "rank": "CAP", "name": "CLEUTER GODINHO DO NASCIMENTO", "agregado": false, "entry_date": "15/05/1996", "current_date": "19/08/2026", "ffaa_time": [0, 8, 23], "civil_time": [1, 0, 27], "pmdf_time_expected": [30, 3, 4], "total_time_expected": [32, 0, 24], "toll_expected": [1, 1, 1], "rr_expected": true, "missing_expected": [0, 0, 0]}, {"id": 43, "rank": "CAP", "name": "WELLINGTON LEITE DE SOUZA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [1, 1, 10], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [27, 10, 28], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [3, 9, 3]}, {"id": 44, "rank": "CAP", "name": "LEURIMAR DE SOUZA DUTRA", "agregado": false, "entry_date": "12/08/1996", "current_date": "19/08/2026", "ffaa_time": [1, 0, 4], "civil_time": [0, 0, 0], "pmdf_time_expected": [30, 0, 7], "total_time_expected": [31, 0, 11], "toll_expected": [1, 1, 16], "rr_expected": false, "missing_expected": [0, 1, 5]}, {"id": 45, "rank": "CAP", "name": "CLAUDIO JEAN DA SILVA PIRES", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [1, 1, 15], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [27, 11, 3], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [3, 8, 28]}, {"id": 46, "rank": "CAP", "name": "ANTÔNIO ARAÚJO MESQUITA FILHO", "agregado": true, "entry_date": "01/08/1993", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [33, 0, 18], "total_time_expected": [33, 0, 18], "toll_expected": [0, 7, 13], "rr_expected": true, "missing_expected": [0, 0, 0]}, {"id": 47, "rank": "CAP", "name": "ANDERSON AUGUSTO CAVALCANTI BATISTA", "agregado": false, "entry_date": "15/05/1996", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [30, 3, 4], "total_time_expected": [30, 3, 4], "toll_expected": [1, 1, 1], "rr_expected": false, "missing_expected": [0, 9, 27]}, {"id": 48, "rank": "CAP", "name": "URSULLA PRISCYLLA RABELO", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 49, "rank": "CAP", "name": "IURE DA SILVA CUNHA", "agregado": false, "entry_date": "01/03/1994", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 11, 0], "pmdf_time_expected": [32, 5, 18], "total_time_expected": [33, 4, 18], "toll_expected": [0, 8, 19], "rr_expected": true, "missing_expected": [0, 0, 0]}, {"id": 50, "rank": "CAP", "name": "ALECIO DE SOUSA LEMOS", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [5, 6, 2], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [32, 4, 20], "toll_expected": [1, 8, 1], "rr_expected": true, "missing_expected": [0, 0, 0]}, {"id": 51, "rank": "CAP", "name": "ADILSON ARAUJO LIMA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [2, 8, 26], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [29, 7, 14], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [2, 0, 17]}, {"id": 52, "rank": "CAP", "name": "JULIO EMANUEL DANTAS DE MOURA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [3, 2, 7], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [30, 0, 25], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [1, 7, 6]}, {"id": 53, "rank": "CAP", "name": "CLEBER CARVALHO DOS ANJOS", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 54, "rank": "CAP", "name": "ANA PAULA MARQUES MOURA DA CRUZ", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 55, "rank": "CAP", "name": "SAULO JOAQUIM NEIVA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 56, "rank": "CAP", "name": "FABIANO AUGUSTO DE SOUZA MOREIRA", "agregado": true, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [1, 5, 6], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [28, 3, 24], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [3, 4, 7]}, {"id": 57, "rank": "CAP", "name": "RONALDO RODRIGUES DA SILVA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 58, "rank": "CAP", "name": "ALEXANDRE HONORIO DA SILVA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 59, "rank": "CAP", "name": "JOAQUIM MANOEL DO NASCIMENTO FILHO", "agregado": false, "entry_date": "01/08/1996", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [30, 0, 18], "total_time_expected": [30, 0, 18], "toll_expected": [1, 1, 14], "rr_expected": false, "missing_expected": [1, 0, 26]}, {"id": 60, "rank": "CAP", "name": "MOISES LOPES VIEIRA", "agregado": false, "entry_date": "01/06/1998", "current_date": "19/08/2026", "ffaa_time": [3, 4, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [28, 2, 18], "total_time_expected": [31, 6, 18], "toll_expected": [1, 5, 8], "rr_expected": true, "missing_expected": [0, 0, 0]}, {"id": 61, "rank": "CAP", "name": "WAGNER GOMES DA COSTA", "agregado": false, "entry_date": "15/05/1996", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 9, 21], "pmdf_time_expected": [30, 3, 4], "total_time_expected": [31, 0, 25], "toll_expected": [1, 1, 1], "rr_expected": false, "missing_expected": [0, 0, 6]}, {"id": 62, "rank": "CAP", "name": "ADERIVALDO MARTINS CARDOSO", "agregado": true, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 63, "rank": "CAP", "name": "WENDERSON RODRIGUES RAMOS", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 64, "rank": "CAP", "name": "LEANDRO GONÇALVES DE SOUZA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 65, "rank": "CAP", "name": "VALTENCIR DAS CHAGAS SILVA", "agregado": false, "entry_date": "15/04/1991", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [35, 4, 4], "total_time_expected": [35, 4, 4], "toll_expected": [0, 2, 20], "rr_expected": true, "missing_expected": [0, 0, 0]}, {"id": 66, "rank": "CAP", "name": "JADSON ALVES BAIÃO SOUSA", "agregado": false, "entry_date": "01/10/1999", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 0, 0], "pmdf_time_expected": [26, 10, 18], "total_time_expected": [26, 10, 18], "toll_expected": [1, 8, 1], "rr_expected": false, "missing_expected": [4, 9, 13]}, {"id": 67, "rank": "CAP", "name": "CLEBSON NOGUEIRA DE OLIVEIRA", "agregado": false, "entry_date": "01/04/2003", "current_date": "19/08/2026", "ffaa_time": [6, 0, 5], "civil_time": [0, 0, 0], "pmdf_time_expected": [23, 4, 18], "total_time_expected": [29, 4, 23], "toll_expected": [2, 3, 3], "rr_expected": false, "missing_expected": [2, 10, 10]}, {"id": 68, "rank": "CAP", "name": "THENYSON DA SILVA BISPO", "agregado": false, "entry_date": "10/03/1997", "current_date": "19/08/2026", "ffaa_time": [0, 0, 0], "civil_time": [0, 8, 23], "pmdf_time_expected": [29, 5, 9], "total_time_expected": [30, 2, 2], "toll_expected": [1, 2, 21], "rr_expected": false, "missing_expected": [1, 0, 19]}];
+        
+        // Initial Default Users database
+        const DEFAULT_USERS = [
+            { username: "admin", password: "admin", name: "Administrador QOPMA", profile: "admin" },
+            { username: "usuario", password: "user", name: "Usuário Consulta", profile: "usuario" }
+        ];
+
+        let officers = [];
+        let users = [];
+        let currentUser = null;
+        
+        let sortCol = "id";
+        let sortAsc = true;
+
+        // AUTHENTICATION AND USERS MANAGEMENT
+        function initUsers() {
+            const savedUsers = localStorage.getItem("qopma_users_db");
+            if (savedUsers) {
+                users = JSON.parse(savedUsers);
+            } else {
+                users = JSON.parse(JSON.stringify(DEFAULT_USERS));
+                localStorage.setItem("qopma_users_db", JSON.stringify(users));
+            }
+        }
+        
+        function checkSession() {
+            const savedSession = sessionStorage.getItem("qopma_current_session");
+            if (savedSession) {
+                currentUser = JSON.parse(savedSession);
+                showDashboardApp();
+            } else {
+                showLoginScreen();
+            }
+        }
+        
+        function showLoginScreen() {
+            document.getElementById("login-container").classList.remove("hidden");
+            document.getElementById("app-container").classList.add("hidden");
+            document.body.className = "bg-slate-900";
+        }
+        
+        function showDashboardApp() {
+            document.getElementById("login-container").classList.add("hidden");
+            document.getElementById("app-container").classList.remove("hidden");
+            document.body.className = "bg-slate-50";
+            
+            // Set User name display in sidebar
+            document.getElementById("user-display-name").innerText = currentUser.name;
+            document.getElementById("user-display-role").innerText = currentUser.profile === "admin" ? "Administrador" : "Usuário Consulta";
+            
+            // Apply Profile Restrictions
+            if (currentUser.profile === "admin") {
+                document.querySelectorAll(".admin-only").forEach(el => el.classList.remove("hidden"));
+                document.querySelectorAll(".user-only").forEach(el => el.classList.add("hidden"));
+                
+                // Allow editing vacancies in promotions
+                const vacInput = document.getElementById("promo-vacancies");
+                if (vacInput) {
+                    vacInput.disabled = false;
+                    vacInput.className = "w-full border rounded px-3 py-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none text-lg";
+                }
+            } else {
+                // Regular User
+                document.querySelectorAll(".admin-only").forEach(el => el.classList.add("hidden"));
+                document.querySelectorAll(".user-only").forEach(el => el.classList.remove("hidden"));
+                
+                // Disable editing vacancies in promotions
+                const vacInput = document.getElementById("promo-vacancies");
+                if (vacInput) {
+                    vacInput.disabled = true;
+                    vacInput.className = "w-full border rounded px-3 py-2.5 text-lg bg-slate-100 text-slate-500 cursor-not-allowed";
+                }
+            }
+            
+            // Save global promotion vacancies default if not saved
+            const savedVacs = localStorage.getItem("qopma_global_vacancies");
+            if (savedVacs) {
+                document.getElementById("promo-vacancies").value = savedVacs;
+            } else {
+                localStorage.setItem("qopma_global_vacancies", "4");
+            }
+            
+            switchPage('dashboard');
+        }
+
+        // Login screen tab switcher
+        function switchLoginTab(tab) {
+            document.getElementById("login-tab-btn-login").classList.remove("active");
+            document.getElementById("login-tab-btn-register").classList.remove("active");
+            document.getElementById("form-login").classList.add("hidden");
+            document.getElementById("form-register").classList.add("hidden");
+            
+            document.getElementById(`login-tab-btn-${tab}`).classList.add("active");
+            document.getElementById(`form-${tab}`).classList.remove("hidden");
+        }
+
+        function handleLoginSubmit(e) {
+            e.preventDefault();
+            const userVal = document.getElementById("login-user").value.trim().toLowerCase();
+            const passVal = document.getElementById("login-pass").value;
+            
+            const matchedUser = users.find(u => u.username === userVal && u.password === passVal);
+            if (matchedUser) {
+                currentUser = matchedUser;
+                sessionStorage.setItem("qopma_current_session", JSON.stringify(currentUser));
+                showDashboardApp();
+                // Reset inputs
+                e.target.reset();
+            } else {
+                alert("Usuário ou senha inválidos!");
+            }
+        }
+
+        function handleRegisterSubmit(e) {
+            e.preventDefault();
+            const fullname = document.getElementById("reg-fullname").value.trim();
+            const username = document.getElementById("reg-user").value.trim().toLowerCase();
+            const password = document.getElementById("reg-pass").value;
+            
+            if (users.some(u => u.username === username)) {
+                alert("Este nome de usuário já está sendo utilizado!");
+                return;
+            }
+            
+            // All new accounts register as regular users by default!
+            const newUser = { username, password, name: fullname, profile: "usuario" };
+            users.push(newUser);
+            localStorage.setItem("qopma_users_db", JSON.stringify(users));
+            
+            alert("Cadastro realizado com sucesso! Um administrador precisará aprovar sua promoção para Administrador se necessário. Você já pode acessar como Usuário.");
+            switchLoginTab("login");
+            e.target.reset();
+        }
+        
+        function handleLogout() {
+            sessionStorage.removeItem("qopma_current_session");
+            currentUser = null;
+            showLoginScreen();
+        }
+
+        // Manage User Accounts Functions
+        function toggleUserProfile(username) {
+            if (username === currentUser.username) {
+                alert("Você não pode alterar o seu próprio perfil!");
+                return;
+            }
+            if (username === "admin") {
+                alert("O perfil do administrador master não pode ser alterado!");
+                return;
+            }
+            const idx = users.findIndex(u => u.username === username);
+            if (idx !== -1) {
+                users[idx].profile = users[idx].profile === "admin" ? "usuario" : "admin";
+                localStorage.setItem("qopma_users_db", JSON.stringify(users));
+                renderAll();
+                alert(`Perfil de ${users[idx].name} alterado com sucesso!`);
+            }
+        }
+
+        function deleteUserAccount(username) {
+            if (username === currentUser.username) {
+                alert("Você não pode excluir a sua própria conta logada!");
+                return;
+            }
+            if (username === "admin") {
+                alert("O administrador master não pode ser excluído!");
+                return;
+            }
+            if (confirm(`Tem certeza absoluta que deseja excluir a conta de usuário "${username}"?`)) {
+                users = users.filter(u => u.username !== username);
+                localStorage.setItem("qopma_users_db", JSON.stringify(users));
+                renderAll();
+                alert(`Usuário "${username}" excluído.`);
+            }
+        }
+
+        // DATABASE LOADER
+        function initDB() {
+            const saved = localStorage.getItem("qopma_officers_db");
+            if (saved) {
+                officers = JSON.parse(saved);
+            } else {
+                officers = JSON.parse(JSON.stringify(INITIAL_OFFICERS));
+                saveToStorage();
+            }
+        }
+
+        function saveToStorage() {
+            localStorage.setItem("qopma_officers_db", JSON.stringify(officers));
+        }
+
+        function restoreOriginalDB() {
+            if (confirm("Tem certeza que deseja apagar todas as alterações e restaurar os 68 oficiais originais?")) {
+                localStorage.removeItem("qopma_officers_db");
+                initDB();
+                renderAll();
+            }
+        }
+
+        // Date Mathematics
+        function parseDate(dStr) {
+            const [day, month, year] = dStr.split("/").map(Number);
+            return new Date(year, month - 1, day);
+        }
+
+        // Convert YMD to total days for sorting/filtering
+        function ymdToTotalDays(ymd) {
+            return ymd[0] * 365 + ymd[1] * 30 + ymd[2];
+        }
+
+        function formatDate(d) {
+            const day = String(d.getDate()).padStart(2, '0');
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const year = d.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+
+        function dateDiffCalendar(start, end) {
+            if (start > end) return [0, 0, 0];
+            let years = end.getFullYear() - start.getFullYear();
+            let months = end.getMonth() - start.getMonth();
+            let days = end.getDate() - start.getDate();
+            
+            if (days < 0) {
+                let prevMonth = new Date(end.getFullYear(), end.getMonth(), 0);
+                let daysInPrev = prevMonth.getDate();
+                days += daysInPrev;
+                months -= 1;
+            }
+            if (months < 0) {
+                months += 12;
+                years -= 1;
+            }
+            return [years, months, days];
+        }
+
+        // Add YMD time
+        function addYmd(t1, t2) {
+            let d = t1[2] + t2[2];
+            let d_rem = d % 30;
+            let d_carry = Math.floor(d / 30);
+            
+            let m = t1[1] + t2[1] + d_carry;
+            let m_rem = m % 12;
+            let m_carry = Math.floor(m / 12);
+            
+            let y = t1[0] + t2[0] + m_carry;
+            return [y, m_rem, d_rem];
+        }
+
+        // Subtract YMD time
+        function subYmd(t1, t2) {
+            if (compareYmd(t1, t2) <= 0) return [0, 0, 0];
+            
+            let y1 = t1[0], m1 = t1[1], d1 = t1[2];
+            let y2 = t2[0], m2 = t2[1], d2 = t2[2];
+            
+            if (d1 < d2) {
+                d1 += 30;
+                m1 -= 1;
+            }
+            let dDiff = d1 - d2;
+            
+            if (m1 < m2) {
+                m1 += 12;
+                y1 -= 1;
+            }
+            let mDiff = m1 - m2;
+            let yDiff = y1 - y2;
+            return [yDiff, mDiff, dDiff];
+        }
+
+        function compareYmd(t1, t2) {
+            if (t1[0] !== t2[0]) return t1[0] - t2[0];
+            if (t1[1] !== t2[1]) return t1[1] - t2[1];
+            return t1[2] - t2[2];
+        }
+
+        function daysToYmd(days) {
+            if (days <= 0) return [0, 0, 0];
+            let years = Math.floor(days / 365);
+            let rem = days % 365;
+            let months = Math.floor(rem / 30);
+            let d = rem % 30;
+            return [years, months, d];
+        }
+
+        function calculateRetirement(entryDateStr, ffaaTime, civilTime, currentDateStr) {
+            const entryDate = parseDate(entryDateStr);
+            const currentDate = parseDate(currentDateStr);
+            
+            const pmdfTime = dateDiffCalendar(entryDate, currentDate);
+            
+            let totalTime = addYmd(pmdfTime, ffaaTime);
+            totalTime = addYmd(totalTime, civilTime);
+            
+            const cutoffDate = new Date(2019, 11, 31); // 31/12/2019
+            let targetYear = entryDate.getFullYear() + 30;
+            let targetMonth = entryDate.getMonth();
+            let targetDay = entryDate.getDate();
+            
+            if (targetMonth === 1 && targetDay === 29) {
+                let isLeap = (targetYear % 4 === 0 && targetYear % 100 !== 0) || (targetYear % 400 === 0);
+                if (!isLeap) targetDay = 28;
+            }
+            
+            const targetDate = new Date(targetYear, targetMonth, targetDay);
+            const missingDays = Math.round((targetDate - cutoffDate) / (1000 * 60 * 60 * 24));
+            
+            let tollDays = 0;
+            if (missingDays > 0) {
+                tollDays = Math.round(missingDays * 0.17);
+            }
+            
+            const tollTime = daysToYmd(tollDays);
+            const requiredTime = addYmd([30, 0, 0], tollTime);
+            
+            let rrStatus = false;
+            let missingTime = [0, 0, 0];
+            
+            if (compareYmd(totalTime, requiredTime) >= 0) {
+                rrStatus = true;
+            } else {
+                missingTime = subYmd(requiredTime, totalTime);
+            }
+            
+            return {
+                pmdf_time: pmdfTime,
+                total_time: totalTime,
+                toll_time: tollTime,
+                required_time: requiredTime,
+                missing_time: missingTime,
+                rr_status: rrStatus,
+                target_date: formatDate(targetDate),
+                missing_days_at_cutoff: Math.max(0, missingDays),
+                toll_days: tollDays
+            };
+        }
+
+        // Formatter helper
+        function formatYmd(ymd) {
+            const [y, m, d] = ymd;
+            let parts = [];
+            if (y > 0) parts.push(y === 1 ? "1 ano" : `${y} anos`);
+            if (m > 0) parts.push(m === 1 ? "1 mês" : `${m} meses`);
+            if (d > 0 || parts.length === 0) parts.push(d === 1 ? "1 dia" : `${d} dias`);
+            
+            if (parts.length === 3) return `${parts[0]}, ${parts[1]} e ${parts[2]}`;
+            if (parts.length === 2) return `${parts[0]} e ${parts[1]}`;
+            return parts[0];
+        }
+
+        // Page Router
+        function switchPage(pageId) {
+            // Check authorization
+            if (currentUser && currentUser.profile === "usuario") {
+                const adminPages = ["detail", "add", "edit", "users"];
+                if (adminPages.includes(pageId)) {
+                    alert("Acesso restrito: Somente administradores podem acessar esta aba!");
+                    return;
+                }
+            }
+            
+            document.querySelectorAll(".page-content").forEach(el => el.classList.add("hidden"));
+            document.querySelectorAll(".menu-item").forEach(btn => btn.classList.remove("active"));
+            
+            document.getElementById(`page-${pageId}`).classList.remove("hidden");
+            document.getElementById(`menu-item-${pageId}`).classList.add("active");
+            
+            renderAll();
+        }
+
+        // Sort configuration
+        function setSort(col) {
+            if (sortCol === col) {
+                sortAsc = !sortAsc;
+            } else {
+                sortCol = col;
+                sortAsc = true;
+            }
+            renderAll();
+        }
+
+        // Render UI
+        function renderAll() {
+            if (!currentUser) return;
+
+            // Get chosen calculation date
+            const projInput = document.getElementById("projection-date").value;
+            const [y, m, d] = projInput.split("-").map(Number);
+            const currentDateStr = `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y}`;
+            
+            // Update all calculations
+            officers.forEach(off => {
+                const calcs = calculateRetirement(off.entry_date, off.ffaa_time, off.civil_time, currentDateStr);
+                Object.assign(off, calcs);
+            });
+
+            // 1. Calculate promotions (CAP -> MAJ)
+            const vacanciesInput = parseInt(document.getElementById("promo-vacancies").value) || 0;
+            
+            // Save global vacancies to storage if changed by admin
+            if (currentUser && currentUser.profile === "admin") {
+                localStorage.setItem("qopma_global_vacancies", String(vacanciesInput));
+            }
+            
+            let captains = officers.filter(o => o.rank === "CAP").sort((a, b) => a.id - b.id);
+            
+            let promotedIds = new Set();
+            let consumedVacancies = 0;
+            let promoLog = [];
+            
+            for (let cap of captains) {
+                if (consumedVacancies >= vacanciesInput) {
+                    break;
+                }
+                promotedIds.add(cap.id);
+                if (cap.agregado) {
+                    promoLog.push(`<span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-semibold text-xs border border-slate-300">${cap.name} (Agregado - não ocupa vaga)</span>`);
+                } else {
+                    consumedVacancies++;
+                    promoLog.push(`<span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded font-semibold text-xs border border-blue-300">${cap.name} (Ocupa vaga ${consumedVacancies}/${vacanciesInput})</span>`);
+                }
+            }
+            
+            const promoSummaryEl = document.getElementById("promo-summary");
+            if (vacanciesInput === 0) {
+                promoSummaryEl.innerHTML = "<span class='text-gray-500'>Nenhuma vaga informada para promoção.</span>";
+            } else {
+                promoSummaryEl.innerHTML = `
+                    <div class="mb-2"><strong>Total Promovidos:</strong> ${promotedIds.size} oficial(ais) (${consumedVacancies} ocupando vaga, ${promotedIds.size - consumedVacancies} agregados)</div>
+                    <div class="flex flex-wrap gap-2 mt-1">${promoLog.length > 0 ? promoLog.join("") : "<span class='text-gray-500'>Nenhum Capitão na fila.</span>"}</div>
+                `;
+            }
+            
+            // Apply filters
+            const filterName = document.getElementById("filter-name").value.toLowerCase().trim();
+            const filterRank = document.getElementById("filter-rank").value;
+            const filterRr = document.getElementById("filter-rr").value;
+            const filterAgregado = document.getElementById("filter-agregado").value;
+            const filterMissing = document.getElementById("filter-missing").value;
+            
+            let filtered = officers.filter(off => {
+                if (filterName && !off.name.toLowerCase().includes(filterName)) return false;
+                if (filterRank !== "Todos" && off.rank !== filterRank) return false;
+                if (filterRr !== "Todos") {
+                    const isApt = filterRr === "SIM";
+                    if (off.rr_status !== isApt) return false;
+                }
+                if (filterAgregado !== "Todos") {
+                    const isAgr = filterAgregado === "SIM";
+                    if (off.agregado !== isAgr) return false;
+                }
+                if (filterMissing !== "Todos") {
+                    const missingDays = off.rr_status ? 0 : ymdToTotalDays(off.missing_time);
+                    if (filterMissing === "apto" && missingDays !== 0) return false;
+                    if (filterMissing === "sub1" && (missingDays === 0 || missingDays > 365)) return false;
+                    if (filterMissing === "1a3" && (missingDays < 365 || missingDays > 1095)) return false;
+                    if (filterMissing === "over3" && missingDays <= 1095) return false;
+                }
+                return true;
+            });
+            
+            // Sort filtered array
+            filtered.sort((a, b) => {
+                let valA, valB;
+                if (sortCol === "id") {
+                    valA = a.id;
+                    valB = b.id;
+                } else if (sortCol === "rank") {
+                    valA = a.rank;
+                    valB = b.rank;
+                } else if (sortCol === "name") {
+                    valA = a.name;
+                    valB = b.name;
+                } else if (sortCol === "entry_date") {
+                    valA = parseDate(a.entry_date).getTime();
+                    valB = parseDate(b.entry_date).getTime();
+                } else if (sortCol === "pmdf_time") {
+                    valA = ymdToTotalDays(a.pmdf_time);
+                    valB = ymdToTotalDays(b.pmdf_time);
+                } else if (sortCol === "total_time") {
+                    valA = ymdToTotalDays(a.total_time);
+                    valB = ymdToTotalDays(b.total_time);
+                } else if (sortCol === "toll_time") {
+                    valA = ymdToTotalDays(a.toll_time);
+                    valB = ymdToTotalDays(b.toll_time);
+                } else if (sortCol === "missing_time") {
+                    valA = a.rr_status ? 0 : ymdToTotalDays(a.missing_time);
+                    valB = b.rr_status ? 0 : ymdToTotalDays(b.missing_time);
+                }
+                
+                if (valA < valB) return sortAsc ? -1 : 1;
+                if (valA > valB) return sortAsc ? 1 : -1;
+                return 0;
+            });
+
+            // Update sorting headers icons
+            const cols = ["id", "rank", "name", "entry_date", "pmdf_time", "total_time", "toll_time", "missing_time"];
+            cols.forEach(c => {
+                const iconSpan = document.getElementById(`sort-icon-${c}`);
+                if (iconSpan) {
+                    if (sortCol === c) {
+                        iconSpan.innerText = sortAsc ? " ▲" : " ▼";
+                        iconSpan.className = "text-blue-600 font-bold ml-1 text-xs";
+                    } else {
+                        iconSpan.innerText = "";
+                    }
+                }
+            });
+
+            // Render KPIs
+            const total = officers.length;
+            const apto = officers.filter(o => o.rr_status).length;
+            const naoApto = total - apto;
+            const taxa = total > 0 ? (apto / total * 100).toFixed(1) : 0;
+            
+            document.getElementById("kpi-total").innerText = total;
+            document.getElementById("kpi-apto").innerText = apto;
+            document.getElementById("kpi-nao-apto").innerText = naoApto;
+            document.getElementById("kpi-taxa").innerText = `${taxa}%`;
+            
+            // Render Table
+            const tbody = document.getElementById("table-body");
+            tbody.innerHTML = "";
+            
+            filtered.forEach(o => {
+                const isPromoted = promotedIds.has(o.id) && o.rank === "CAP";
+                const tr = document.createElement("tr");
+                tr.className = isPromoted ? "bg-green-50 hover:bg-green-100 transition" : "hover:bg-gray-50 transition";
+                
+                let rankCell = o.rank;
+                if (isPromoted) {
+                    rankCell = `<div class="font-bold text-green-700">${o.rank} ➡️ MAJ</div><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 border border-green-300">⭐ Promovido</span>`;
+                }
+
+                tr.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-bold">${o.id}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">${rankCell}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium ${isPromoted ? 'text-green-950 font-semibold' : 'text-gray-900'}">${o.name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${o.agregado ? "SIM" : "NÃO"}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${o.entry_date}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${formatYmd(o.pmdf_time)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${formatYmd(o.ffaa_time)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${formatYmd(o.civil_time)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-bold">${formatYmd(o.total_time)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${formatYmd(o.toll_time)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        <span class="px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${o.rr_status ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'}">
+                            ${o.rr_status ? 'SIM' : 'NÃO'}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold ${o.rr_status ? 'text-gray-400' : 'text-orange-600'}">${o.rr_status ? 'Apto' : formatYmd(o.missing_time)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+            
+            // Fill dropdowns for detail and edit select options
+            updateDropdowns(filtered);
+            
+            // Render Users Table (only if admin)
+            if (currentUser && currentUser.profile === "admin") {
+                const usersTbody = document.getElementById("users-table-body");
+                if (usersTbody) {
+                    usersTbody.innerHTML = "";
+                    users.forEach(u => {
+                        const tr = document.createElement("tr");
+                        tr.className = "hover:bg-gray-50 transition";
+                        
+                        const isSelf = u.username === currentUser.username;
+                        const isAdminPrimary = u.username === "admin";
+                        const showActions = !isSelf && !isAdminPrimary;
+                        
+                        tr.innerHTML = `
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">${u.name}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${u.username}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                <span class="px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${u.profile === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-slate-100 text-slate-800'}">
+                                    ${u.profile === 'admin' ? 'Administrador' : 'Usuário'}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm flex gap-2">
+                                ${showActions ? `
+                                    <button onclick="toggleUserProfile('${u.username}')" class="bg-blue-100 hover:bg-blue-200 text-blue-700 font-semibold px-3 py-1 rounded text-xs transition">Alternar Perfil</button>
+                                    <button onclick="deleteUserAccount('${u.username}')" class="bg-red-100 hover:bg-red-200 text-red-700 font-semibold px-3 py-1 rounded text-xs transition">Excluir</button>
+                                ` : `<span class="text-xs text-gray-400 font-medium italic">${isSelf ? 'Sua Conta' : 'Protegido'}</span>`}
+                            </td>
+                        `;
+                        usersTbody.appendChild(tr);
+                    });
+                }
+            }
+        }
+
+        function updateDropdowns(filtered) {
+            const detailSelect = document.getElementById("detail-select");
+            const editSelect = document.getElementById("edit-select");
+            
+            if (!detailSelect || !editSelect) return;
+            
+            const prevDetailVal = detailSelect.value;
+            const prevEditVal = editSelect.value;
+            
+            detailSelect.innerHTML = "";
+            editSelect.innerHTML = "<option value=''>-- Selecione um oficial --</option>";
+            
+            filtered.forEach(o => {
+                const optText = `${o.rank} ${o.name} (ID: ${o.id})`;
+                detailSelect.appendChild(new Option(optText, o.id));
+                editSelect.appendChild(new Option(optText, o.id));
+            });
+            
+            if (prevDetailVal && filtered.some(o => o.id == prevDetailVal)) {
+                detailSelect.value = prevDetailVal;
+            }
+            if (prevEditVal && filtered.some(o => o.id == prevEditVal)) {
+                editSelect.value = prevEditVal;
+                fillEditForm();
+            } else {
+                const editForm = document.getElementById("edit-form");
+                if (editForm) editForm.classList.add("hidden");
+            }
+            
+            renderMemorial();
+        }
+
+        // Render Memorial Tab content
+        function renderMemorial() {
+            const select = document.getElementById("detail-select");
+            const container = document.getElementById("memorial-container");
+            if (!select || !container) return;
+            
+            container.innerHTML = "";
+            
+            const o = officers.find(item => item.id == select.value);
+            if (!o) {
+                container.innerHTML = "<p class='text-gray-500'>Selecione um oficial no menu acima para detalhar o cálculo.</p>";
+                return;
+            }
+            
+            const projInput = document.getElementById("projection-date").value;
+            const [y, m, d] = projInput.split("-").map(Number);
+            const currentDateStr = `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y}`;
+            
+            const knownBugs = {
+                37: "No arquivo de planilha original, a soma de dias de PMDF + Civil deu 47 dias. O correto leva ao carry de 1 mês para a coluna de meses, totalizando 32a 0m 17d em vez de 31a 11m 17d.",
+                41: "No arquivo de planilha original, o mês da coluna FFAA (1 mês) não foi somado na planilha original (exibindo 31a 5m em vez de 31a 6m).",
+                43: "No arquivo de planilha original, o mês da coluna Civil (1 mês) não foi somado na planilha original (exibindo 27a 10m em vez de 27a 11m).",
+                45: "No arquivo de planilha original, a soma de dias deu 33 dias. O correto leva ao carry de 1 mês, resultando em 28a 0m 3d em vez de 27a 11m 3d."
+            };
+            
+            let anomalyHtml = "";
+            if (knownBugs[o.id]) {
+                anomalyHtml = `
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded text-sm text-blue-700">
+                        💡 <strong>Nota de Consistência:</strong> ${knownBugs[o.id]}
+                    </div>
+                `;
+            }
+            
+            container.innerHTML = `
+                ${anomalyHtml}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <h5 class="font-bold text-gray-800 text-lg mb-3">1. Composição do Tempo de Serviço</h5>
+                        <ul class="space-y-2 text-gray-600">
+                            <li>📅 <strong>Data de Entrada na PMDF:</strong> ${o.entry_date}</li>
+                            <li>🔹 <strong>Tempo PMDF (Calendário exato):</strong> ${formatYmd(o.pmdf_time)} <span class="text-xs text-gray-400">(de ${o.entry_date} a ${currentDateStr})</span></li>
+                            <li>🔹 <strong>Tempo de FFAA (Forças Armadas):</strong> ${formatYmd(o.ffaa_time)}</li>
+                            <li>🔹 <strong>Tempo de Serviço Civil:</strong> ${formatYmd(o.civil_time)}</li>
+                            <li class="pt-2 border-t font-semibold text-gray-900">🧮 Tempo de Serviço Total (soma): ${formatYmd(o.total_time)}</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h5 class="font-bold text-gray-800 text-lg mb-3">2. Cálculo do Pedágio (Transição 17%)</h5>
+                        <ul class="space-y-2 text-gray-600">
+                            <li>📅 <strong>Data de Corte da Reforma:</strong> 31/12/2019</li>
+                            <li>🎯 <strong>Data Limite para 30 anos (Meta):</strong> ${o.target_date}</li>
+                            <li>⏳ <strong>Dias Faltantes na data de corte:</strong> ${o.missing_days_at_cutoff} dias</li>
+                            <li>🔢 <strong>Pedágio Calculado (17%):</strong> ${o.toll_days} dias</li>
+                            <li class="pt-2 border-t font-semibold text-gray-900">📦 Tempo de Pedágio Convertido: ${formatYmd(o.toll_time)}</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="mt-8 border-t pt-6 bg-gray-50 p-6 rounded-lg">
+                    <h5 class="font-bold text-gray-800 text-lg mb-3">3. Requisitos e Status Final</h5>
+                    <div class="space-y-3">
+                        <p class="text-gray-700">🕒 <strong>Requisito Total Requerido (30 Anos + Pedágio):</strong> <span class="font-bold text-gray-900">${formatYmd(o.required_time)}</span></p>
+                        <p class="text-gray-700">💪 <strong>Tempo Total Acumulado pelo Oficial:</strong> <span class="font-bold text-gray-900">${formatYmd(o.total_time)}</span></p>
+                        <div class="mt-4">
+                            ${o.rr_status ? 
+                                `<div class="bg-green-100 border border-green-300 text-green-800 px-4 py-3 rounded font-bold inline-flex items-center gap-2">✔️ APTO PARA RESERVA: Oficial completou todos os requisitos!</div>` : 
+                                `<div class="bg-orange-100 border border-orange-300 text-orange-800 px-4 py-3 rounded font-bold inline-flex items-center gap-2">⏳ NÃO APTO: Faltam ${formatYmd(o.missing_time)} para a reserva.</div>`
+                            }
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Handle Add Form Submission
+        function handleAdd(e) {
+            e.preventDefault();
+            const id = parseInt(document.getElementById("add-id").value);
+            const name = document.getElementById("add-name").value.trim().toUpperCase();
+            const rank = document.getElementById("add-rank").value;
+            const agregado = document.getElementById("add-agregado").checked;
+            
+            const entryInput = document.getElementById("add-entry").value;
+            const [y, m, d] = entryInput.split("-");
+            const entry_date = `${d}/${m}/${y}`;
+            
+            const ffaa_y = parseInt(document.getElementById("add-ffaa-y").value) || 0;
+            const ffaa_m = parseInt(document.getElementById("add-ffaa-m").value) || 0;
+            const ffaa_d = parseInt(document.getElementById("add-ffaa-d").value) || 0;
+            
+            const civil_y = parseInt(document.getElementById("add-civil-y").value) || 0;
+            const civil_m = parseInt(document.getElementById("add-civil-m").value) || 0;
+            const civil_d = parseInt(document.getElementById("add-civil-d").value) || 0;
+            
+            if (officers.some(o => o.id === id)) {
+                alert(`Erro: Já existe um oficial com o número ${id}!`);
+                return;
+            }
+            
+            const newOff = {
+                id,
+                rank,
+                name,
+                agregado,
+                entry_date,
+                ffaa_time: [ffaa_y, ffaa_m, ffaa_d],
+                civil_time: [civil_y, civil_m, civil_d]
+            };
+            
+            officers.push(newOff);
+            saveToStorage();
+            
+            alert(`${rank} ${name} cadastrado com sucesso!`);
+            e.target.reset();
+            switchPage('dashboard');
+        }
+
+        // Edit Tab operations
+        function fillEditForm() {
+            const select = document.getElementById("edit-select");
+            const form = document.getElementById("edit-form");
+            
+            const o = officers.find(item => item.id == select.value);
+            if (!o) {
+                form.classList.add("hidden");
+                return;
+            }
+            
+            form.classList.remove("hidden");
+            document.getElementById("edit-rank").value = o.rank;
+            document.getElementById("edit-name").value = o.name;
+            document.getElementById("edit-agregado").checked = o.agregado;
+            
+            const [d, m, y] = o.entry_date.split("/");
+            document.getElementById("edit-entry").value = `${y}-${m}-${d}`;
+            
+            document.getElementById("edit-ffaa-y").value = o.ffaa_time[0];
+            document.getElementById("edit-ffaa-m").value = o.ffaa_time[1];
+            document.getElementById("edit-ffaa-d").value = o.ffaa_time[2];
+            
+            document.getElementById("edit-civil-y").value = o.civil_time[0];
+            document.getElementById("edit-civil-m").value = o.civil_time[1];
+            document.getElementById("edit-civil-d").value = o.civil_time[2];
+        }
+
+        function handleEditSave(e) {
+            e.preventDefault();
+            const select = document.getElementById("edit-select");
+            const id = parseInt(select.value);
+            
+            const idx = officers.findIndex(item => item.id === id);
+            if (idx === -1) return;
+            
+            const name = document.getElementById("edit-name").value.trim().toUpperCase();
+            const rank = document.getElementById("edit-rank").value;
+            const agregado = document.getElementById("edit-agregado").checked;
+            
+            const entryInput = document.getElementById("edit-entry").value;
+            const [y, m, d] = entryInput.split("-");
+            const entry_date = `${d}/${m}/${y}`;
+            
+            const ffaa_y = parseInt(document.getElementById("edit-ffaa-y").value) || 0;
+            const ffaa_m = parseInt(document.getElementById("edit-ffaa-m").value) || 0;
+            const ffaa_d = parseInt(document.getElementById("edit-ffaa-d").value) || 0;
+            
+            const civil_y = parseInt(document.getElementById("edit-civil-y").value) || 0;
+            const civil_m = parseInt(document.getElementById("edit-civil-m").value) || 0;
+            const civil_d = parseInt(document.getElementById("edit-civil-d").value) || 0;
+            
+            officers[idx] = {
+                id,
+                rank,
+                name,
+                agregado,
+                entry_date,
+                ffaa_time: [ffaa_y, ffaa_m, ffaa_d],
+                civil_time: [civil_y, civil_m, civil_d]
+            };
+            
+            saveToStorage();
+            alert("Alterações salvas com sucesso!");
+            switchPage('dashboard');
+        }
+
+        function handleDelete() {
+            const select = document.getElementById("edit-select");
+            const id = parseInt(select.value);
+            
+            const o = officers.find(item => item.id === id);
+            if (!o) return;
+            
+            if (confirm(`Tem certeza que deseja EXCLUIR o registro de ${o.rank} ${o.name}?`)) {
+                officers = officers.filter(item => item.id !== id);
+                saveToStorage();
+                alert("Registro excluído com sucesso!");
+                switchPage('dashboard');
+            }
+        }
+
+        // CSV Export
+        function exportCSV() {
+            let csv = "﻿"; // UTF-8 BOM for Excel compatibility
+            csv += "N.º;Posto;Nome;Agregado;Entrada PMDF;Tempo PMDF;Tempo FFAA;Tempo Civil;Tempo Total;Pedagio;Apto RR;Tempo Faltante\n";
+            
+            officers.forEach(o => {
+                csv += `${o.id};${o.rank};${o.name};${o.agregado ? "SIM" : "NÃO"};${o.entry_date};${formatYmd(o.pmdf_time)};${formatYmd(o.ffaa_time)};${formatYmd(o.civil_time)};${formatYmd(o.total_time)};${formatYmd(o.toll_time)};${o.rr_status ? "SIM" : "NÃO"};${o.rr_status ? "Apto" : formatYmd(o.missing_time)}\n`;
+            });
+            
+            const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+            const link = document.createElement("a");
+            const projInput = document.getElementById("projection-date").value.replace(/-/g, "");
+            
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute("download", `tempo_servico_qopma_${projInput}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Initialize Listeners
+        document.getElementById("projection-date").addEventListener("change", renderAll);
+        document.getElementById("filter-name").addEventListener("input", renderAll);
+        document.getElementById("filter-rank").addEventListener("change", renderAll);
+        document.getElementById("filter-rr").addEventListener("change", renderAll);
+        document.getElementById("filter-agregado").addEventListener("change", renderAll);
+        document.getElementById("filter-missing").addEventListener("change", renderAll);
+        document.getElementById("promo-vacancies").addEventListener("input", renderAll);
+
+        // Run Init
+        initUsers();
+        initDB();
+        checkSession();
+    </script>
+</body>
+</html>
