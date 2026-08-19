@@ -327,7 +327,7 @@
                             <div>
                                 <span class="font-bold text-slate-800 block">📊 Estatísticas do Quadro:</span>
                                 <span id="promo-stat-captains">Total de Capitães: 0</span><br>
-                                <span id="promo-stat-active">Capitães Ativos: 0</span><br>
+                                <span id="promo-stat-active">Capitães Efetivos (Ativos): 0</span><br>
                                 <span id="promo-stat-limit">Limite Faixa de Acesso (Art. 4º): 0</span>
                             </div>
                             <div class="bg-slate-50 p-4 rounded border border-slate-200 space-y-1 text-xs">
@@ -867,11 +867,36 @@
             }
         }
 
-        // DATABASE LOADER
+        // DATABASE LOADER AND MIGRATIONS
         function initDB() {
             const saved = localStorage.getItem("qopma_officers_db");
             if (saved) {
-                officers = JSON.parse(saved);
+                try {
+                    officers = JSON.parse(saved);
+                    // Legacy migration patch: guarantee that newer properties exist for older localStorage stores
+                    let patched = false;
+                    officers.forEach(o => {
+                        if (!o.ffaa_time || !Array.isArray(o.ffaa_time)) {
+                            o.ffaa_time = [0, 0, 0];
+                            patched = true;
+                        }
+                        if (!o.civil_time || !Array.isArray(o.civil_time)) {
+                            o.civil_time = [0, 0, 0];
+                            patched = true;
+                        }
+                        if (o.promotion_date === undefined) {
+                            o.promotion_date = "";
+                            patched = true;
+                        }
+                    });
+                    if (patched) {
+                        saveToStorage();
+                    }
+                } catch (e) {
+                    console.error("Erro ao ler banco local. Restaurando originais...", e);
+                    officers = JSON.parse(JSON.stringify(INITIAL_OFFICERS));
+                    saveToStorage();
+                }
             } else {
                 officers = JSON.parse(JSON.stringify(INITIAL_OFFICERS));
                 officers.forEach(o => o.promotion_date = "");
@@ -894,16 +919,21 @@
 
         // Date Mathematics
         function parseDate(dStr) {
-            const [day, month, year] = dStr.split("/").map(Number);
+            if (!dStr || typeof dStr !== "string") return new Date();
+            const parts = dStr.split("/");
+            if (parts.length < 3) return new Date();
+            const [day, month, year] = parts.map(Number);
             return new Date(year, month - 1, day);
         }
 
         // Convert YMD to total days for sorting/filtering
         function ymdToTotalDays(ymd) {
+            if (!ymd || !Array.isArray(ymd) || ymd.length < 3) return 0;
             return ymd[0] * 365 + ymd[1] * 30 + ymd[2];
         }
 
         function formatDate(d) {
+            if (!(d instanceof Date) || isNaN(d.getTime())) return "";
             const day = String(d.getDate()).padStart(2, '0');
             const month = String(d.getMonth() + 1).padStart(2, '0');
             const year = d.getFullYear();
@@ -911,6 +941,9 @@
         }
 
         function dateDiffCalendar(start, end) {
+            if (!(start instanceof Date) || isNaN(start.getTime()) || !(end instanceof Date) || isNaN(end.getTime())) {
+                return [0, 0, 0];
+            }
             if (start > end) return [0, 0, 0];
             let years = end.getFullYear() - start.getFullYear();
             let months = end.getMonth() - start.getMonth();
@@ -930,23 +963,29 @@
         }
 
         function addYmd(t1, t2) {
-            let d = t1[2] + t2[2];
+            const v1 = (t1 && Array.isArray(t1) && t1.length >= 3) ? t1 : [0, 0, 0];
+            const v2 = (t2 && Array.isArray(t2) && t2.length >= 3) ? t2 : [0, 0, 0];
+            
+            let d = v1[2] + v2[2];
             let d_rem = d % 30;
             let d_carry = Math.floor(d / 30);
             
-            let m = t1[1] + t2[1] + d_carry;
+            let m = v1[1] + v2[1] + d_carry;
             let m_rem = m % 12;
             let m_carry = Math.floor(m / 12);
             
-            let y = t1[0] + t2[0] + m_carry;
+            let y = v1[0] + v2[0] + m_carry;
             return [y, m_rem, d_rem];
         }
 
         function subYmd(t1, t2) {
-            if (compareYmd(t1, t2) <= 0) return [0, 0, 0];
+            const v1 = (t1 && Array.isArray(t1) && t1.length >= 3) ? t1 : [0, 0, 0];
+            const v2 = (t2 && Array.isArray(t2) && t2.length >= 3) ? t2 : [0, 0, 0];
             
-            let y1 = t1[0], m1 = t1[1], d1 = t1[2];
-            let y2 = t2[0], m2 = t2[1], d2 = t2[2];
+            if (compareYmd(v1, v2) <= 0) return [0, 0, 0];
+            
+            let y1 = v1[0], m1 = v1[1], d1 = v1[2];
+            let y2 = v2[0], m2 = v2[1], d2 = v2[2];
             
             if (d1 < d2) {
                 d1 += 30;
@@ -964,9 +1003,12 @@
         }
 
         function compareYmd(t1, t2) {
-            if (t1[0] !== t2[0]) return t1[0] - t2[0];
-            if (t1[1] !== t2[1]) return t1[1] - t2[1];
-            return t1[2] - t2[2];
+            const v1 = (t1 && Array.isArray(t1) && t1.length >= 3) ? t1 : [0, 0, 0];
+            const v2 = (t2 && Array.isArray(t2) && t2.length >= 3) ? t2 : [0, 0, 0];
+            
+            if (v1[0] !== v2[0]) return v1[0] - v2[0];
+            if (v1[1] !== v2[1]) return v1[1] - v2[1];
+            return v1[2] - v2[2];
         }
 
         function daysToYmd(days) {
@@ -982,10 +1024,13 @@
             const entryDate = parseDate(entryDateStr);
             const currentDate = parseDate(currentDateStr);
             
+            const ffaa = (ffaaTime && Array.isArray(ffaaTime) && ffaaTime.length >= 3) ? ffaaTime : [0, 0, 0];
+            const civil = (civilTime && Array.isArray(civilTime) && civilTime.length >= 3) ? civilTime : [0, 0, 0];
+            
             const pmdfTime = dateDiffCalendar(entryDate, currentDate);
             
-            let totalTime = addYmd(pmdfTime, ffaaTime);
-            totalTime = addYmd(totalTime, civilTime);
+            let totalTime = addYmd(pmdfTime, ffaa);
+            totalTime = addYmd(totalTime, civil);
             
             const cutoffDate = new Date(2019, 11, 31); // 31/12/2019
             let targetYear = entryDate.getFullYear() + 30;
@@ -1030,9 +1075,23 @@
             };
         }
 
+        // Formatter helper
+        function formatYmd(ymd) {
+            if (!ymd || !Array.isArray(ymd) || ymd.length < 3) return "0 dias";
+            const [y, m, d] = ymd;
+            let parts = [];
+            if (y > 0) parts.push(y === 1 ? "1 ano" : `${y} anos`);
+            if (m > 0) parts.push(m === 1 ? "1 mês" : `${m} meses`);
+            if (d > 0 || parts.length === 0) parts.push(d === 1 ? "1 dia" : `${d} dias`);
+            
+            if (parts.length === 3) return `${parts[0]}, ${parts[1]} e ${parts[2]}`;
+            if (parts.length === 2) return `${parts[0]} e ${parts[1]}`;
+            return parts[0];
+        }
+
         // Check if officer has completed interstício (minimum rank time)
         function checkIntersticio(rank, promoDateStr, currentDateStr) {
-            if (!promoDateStr) return { ok: true, reason: "" };
+            if (!promoDateStr || typeof promoDateStr !== "string" || !promoDateStr.includes("/")) return { ok: true, reason: "" };
             const promoDate = parseDate(promoDateStr);
             const currentDate = parseDate(currentDateStr);
             
@@ -1086,7 +1145,7 @@
             if (!currentUser) return;
 
             // Get chosen calculation date
-            const projInput = document.getElementById("projection-date").value;
+            const projInput = document.getElementById("projection-date").value || "2026-08-19";
             const [y, m, d] = projInput.split("-").map(Number);
             const currentDateStr = `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y}`;
             
@@ -1441,7 +1500,7 @@
                 return;
             }
             
-            const projInput = document.getElementById("projection-date").value;
+            const projInput = document.getElementById("projection-date").value || "2026-08-19";
             const [y, m, d] = projInput.split("-").map(Number);
             const currentDateStr = `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y}`;
             
@@ -1585,10 +1644,14 @@
             document.getElementById("edit-name").value = o.name;
             document.getElementById("edit-agregado").checked = o.agregado;
             
-            const [d, m, y] = o.entry_date.split("/");
-            document.getElementById("edit-entry").value = `${y}-${m}-${d}`;
+            if (o.entry_date && o.entry_date.includes("/")) {
+                const [d, m, y] = o.entry_date.split("/");
+                document.getElementById("edit-entry").value = `${y}-${m}-${d}`;
+            } else {
+                document.getElementById("edit-entry").value = "";
+            }
             
-            if (o.promotion_date) {
+            if (o.promotion_date && o.promotion_date.includes("/")) {
                 const [pd, pm, py] = o.promotion_date.split("/");
                 document.getElementById("edit-promotion-date").value = `${py}-${pm}-${pd}`;
             } else {
