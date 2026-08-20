@@ -1091,6 +1091,7 @@
             return [years, months, d];
         }
 
+        // Calculate Retirement details, including averbado external times in Toll math
         function calculateRetirement(entryDateStr, ffaaTime, civilTime, currentDateStr) {
             const entryDate = parseDate(entryDateStr);
             const currentDate = parseDate(currentDateStr);
@@ -1114,7 +1115,17 @@
             }
             
             const targetDate = new Date(targetYear, targetMonth, targetDay);
-            const missingDays = Math.round((targetDate - cutoffDate) / (1000 * 60 * 60 * 24));
+            
+            // Calculate base missing days to 30 years PMDF service at cutoff date
+            let missingDays = Math.round((targetDate - cutoffDate) / (1000 * 60 * 60 * 24));
+            
+            // Averbado / external service (FFAA + Civil) reduces the missing time to 30 years at cutoff!
+            const ffaaDays = ffaa[0] * 365 + ffaa[1] * 30 + ffaa[2];
+            const civilDays = civil[0] * 365 + civil[1] * 30 + civil[2];
+            const externalDays = ffaaDays + civilDays;
+            
+            // Subtract external days from the missing days at cutoff
+            missingDays = Math.max(0, missingDays - externalDays);
             
             let tollDays = 0;
             if (missingDays > 0) {
