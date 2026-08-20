@@ -591,23 +591,91 @@
         let sortCol = "id";
         let sortAsc = true;
 
+        // Safe Storage wrappers to handle strict corporate firewall policies blocking localStorage/sessionStorage
+        const safeStorage = {
+            memoryStore: {},
+            getItem(key) {
+                try {
+                    return localStorage.getItem(key);
+                } catch (e) {
+                    console.warn("safeStorage: localStorage blocked, reading from memory.", e);
+                    return this.memoryStore[key] || null;
+                }
+            },
+            setItem(key, value) {
+                try {
+                    localStorage.setItem(key, value);
+                } catch (e) {
+                    console.warn("safeStorage: localStorage blocked, writing to memory.", e);
+                    this.memoryStore[key] = String(value);
+                }
+            },
+            removeItem(key) {
+                try {
+                    localStorage.removeItem(key);
+                } catch (e) {
+                    console.warn("safeStorage: localStorage blocked, removing from memory.", e);
+                    delete this.memoryStore[key];
+                }
+            }
+        };
+
+        const safeSessionStorage = {
+            memoryStore: {},
+            getItem(key) {
+                try {
+                    return sessionStorage.getItem(key);
+                } catch (e) {
+                    console.warn("safeSessionStorage: sessionStorage blocked, reading from memory.", e);
+                    return this.memoryStore[key] || null;
+                }
+            },
+            setItem(key, value) {
+                try {
+                    sessionStorage.setItem(key, value);
+                } catch (e) {
+                    console.warn("safeSessionStorage: sessionStorage blocked, writing to memory.", e);
+                    this.memoryStore[key] = String(value);
+                }
+            },
+            removeItem(key) {
+                try {
+                    sessionStorage.removeItem(key);
+                } catch (e) {
+                    console.warn("safeSessionStorage: sessionStorage blocked, removing from memory.", e);
+                    delete this.memoryStore[key];
+                }
+            }
+        };
+
         // AUTHENTICATION AND USERS MANAGEMENT
         function initUsers() {
-            const savedUsers = localStorage.getItem("qopma_users_db");
-            if (savedUsers) {
-                users = JSON.parse(savedUsers);
-            } else {
-                users = JSON.parse(JSON.stringify(DEFAULT_USERS));
-                localStorage.setItem("qopma_users_db", JSON.stringify(users));
+            try {
+                const savedUsers = safeStorage.getItem("qopma_users_db");
+                if (savedUsers) {
+                    users = JSON.parse(savedUsers);
+                } else {
+                    users = JSON.parse(JSON.stringify(DEFAULT_USERS));
+                    safeStorage.setItem("qopma_users_db", JSON.stringify(users));
+                }
+            } catch (e) {
+                console.error("Erro ao carregar usuários localmente. Resetando...", e);
+                users = [];
+                safeStorage.setItem("qopma_users_db", JSON.stringify(users));
             }
         }
         
         function checkSession() {
-            const savedSession = sessionStorage.getItem("qopma_current_session");
-            if (savedSession) {
-                currentUser = JSON.parse(savedSession);
-                showDashboardApp();
-            } else {
+            try {
+                const savedSession = safeSessionStorage.getItem("qopma_current_session");
+                if (savedSession) {
+                    currentUser = JSON.parse(savedSession);
+                    showDashboardApp();
+                } else {
+                    showLoginScreen();
+                }
+            } catch (e) {
+                console.error("Erro ao verificar sessão.", e);
                 showLoginScreen();
             }
         }
@@ -656,11 +724,11 @@
             }
             
             // Save global promotion vacancies default if not saved
-            const savedVacs = localStorage.getItem("qopma_global_vacancies");
+            const savedVacs = safeStorage.getItem("qopma_global_vacancies");
             if (savedVacs) {
                 document.getElementById("promo-vacancies").value = savedVacs;
             } else {
-                localStorage.setItem("qopma_global_vacancies", "4");
+                safeStorage.setItem("qopma_global_vacancies", "4");
             }
             
             switchPage('dashboard');
@@ -685,7 +753,7 @@
             const matchedUser = users.find(u => u.username === userVal && u.password === passVal);
             if (matchedUser) {
                 currentUser = matchedUser;
-                sessionStorage.setItem("qopma_current_session", JSON.stringify(currentUser));
+                safeSessionStorage.setItem("qopma_current_session", JSON.stringify(currentUser));
                 showDashboardApp();
                 e.target.reset();
             } else {
@@ -710,7 +778,7 @@
             
             const newUser = { username, password, name: fullname, profile: profile };
             users.push(newUser);
-            localStorage.setItem("qopma_users_db", JSON.stringify(users));
+            safeStorage.setItem("qopma_users_db", JSON.stringify(users));
             
             if (profile === "admin") {
                 alert("Cadastro realizado! Como você é o primeiro usuário do sistema, sua conta foi configurada como Administrador.");
@@ -722,7 +790,7 @@
         }
         
         function handleLogout() {
-            sessionStorage.removeItem("qopma_current_session");
+            safeSessionStorage.removeItem("qopma_current_session");
             currentUser = null;
             showLoginScreen();
         }
@@ -745,7 +813,7 @@
             }
             
             targetUser.profile = targetUser.profile === "admin" ? "usuario" : "admin";
-            localStorage.setItem("qopma_users_db", JSON.stringify(users));
+            safeStorage.setItem("qopma_users_db", JSON.stringify(users));
             renderAll();
             alert(`Perfil de ${targetUser.name} alterado com sucesso!`);
         }
@@ -768,7 +836,7 @@
             
             if (confirm(`Tem certeza absoluta que deseja excluir a conta de usuário "${username}"?`)) {
                 users = users.filter(u => u.username !== username);
-                localStorage.setItem("qopma_users_db", JSON.stringify(users));
+                safeStorage.setItem("qopma_users_db", JSON.stringify(users));
                 renderAll();
                 alert(`Usuário "${username}" excluído.`);
             }
@@ -781,7 +849,7 @@
                 return;
             }
             const vacanciesInput = parseInt(document.getElementById("promo-vacancies").value) || 0;
-            localStorage.setItem("qopma_global_vacancies", String(vacanciesInput));
+            safeStorage.setItem("qopma_global_vacancies", String(vacanciesInput));
             alert(`Configuração salva: O padrão de vagas para promoção agora é ${vacanciesInput}.`);
         }
 
@@ -799,7 +867,7 @@
             }
             
             // Get eligible queue for Antiguidade
-            const projInput = document.getElementById("projection-date").value;
+            const projInput = document.getElementById("projection-date").value || "2026-08-19";
             const [y, m, d] = projInput.split("-").map(Number);
             const currentDateStr = `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y}`;
             
@@ -860,7 +928,7 @@
                 
                 // Reset simulated vacancies count to 0
                 document.getElementById("promo-vacancies").value = 0;
-                localStorage.setItem("qopma_global_vacancies", "0");
+                safeStorage.setItem("qopma_global_vacancies", "0");
                 
                 alert("Promoções efetivadas com sucesso! Os oficiais agora constam no posto de Major (MAJ).");
                 switchPage('dashboard');
@@ -869,7 +937,7 @@
 
         // DATABASE LOADER AND MIGRATIONS
         function initDB() {
-            const saved = localStorage.getItem("qopma_officers_db");
+            const saved = safeStorage.getItem("qopma_officers_db");
             if (saved) {
                 try {
                     officers = JSON.parse(saved);
@@ -906,12 +974,12 @@
 
         // Save DB to localStorage
         function saveToStorage() {
-            localStorage.setItem("qopma_officers_db", JSON.stringify(officers));
+            safeStorage.setItem("qopma_officers_db", JSON.stringify(officers));
         }
 
         function restoreOriginalDB() {
             if (confirm("Tem certeza que deseja apagar todas as alterações e restaurar os 68 oficiais originais?")) {
-                localStorage.removeItem("qopma_officers_db");
+                safeStorage.removeItem("qopma_officers_db");
                 initDB();
                 renderAll();
             }
@@ -1002,6 +1070,7 @@
             return [yDiff, mDiff, dDiff];
         }
 
+        // Compare two YMD array values
         function compareYmd(t1, t2) {
             const v1 = (t1 && Array.isArray(t1) && t1.length >= 3) ? t1 : [0, 0, 0];
             const v2 = (t2 && Array.isArray(t2) && t2.length >= 3) ? t2 : [0, 0, 0];
