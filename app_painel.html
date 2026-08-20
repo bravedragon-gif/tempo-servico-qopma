@@ -278,25 +278,25 @@
                 <!-- Table Card -->
                 <div class="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden mb-8">
                     <div class="p-6 border-b border-slate-200 flex justify-between items-center flex-wrap gap-4 bg-slate-50">
-                        <h3 class="text-lg font-bold text-slate-800">📋 Quadro Geral (Clique nas colunas para ordenar)</h3>
+                        <h3 class="text-lg font-bold text-slate-800">📋 Quadro Geral</h3>
                         <button onclick="exportCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 py-2 rounded shadow transition text-sm">📥 Exportar Planilha (CSV)</button>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200 m-0 shadow-none border-none">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th onclick="setSort('id')" class="sortable-header px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">N.º<span id="sort-icon-id"></span></th>
-                                    <th onclick="setSort('rank')" class="sortable-header px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Posto<span id="sort-icon-rank"></span></th>
-                                    <th onclick="setSort('name')" class="sortable-header px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Nome<span id="sort-icon-name"></span></th>
-                                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Agr.</th>
-                                    <th onclick="setSort('entry_date')" class="sortable-header px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Entrada PMDF<span id="sort-icon-entry_date"></span></th>
-                                    <th onclick="setSort('pmdf_time')" class="sortable-header px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Tempo PMDF<span id="sort-icon-pmdf_time"></span></th>
-                                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">FFAA</th>
-                                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Civil</th>
-                                    <th onclick="setSort('total_time')" class="sortable-header px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Tempo Total<span id="sort-icon-total_time"></span></th>
-                                    <th onclick="setSort('toll_time')" class="sortable-header px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Pedágio<span id="sort-icon-toll_time"></span></th>
-                                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Apto RR</th>
-                                    <th onclick="setSort('missing_time')" class="sortable-header px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Tempo Faltante<span id="sort-icon-missing_time"></span></th>
+                                    <th onclick="setSort('id')" class="sortable-header px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">N.º<span id="sort-icon-id"></span></th>
+                                    <th onclick="setSort('rank')" class="sortable-header px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">Posto<span id="sort-icon-rank"></span></th>
+                                    <th onclick="setSort('name')" class="sortable-header px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">Nome<span id="sort-icon-name"></span></th>
+                                    <th class="px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">Agr.</th>
+                                    <th onclick="setSort('entry_date')" class="sortable-header px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">Entrada PMDF<span id="sort-icon-entry_date"></span></th>
+                                    <th onclick="setSort('pmdf_time')" class="sortable-header px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">Tempo PMDF<span id="sort-icon-pmdf_time"></span></th>
+                                    <th class="px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">FFAA</th>
+                                    <th class="px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">Civil</th>
+                                    <th onclick="setSort('total_time')" class="sortable-header px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">Tempo Total<span id="sort-icon-total_time"></span></th>
+                                    <th onclick="setSort('toll_time')" class="sortable-header px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">Pedágio<span id="sort-icon-toll_time"></span></th>
+                                    <th class="px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">Apto RR</th>
+                                    <th onclick="setSort('missing_time')" class="sortable-header px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">Tempo Faltante<span id="sort-icon-missing_time"></span></th>
                                 </tr>
                             </thead>
                             <tbody id="table-body" class="bg-white divide-y divide-gray-200">
@@ -1144,8 +1144,19 @@
             };
         }
 
-        // Formatter helper
+        // Compact formatting (for tables) e.g. "30a 10m 18d"
         function formatYmd(ymd) {
+            if (!ymd || !Array.isArray(ymd) || ymd.length < 3) return "0d";
+            const [y, m, d] = ymd;
+            let parts = [];
+            if (y > 0) parts.push(`${y}a`);
+            if (m > 0) parts.push(`${m}m`);
+            if (d > 0 || parts.length === 0) parts.push(`${d}d`);
+            return parts.join(" ");
+        }
+
+        // Verbose formatting (for memorial calculation view) e.g. "30 anos, 10 meses e 18 dias"
+        function formatYmdVerbose(ymd) {
             if (!ymd || !Array.isArray(ymd) || ymd.length < 3) return "0 dias";
             const [y, m, d] = ymd;
             let parts = [];
@@ -1467,22 +1478,22 @@
                 }
 
                 tr.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-bold">${o.id}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm">${rankCell}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium ${isPromoted ? 'text-green-950 font-semibold' : 'text-gray-900'}">${o.name}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${o.agregado ? "SIM" : "NÃO"}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${o.entry_date}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${formatYmd(o.pmdf_time)}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${formatYmd(o.ffaa_time)}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${formatYmd(o.civil_time)}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-bold">${formatYmd(o.total_time)}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${formatYmd(o.toll_time)}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm">
-                        <span class="px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${o.rr_status ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'}">
+                    <td class="px-2 py-1.5 whitespace-nowrap text-[11px] text-gray-500 font-bold">${o.id}</td>
+                    <td class="px-2 py-1.5 whitespace-nowrap text-[11px]">${rankCell}</td>
+                    <td class="px-2 py-1.5 whitespace-nowrap text-[11px] font-medium ${isPromoted ? 'text-green-950 font-semibold' : 'text-gray-900'}">${o.name}</td>
+                    <td class="px-2 py-1.5 whitespace-nowrap text-[11px] text-gray-500">${o.agregado ? "SIM" : "NÃO"}</td>
+                    <td class="px-2 py-1.5 whitespace-nowrap text-[11px] text-gray-500">${o.entry_date}</td>
+                    <td class="px-2 py-1.5 whitespace-nowrap text-[11px] text-gray-600">${formatYmd(o.pmdf_time)}</td>
+                    <td class="px-2 py-1.5 whitespace-nowrap text-[11px] text-gray-600">${formatYmd(o.ffaa_time)}</td>
+                    <td class="px-2 py-1.5 whitespace-nowrap text-[11px] text-gray-600">${formatYmd(o.civil_time)}</td>
+                    <td class="px-2 py-1.5 whitespace-nowrap text-[11px] text-gray-900 font-bold">${formatYmd(o.total_time)}</td>
+                    <td class="px-2 py-1.5 whitespace-nowrap text-[11px] text-gray-600">${formatYmd(o.toll_time)}</td>
+                    <td class="px-2 py-1.5 whitespace-nowrap text-[11px]">
+                        <span class="px-1.5 py-0.5 inline-flex text-[9px] leading-4 font-semibold rounded-full ${o.rr_status ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'}">
                             ${o.rr_status ? 'SIM' : 'NÃO'}
                         </span>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold ${o.rr_status ? 'text-gray-400' : 'text-orange-600'}">${o.rr_status ? 'Apto' : formatYmd(o.missing_time)}</td>
+                    <td class="px-2 py-1.5 whitespace-nowrap text-[11px] font-semibold ${o.rr_status ? 'text-gray-400' : 'text-orange-600'}">${o.rr_status ? 'Apto' : formatYmd(o.missing_time)}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -1612,10 +1623,10 @@
                         <ul class="space-y-2 text-gray-600">
                             <li>📅 <strong>Data de Entrada na PMDF:</strong> ${o.entry_date}</li>
                             ${promotionDateHtml}
-                            <li>🔹 <strong>Tempo PMDF (Calendário exato):</strong> ${formatYmd(o.pmdf_time)} <span class="text-xs text-gray-400">(de ${o.entry_date} a ${currentDateStr})</span></li>
-                            <li>🔹 <strong>Tempo de FFAA (Forças Armadas):</strong> ${formatYmd(o.ffaa_time)}</li>
-                            <li>🔹 <strong>Tempo de Serviço Civil:</strong> ${formatYmd(o.civil_time)}</li>
-                            <li class="pt-2 border-t font-semibold text-gray-900">🧮 Tempo de Serviço Total (soma): ${formatYmd(o.total_time)}</li>
+                            <li>🔹 <strong>Tempo PMDF (Calendário exato):</strong> ${formatYmdVerbose(o.pmdf_time)} <span class="text-xs text-gray-400">(de ${o.entry_date} a ${currentDateStr})</span></li>
+                            <li>🔹 <strong>Tempo de FFAA (Forças Armadas):</strong> ${formatYmdVerbose(o.ffaa_time)}</li>
+                            <li>🔹 <strong>Tempo de Serviço Civil:</strong> ${formatYmdVerbose(o.civil_time)}</li>
+                            <li class="pt-2 border-t font-semibold text-gray-900">🧮 Tempo de Serviço Total (soma): ${formatYmdVerbose(o.total_time)}</li>
                         </ul>
                     </div>
                     <div>
@@ -1625,7 +1636,7 @@
                             <li>🎯 <strong>Data Limite para 30 anos (Meta):</strong> ${o.target_date}</li>
                             <li>⏳ <strong>Dias Faltantes na data de corte:</strong> ${o.missing_days_at_cutoff} dias</li>
                             <li>🔢 <strong>Pedágio Calculado (17%):</strong> ${o.toll_days} dias</li>
-                            <li class="pt-2 border-t font-semibold text-gray-900">📦 Tempo de Pedágio Convertido: ${formatYmd(o.toll_time)}</li>
+                            <li class="pt-2 border-t font-semibold text-gray-900">📦 Tempo de Pedágio Convertido: ${formatYmdVerbose(o.toll_time)}</li>
                         </ul>
                     </div>
                 </div>
@@ -1633,12 +1644,12 @@
                 <div class="mt-8 border-t pt-6 bg-gray-50 p-6 rounded-lg">
                     <h5 class="font-bold text-gray-800 text-lg mb-3">3. Requisitos e Status Final</h5>
                     <div class="space-y-3">
-                        <p class="text-gray-700">🕒 <strong>Requisito Total Requerido (30 Anos + Pedágio):</strong> <span class="font-bold text-gray-900">${formatYmd(o.required_time)}</span></p>
-                        <p class="text-gray-700">💪 <strong>Tempo Total Acumulado pelo Oficial:</strong> <span class="font-bold text-gray-900">${formatYmd(o.total_time)}</span></p>
+                        <p class="text-gray-700">🕒 <strong>Requisito Total Requerido (30 Anos + Pedágio):</strong> <span class="font-bold text-gray-900">${formatYmdVerbose(o.required_time)}</span></p>
+                        <p class="text-gray-700">💪 <strong>Tempo Total Acumulado pelo Oficial:</strong> <span class="font-bold text-gray-900">${formatYmdVerbose(o.total_time)}</span></p>
                         <div class="mt-4">
                             ${o.rr_status ? 
                                 `<div class="bg-green-100 border border-green-300 text-green-800 px-4 py-3 rounded font-bold inline-flex items-center gap-2">✔️ APTO PARA RESERVA: Oficial completou todos os requisitos!</div>` : 
-                                `<div class="bg-orange-100 border border-orange-300 text-orange-800 px-4 py-3 rounded font-bold inline-flex items-center gap-2">⏳ NÃO APTO: Faltam ${formatYmd(o.missing_time)} para a reserva.</div>`
+                                `<div class="bg-orange-100 border border-orange-300 text-orange-800 px-4 py-3 rounded font-bold inline-flex items-center gap-2">⏳ NÃO APTO: Faltam ${formatYmdVerbose(o.missing_time)} para a reserva.</div>`
                             }
                         </div>
                     </div>
@@ -1805,7 +1816,7 @@
             csv += "N.º;Posto;Nome;Agregado;Entrada PMDF;Tempo PMDF;Tempo FFAA;Tempo Civil;Tempo Total;Pedagio;Apto RR;Tempo Faltante\n";
             
             officers.forEach(o => {
-                csv += `${o.id};${o.rank};${o.name};${o.agregado ? "SIM" : "NÃO"};${o.entry_date};${formatYmd(o.pmdf_time)};${formatYmd(o.ffaa_time)};${formatYmd(o.civil_time)};${formatYmd(o.total_time)};${formatYmd(o.toll_time)};${o.rr_status ? "SIM" : "NÃO"};${o.rr_status ? "Apto" : formatYmd(o.missing_time)}\n`;
+                csv += `${o.id};${o.rank};${o.name};${o.agregado ? "SIM" : "NÃO"};${o.entry_date};${formatYmdVerbose(o.pmdf_time)};${formatYmdVerbose(o.ffaa_time)};${formatYmdVerbose(o.civil_time)};${formatYmdVerbose(o.total_time)};${formatYmdVerbose(o.toll_time)};${o.rr_status ? "SIM" : "NÃO"};${o.rr_status ? "Apto" : formatYmdVerbose(o.missing_time)}\n`;
             });
             
             const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
