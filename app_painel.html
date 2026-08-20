@@ -588,16 +588,75 @@
         let stratRetiredMajors = new Set();
         let stratAggregatedCaptains = new Set();
 
+        const cookieStorage = {
+            getItem(key) {
+                const name = key + "=";
+                const decodedCookie = decodeURIComponent(document.cookie);
+                const ca = decodedCookie.split(';');
+                for (let i = 0; i < ca.length; i++) {
+                    let c = ca[i];
+                    while (c.charAt(0) == ' ') {
+                        c = c.substring(1);
+                    }
+                    if (c.indexOf(name) == 0) {
+                        return c.substring(name.length, c.length);
+                    }
+                }
+                return null;
+            },
+            setItem(key, value) {
+                const d = new Date();
+                d.setTime(d.getTime() + (365 * 24 * 60 * 60 * 1000));
+                const expires = "expires=" + d.toUTCString();
+                document.cookie = key + "=" + encodeURIComponent(value) + ";" + expires + ";path=/;SameSite=Strict";
+            },
+            removeItem(key) {
+                document.cookie = key + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            }
+        };
+
+        const cookieSessionStorage = {
+            getItem(key) {
+                const name = key + "=";
+                const decodedCookie = decodeURIComponent(document.cookie);
+                const ca = decodedCookie.split(';');
+                for (let i = 0; i < ca.length; i++) {
+                    let c = ca[i];
+                    while (c.charAt(0) == ' ') {
+                        c = c.substring(1);
+                    }
+                    if (c.indexOf(name) == 0) {
+                        return c.substring(name.length, c.length);
+                    }
+                }
+                return null;
+            },
+            setItem(key, value) {
+                document.cookie = key + "=" + encodeURIComponent(value) + ";path=/;SameSite=Strict";
+            },
+            removeItem(key) {
+                document.cookie = key + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            }
+        };
+
         // Safe Storage wrappers to handle strict corporate firewall policies blocking localStorage/sessionStorage
         const safeStorage = {
             memoryStore: {},
             isFallback: false,
+            fallbackType: "",
             getItem(key) {
                 try {
                     return localStorage.getItem(key);
                 } catch (e) {
                     this.isFallback = true;
-                    console.warn("safeStorage: localStorage blocked, reading from memory.", e);
+                    try {
+                        const val = cookieStorage.getItem(key);
+                        if (val !== null) {
+                            this.fallbackType = "cookie";
+                            return val;
+                        }
+                    } catch (err) {}
+                    this.fallbackType = "memory";
                     return this.memoryStore[key] || null;
                 }
             },
@@ -606,7 +665,12 @@
                     localStorage.setItem(key, value);
                 } catch (e) {
                     this.isFallback = true;
-                    console.warn("safeStorage: localStorage blocked, writing to memory.", e);
+                    try {
+                        cookieStorage.setItem(key, value);
+                        this.fallbackType = "cookie";
+                        return;
+                    } catch (err) {}
+                    this.fallbackType = "memory";
                     this.memoryStore[key] = String(value);
                 }
             },
@@ -615,7 +679,12 @@
                     localStorage.removeItem(key);
                 } catch (e) {
                     this.isFallback = true;
-                    console.warn("safeStorage: localStorage blocked, removing from memory.", e);
+                    try {
+                        cookieStorage.removeItem(key);
+                        this.fallbackType = "cookie";
+                        return;
+                    } catch (err) {}
+                    this.fallbackType = "memory";
                     delete this.memoryStore[key];
                 }
             }
@@ -624,12 +693,20 @@
         const safeSessionStorage = {
             memoryStore: {},
             isFallback: false,
+            fallbackType: "",
             getItem(key) {
                 try {
                     return sessionStorage.getItem(key);
                 } catch (e) {
                     this.isFallback = true;
-                    console.warn("safeSessionStorage: sessionStorage blocked, reading from memory.", e);
+                    try {
+                        const val = cookieSessionStorage.getItem(key);
+                        if (val !== null) {
+                            this.fallbackType = "cookie";
+                            return val;
+                        }
+                    } catch (err) {}
+                    this.fallbackType = "memory";
                     return this.memoryStore[key] || null;
                 }
             },
@@ -638,7 +715,12 @@
                     sessionStorage.setItem(key, value);
                 } catch (e) {
                     this.isFallback = true;
-                    console.warn("safeSessionStorage: sessionStorage blocked, writing to memory.", e);
+                    try {
+                        cookieSessionStorage.setItem(key, value);
+                        this.fallbackType = "cookie";
+                        return;
+                    } catch (err) {}
+                    this.fallbackType = "memory";
                     this.memoryStore[key] = String(value);
                 }
             },
@@ -647,7 +729,12 @@
                     sessionStorage.removeItem(key);
                 } catch (e) {
                     this.isFallback = true;
-                    console.warn("safeSessionStorage: sessionStorage blocked, removing from memory.", e);
+                    try {
+                        cookieSessionStorage.removeItem(key);
+                        this.fallbackType = "cookie";
+                        return;
+                    } catch (err) {}
+                    this.fallbackType = "memory";
                     delete this.memoryStore[key];
                 }
             }
@@ -663,9 +750,20 @@
             }
 
             if (safeStorage.isFallback) {
+                let warningText = "";
+                let styleClass = "";
+                
+                if (safeStorage.fallbackType === "cookie") {
+                    warningText = "ℹ️ Nota: O armazenamento local do seu navegador está bloqueado por diretivas de TI. O sistema ativou automaticamente a persistência via Cookies, mantendo a sua conta ativa mesmo se fechar a página.";
+                    styleClass = "bg-blue-50 border border-blue-200 text-blue-900 text-xs p-3 rounded mt-4 text-center font-semibold";
+                } else {
+                    warningText = "⚠️ Atenção crítica: O armazenamento local e os Cookies do seu navegador estão bloqueados. Suas contas cadastradas e simulações serão totalmente perdidas caso você recarregue ou feche a página.";
+                    styleClass = "bg-amber-50 border border-amber-300 text-amber-900 text-xs p-3 rounded mt-4 text-center font-semibold";
+                }
+                
                 const warningDiv = document.createElement("div");
-                warningDiv.className = "bg-amber-50 border border-amber-300 text-amber-900 text-xs p-3 rounded mt-4 text-center font-semibold";
-                warningDiv.innerHTML = "⚠️ Atenção: O armazenamento local do seu navegador está bloqueado por diretivas de segurança de TI. Suas contas cadastradas e alterações de simulação serão perdidas caso você recarregue ou feche a página.";
+                warningDiv.className = styleClass;
+                warningDiv.innerHTML = warningText;
                 
                 const loginForm = document.getElementById("form-login");
                 if (loginForm) {
@@ -1859,7 +1957,7 @@
             }
 
             if (recs.length === 0) {
-                recEl.innerHTML = "🎉 <strong>Configuração de Máximo Fluxo Atingida!</strong> O plano estratégico está otimizado ao limite de vagas e agregações possíveis.";
+                recEl.innerHTML = "🎉 <strong>Configuração de Máximo Fluxo Atingida!</strong> O plano estratégico está otimizado al limite de vagas e agregações possíveis.";
             } else {
                 recEl.innerHTML = recs.map(r => `• ${r}`).join("<br>");
             }
