@@ -6,6 +6,8 @@
     <title>Gestão de Tempo de Serviço - QOPMA</title>
     <!-- Tailwind CSS (CDN for modern styles, works online) -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase Client Library CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         /* Fallback offline basic styling in case Tailwind CDN is blocked by corporate firewall */
         body {
@@ -576,6 +578,11 @@
         // Initial Default Users database is empty now
         const DEFAULT_USERS = [];
 
+        const SUPABASE_URL = "https://ozaikpemaplhqksoxcze.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im96YWlrcGVtYXBsaHFrc294Y3plIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcyNDg3MzcsImV4cCI6MjEwMjgyNDczN30._ylhce0ej06J6ZZ-d46m24JXP0GyKK5CvlzkFM3cyr8";
+        const useSupabase = true;
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
         let officers = [];
         let users = [];
         let currentUser = null;
@@ -753,7 +760,10 @@
                 let warningText = "";
                 let styleClass = "";
                 
-                if (safeStorage.fallbackType === "cookie") {
+                if (useSupabase) {
+                    warningText = "☁️ Conectado: Sincronização em tempo real ativa com o banco de dados Supabase.";
+                    styleClass = "bg-green-50 border border-green-200 text-green-900 text-xs p-3 rounded mt-4 text-center font-semibold";
+                } else if (safeStorage.fallbackType === "cookie") {
                     warningText = "ℹ️ Nota: O armazenamento local do seu navegador está bloqueado por diretivas de TI. O sistema ativou automaticamente a persistência via Cookies, mantendo a sua conta ativa mesmo se fechar a página.";
                     styleClass = "bg-blue-50 border border-blue-200 text-blue-900 text-xs p-3 rounded mt-4 text-center font-semibold";
                 } else {
@@ -773,7 +783,19 @@
         }
 
         // AUTHENTICATION AND USERS MANAGEMENT
-        function initUsers() {
+        async function initUsers() {
+            if (useSupabase) {
+                try {
+                    const { data, error } = await supabaseClient.from("app_users").select("*");
+                    if (!error && data) {
+                        users = data;
+                        return;
+                    }
+                    console.error("Erro ao carregar usuários do Supabase:", error);
+                } catch (e) {
+                    console.error("Erro na requisição dos usuários:", e);
+                }
+            }
             try {
                 const savedUsers = safeStorage.getItem("qopma_users_db");
                 if (savedUsers) {
@@ -887,7 +909,7 @@
         }
 
         // Form registration handler
-        function handleRegisterSubmit(e) {
+        async function handleRegisterSubmit(e) {
             e.preventDefault();
             const fullname = document.getElementById("reg-fullname").value.trim();
             const username = document.getElementById("reg-user").value.trim().toLowerCase();
@@ -903,6 +925,20 @@
             const profile = hasAdmin ? "usuario" : "admin";
             
             const newUser = { username, password, name: fullname, profile: profile };
+            
+            if (useSupabase) {
+                try {
+                    const { error } = await supabaseClient.from("app_users").insert([newUser]);
+                    if (error) {
+                        alert("Erro ao salvar usuário no banco de dados Supabase: " + error.message);
+                        return;
+                    }
+                } catch (err) {
+                    alert("Erro de conexão ao salvar usuário.");
+                    return;
+                }
+            }
+            
             users.push(newUser);
             safeStorage.setItem("qopma_users_db", JSON.stringify(users));
             
@@ -922,7 +958,7 @@
         }
 
         // Manage User Accounts Functions
-        function toggleUserProfile(username) {
+        async function toggleUserProfile(username) {
             if (username === currentUser.username) {
                 alert("Você não pode alterar o seu próprio perfil!");
                 return;
@@ -938,13 +974,28 @@
                 }
             }
             
-            targetUser.profile = targetUser.profile === "admin" ? "usuario" : "admin";
+            const newProfile = targetUser.profile === "admin" ? "usuario" : "admin";
+            
+            if (useSupabase) {
+                try {
+                    const { error } = await supabaseClient.from("app_users").update({ profile: newProfile }).eq("username", username);
+                    if (error) {
+                        alert("Erro ao atualizar perfil no Supabase: " + error.message);
+                        return;
+                    }
+                } catch (e) {
+                    alert("Erro de conexão ao Supabase.");
+                    return;
+                }
+            }
+            
+            targetUser.profile = newProfile;
             safeStorage.setItem("qopma_users_db", JSON.stringify(users));
             renderAll();
             alert(`Perfil de ${targetUser.name} alterado com sucesso!`);
         }
 
-        function deleteUserAccount(username) {
+        async function deleteUserAccount(username) {
             if (username === currentUser.username) {
                 alert("Você não pode excluir a sua própria conta logada!");
                 return;
@@ -961,6 +1012,18 @@
             }
             
             if (confirm(`Tem certeza absoluta que deseja excluir a conta de usuário "${username}"?`)) {
+                if (useSupabase) {
+                    try {
+                        const { error } = await supabaseClient.from("app_users").delete().eq("username", username);
+                        if (error) {
+                            alert("Erro ao excluir conta do Supabase: " + error.message);
+                            return;
+                        }
+                    } catch (e) {
+                        alert("Erro de conexão ao Supabase.");
+                        return;
+                    }
+                }
                 users = users.filter(u => u.username !== username);
                 safeStorage.setItem("qopma_users_db", JSON.stringify(users));
                 renderAll();
@@ -981,7 +1044,7 @@
         }
 
         // Commit Promotions permanently to the local database
-        function commitPromotions() {
+        async function commitPromotions() {
             if (currentUser.profile !== "admin") {
                 alert("Apenas administradores podem efetivar as promoções!");
                 return;
@@ -1053,7 +1116,7 @@
                     }
                 });
                 
-                saveToStorage();
+                await saveToStorage();
                 
                 // Reset simulated vacancies count to 0
                 document.getElementById("promo-vacancies").value = 0;
@@ -1065,7 +1128,28 @@
         }
 
         // DATABASE LOADER AND MIGRATIONS
-        function initDB() {
+        async function initDB() {
+            if (useSupabase) {
+                try {
+                    const { data, error } = await supabaseClient.from("officers").select("*");
+                    if (!error && data && data.length > 0) {
+                        officers = data.map(o => ({
+                            id: o.id,
+                            name: o.name,
+                            rank: o.rank,
+                            agregado: o.agregado,
+                            entry_date: o.entry_date,
+                            promotion_date: o.promotion_date || "",
+                            ffaa_time: [o.ffaa_years, o.ffaa_months, o.ffaa_days],
+                            civil_time: [o.civil_years, o.civil_months, o.civil_days]
+                        }));
+                        return;
+                    }
+                    console.error("Erro ao carregar oficiais do Supabase (caindo para local):", error);
+                } catch (e) {
+                    console.error("Erro na requisição dos oficiais:", e);
+                }
+            }
             const saved = safeStorage.getItem("qopma_officers_db");
             if (saved) {
                 try {
@@ -1087,29 +1171,65 @@
                         }
                     });
                     if (patched) {
-                        saveToStorage();
+                        await saveToStorage();
                     }
                 } catch (e) {
                     console.error("Erro ao ler banco local. Restaurando originais...", e);
                     officers = JSON.parse(JSON.stringify(INITIAL_OFFICERS));
-                    saveToStorage();
+                    await saveToStorage();
                 }
             } else {
                 officers = JSON.parse(JSON.stringify(INITIAL_OFFICERS));
                 officers.forEach(o => o.promotion_date = "");
-                saveToStorage();
+                await saveToStorage();
             }
         }
 
-        // Save DB to localStorage
-        function saveToStorage() {
+        // Save DB to localStorage / Supabase
+        async function saveToStorage() {
+            if (useSupabase) {
+                try {
+                    const mapped = officers.map(o => ({
+                        id: o.id,
+                        name: o.name,
+                        rank: o.rank,
+                        agregado: o.agregado,
+                        entry_date: o.entry_date,
+                        promotion_date: o.promotion_date,
+                        ffaa_years: o.ffaa_time[0],
+                        ffaa_months: o.ffaa_time[1],
+                        ffaa_days: o.ffaa_time[2],
+                        civil_years: o.civil_time[0],
+                        civil_months: o.civil_time[1],
+                        civil_days: o.civil_time[2]
+                    }));
+                    const { error } = await supabaseClient.from("officers").upsert(mapped);
+                    if (error) {
+                        console.error("Erro ao sincronizar com o Supabase:", error);
+                    }
+                } catch (e) {
+                    console.error("Erro na sincronização:", e);
+                }
+            }
             safeStorage.setItem("qopma_officers_db", JSON.stringify(officers));
         }
 
-        function restoreOriginalDB() {
+        async function restoreOriginalDB() {
             if (confirm("Tem certeza que deseja apagar todas as alterações e restaurar os 68 oficiais originais?")) {
+                if (useSupabase) {
+                    try {
+                        const { error: delErr } = await supabaseClient.from("officers").delete().neq("id", 0);
+                        if (delErr) {
+                            alert("Erro ao limpar oficiais no Supabase: " + delErr.message);
+                            return;
+                        }
+                    } catch (e) {
+                        alert("Erro de rede ao restaurar banco no Supabase.");
+                        return;
+                    }
+                }
                 safeStorage.removeItem("qopma_officers_db");
-                initDB();
+                await initDB();
                 renderAll();
             }
         }
@@ -2034,7 +2154,7 @@
             renderStrategy();
         }
 
-        function commitStrategicPlan() {
+        async function commitStrategicPlan() {
             if (currentUser.profile !== "admin") {
                 alert("Acesso negado: Apenas administradores podem efetivar o plano estratégico!");
                 return;
@@ -2134,7 +2254,7 @@
                     }
                 });
 
-                saveToStorage();
+                await saveToStorage();
                 
                 // Clear strategy simulation variables
                 stratRetiredMajors.clear();
@@ -2309,7 +2429,7 @@
             document.getElementById("edit-civil-d").value = o.civil_time[2];
         }
 
-        function handleEditSave(e) {
+        async function handleEditSave(e) {
             e.preventDefault();
             const select = document.getElementById("edit-select");
             const id = parseInt(select.value);
@@ -2351,13 +2471,13 @@
                 civil_time: [civil_y, civil_m, civil_d]
             };
             
-            saveToStorage();
+            await saveToStorage();
             alert("Alterações salvas com sucesso!");
             switchPage('dashboard');
         }
 
         // Delete officer
-        function handleDelete() {
+        async function handleDelete() {
             const select = document.getElementById("edit-select");
             const id = parseInt(select.value);
             
@@ -2365,8 +2485,20 @@
             if (!o) return;
             
             if (confirm(`Tem certeza que deseja EXCLUIR o registro de ${o.rank} ${o.name}?`)) {
+                if (useSupabase) {
+                    try {
+                        const { error } = await supabaseClient.from("officers").delete().eq("id", id);
+                        if (error) {
+                            alert("Erro ao excluir oficial do Supabase: " + error.message);
+                            return;
+                        }
+                    } catch (e) {
+                        alert("Erro de conexão ao Supabase.");
+                        return;
+                    }
+                }
                 officers = officers.filter(item => item.id !== id);
-                saveToStorage();
+                await saveToStorage();
                 alert("Registro excluído com sucesso!");
                 switchPage('dashboard');
             }
@@ -2401,10 +2533,12 @@
         document.getElementById("promo-vacancies").addEventListener("input", renderAll);
 
         // Run Init
-        initUsers();
-        initDB();
-        checkSession();
-        checkStorageStatus();
+        (async () => {
+            await initUsers();
+            await initDB();
+            checkSession();
+            checkStorageStatus();
+        })();
     </script>
 </body>
 </html>
