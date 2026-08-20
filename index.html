@@ -172,9 +172,6 @@
                 <div onclick="switchPage('detail')" id="menu-item-detail" class="menu-item admin-only">
                     <span>🔍 Memorial de Cálculo</span>
                 </div>
-                <div onclick="switchPage('add')" id="menu-item-add" class="menu-item admin-only">
-                    <span>➕ Cadastrar Oficial</span>
-                </div>
                 <div onclick="switchPage('edit')" id="menu-item-edit" class="menu-item admin-only">
                     <span>⚙️ Editar / Excluir</span>
                 </div>
@@ -183,11 +180,11 @@
                 </div>
             </div>
             
-            <!-- Global Settings Panel in Sidebar -->
+            <!-- Global Settings Panel in Sidebar (Locked to Today) -->
             <div class="p-6 border-t border-slate-700 bg-slate-900 space-y-4">
-                <div>
-                    <label for="projection-date" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Data de Projeção</label>
-                    <input type="date" id="projection-date" value="2026-08-19" class="w-full border-0 bg-slate-800 text-white rounded px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                <div class="text-xs text-slate-400 space-y-1">
+                    <span class="block font-semibold uppercase tracking-wider text-[10px] text-slate-500">Data de Referência</span>
+                    <span id="projection-date-display" class="block text-white font-bold text-sm bg-slate-800 px-3 py-2 rounded">Carregando...</span>
                 </div>
                 <button id="admin-reset-btn" onclick="restoreOriginalDB()" class="admin-only w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium px-4 py-2 rounded text-xs transition border border-slate-700">
                     🔄 Restaurar Banco Original
@@ -285,18 +282,18 @@
                         <table class="min-w-full divide-y divide-gray-200 m-0 shadow-none border-none">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th onclick="setSort('id')" class="sortable-header px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">N.º<span id="sort-icon-id"></span></th>
-                                    <th onclick="setSort('rank')" class="sortable-header px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">Posto<span id="sort-icon-rank"></span></th>
+                                    <th onclick="setSort('id')" class="sortable-header px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider w-12">N.º<span id="sort-icon-id"></span></th>
+                                    <th onclick="setSort('rank')" class="sortable-header px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider w-24">Posto<span id="sort-icon-rank"></span></th>
                                     <th onclick="setSort('name')" class="sortable-header px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">Nome<span id="sort-icon-name"></span></th>
-                                    <th class="px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">Agr.</th>
-                                    <th onclick="setSort('entry_date')" class="sortable-header px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">Entrada PMDF<span id="sort-icon-entry_date"></span></th>
+                                    <th class="px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider w-12">Agr.</th>
+                                    <th onclick="setSort('entry_date')" class="sortable-header px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider w-24">Entrada PMDF<span id="sort-icon-entry_date"></span></th>
                                     <th onclick="setSort('pmdf_time')" class="sortable-header px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">Tempo PMDF<span id="sort-icon-pmdf_time"></span></th>
                                     <th class="px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">FFAA</th>
                                     <th class="px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">Civil</th>
                                     <th onclick="setSort('total_time')" class="sortable-header px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">Tempo Total<span id="sort-icon-total_time"></span></th>
                                     <th onclick="setSort('toll_time')" class="sortable-header px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">Pedágio<span id="sort-icon-toll_time"></span></th>
-                                    <th class="px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">Apto RR</th>
-                                    <th onclick="setSort('missing_time')" class="sortable-header px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">Tempo Faltante<span id="sort-icon-missing_time"></span></th>
+                                    <th class="px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider w-16">Apto RR</th>
+                                    <th onclick="setSort('missing_time')" class="sortable-header px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider text-orange-600">Tempo Faltante<span id="sort-icon-missing_time"></span></th>
                                 </tr>
                             </thead>
                             <tbody id="table-body" class="bg-white divide-y divide-gray-200">
@@ -377,89 +374,6 @@
                     <div id="memorial-container" class="mt-8 border-t pt-8">
                         <!-- Filled by JS -->
                     </div>
-                </div>
-            </div>
-
-            <!-- ================= PAGE: ADD OFFICER ================= -->
-            <div id="page-add" class="page-content hidden">
-                <h1 class="text-3xl font-bold text-slate-900 mb-2">➕ Cadastrar Novo Oficial</h1>
-                <p class="text-slate-500 mb-8">Insira as informações básicas e tempos externos para inserir um oficial no banco de dados local.</p>
-                
-                <div class="bg-white p-8 rounded-lg shadow-sm border border-slate-200">
-                    <form onsubmit="handleAdd(event)" class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-semibold text-slate-700 mb-1">N.º (Identificador de Antiguidade)</label>
-                                <input type="number" id="add-id" required class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-slate-700 mb-1">Posto</label>
-                                <select id="add-rank" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                                    <option value="MAJ">MAJ</option>
-                                    <option value="CAP">CAP</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-slate-700 mb-1">Nome Completo</label>
-                                <input type="text" id="add-name" required class="w-full border rounded px-3 py-2 mt-1 focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                            </div>
-                            <div class="flex items-center gap-2 pt-2">
-                                <input type="checkbox" id="add-agregado" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-                                <label for="add-agregado" class="text-sm font-semibold text-slate-700">Agregado (SIM)</label>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-slate-700 mb-1">Data de Entrada na PMDF</label>
-                                <input type="date" id="add-entry" required class="w-full border rounded px-3 py-2 mt-1 focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-slate-700 mb-1">Data de Promoção ao Posto Atual (Opcional)</label>
-                                <input type="date" id="add-promotion-date" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                                <span class="text-xs text-slate-400">Usado para o cálculo de interstício (CAP: 2 anos, MAJ: 1.5 anos)</span>
-                            </div>
-                        </div>
-                        
-                        <div class="space-y-6">
-                            <div>
-                                <h5 class="font-bold text-slate-800 border-b border-slate-200 pb-2 text-base">Tempo Externo de Forças Armadas (FFAA)</h5>
-                                <div class="grid grid-cols-3 gap-3 mt-3">
-                                    <div>
-                                        <label class="text-xs font-semibold text-slate-400 uppercase">Anos</label>
-                                        <input type="number" id="add-ffaa-y" value="0" min="0" class="w-full border rounded px-3 py-2 mt-1 focus:ring-2 focus:ring-blue-500">
-                                    </div>
-                                    <div>
-                                        <label class="text-xs font-semibold text-slate-400 uppercase">Meses</label>
-                                        <input type="number" id="add-ffaa-m" value="0" min="0" max="11" class="w-full border rounded px-3 py-2 mt-1 focus:ring-2 focus:ring-blue-500">
-                                    </div>
-                                    <div>
-                                        <label class="text-xs font-semibold text-slate-400 uppercase">Dias</label>
-                                        <input type="number" id="add-ffaa-d" value="0" min="0" max="29" class="w-full border rounded px-3 py-2 mt-1 focus:ring-2 focus:ring-blue-500">
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div>
-                                <h5 class="font-bold text-slate-800 border-b border-slate-200 pb-2 text-base">Tempo Externo de Serviço Civil</h5>
-                                <div class="grid grid-cols-3 gap-3 mt-3">
-                                    <div>
-                                        <label class="text-xs font-semibold text-slate-400 uppercase">Anos</label>
-                                        <input type="number" id="add-civil-y" value="0" min="0" class="w-full border rounded px-3 py-2 mt-1 focus:ring-2 focus:ring-blue-500">
-                                    </div>
-                                    <div>
-                                        <label class="text-xs font-semibold text-slate-400 uppercase">Meses</label>
-                                        <input type="number" id="add-civil-m" value="0" min="0" max="11" class="w-full border rounded px-3 py-2 mt-1 focus:ring-2 focus:ring-blue-500">
-                                    </div>
-                                    <div>
-                                        <label class="text-xs font-semibold text-slate-400 uppercase">Dias</label>
-                                        <input type="number" id="add-civil-d" value="0" min="0" max="29" class="w-full border rounded px-3 py-2 mt-1 focus:ring-2 focus:ring-blue-500">
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="pt-6">
-                                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded shadow transition">💾 Cadastrar Policial</button>
-                            </div>
-                        </div>
-                    </form>
                 </div>
             </div>
 
@@ -761,6 +675,7 @@
             }
         }
 
+        // Form registration handler
         function handleRegisterSubmit(e) {
             e.preventDefault();
             const fullname = document.getElementById("reg-fullname").value.trim();
@@ -866,10 +781,12 @@
                 return;
             }
             
-            // Get eligible queue for Antiguidade
-            const projInput = document.getElementById("projection-date").value || "2026-08-19";
-            const [y, m, d] = projInput.split("-").map(Number);
-            const currentDateStr = `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y}`;
+            // Get eligible queue for Antiguidade based on current date (Today)
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            const currentDateStr = `${dd}/${mm}/${yyyy}`;
             
             // Recalculate inside execution context
             officers.forEach(off => {
@@ -920,7 +837,7 @@
                     const idx = officers.findIndex(o => o.id === promoOff.id);
                     if (idx !== -1) {
                         officers[idx].rank = "MAJ";
-                        officers[idx].promotion_date = projInput.split("-").reverse().join("/"); // DD/MM/YYYY
+                        officers[idx].promotion_date = currentDateStr; // DD/MM/YYYY
                     }
                 });
                 
@@ -1193,7 +1110,7 @@
         // Page Router
         function switchPage(pageId) {
             if (currentUser && currentUser.profile === "usuario") {
-                const adminPages = ["detail", "add", "edit", "users"];
+                const adminPages = ["detail", "edit", "users"];
                 if (adminPages.includes(pageId)) {
                     alert("Acesso restrito: Somente administradores podem acessar esta aba!");
                     return;
@@ -1224,10 +1141,18 @@
         function renderAll() {
             if (!currentUser) return;
 
-            // Get chosen calculation date
-            const projInput = document.getElementById("projection-date").value || "2026-08-19";
-            const [y, m, d] = projInput.split("-").map(Number);
-            const currentDateStr = `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y}`;
+            // Get chosen calculation date (Now locked to "Today")
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            const currentDateStr = `${dd}/${mm}/${yyyy}`;
+            
+            // Set the read-only display inside the sidebar
+            const sidebarDateEl = document.getElementById("projection-date-display");
+            if (sidebarDateEl) {
+                sidebarDateEl.innerText = currentDateStr;
+            }
             
             // Update all calculations
             officers.forEach(off => {
@@ -1466,15 +1391,17 @@
                 
                 let rankCell = o.rank;
                 if (isPromoted) {
-                    rankCell = `<div class="font-bold text-green-700">${o.rank} ➡️ MAJ</div><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 border border-green-300">⭐ Promovido (Antiguidade)</span>`;
+                    rankCell = `<span class="text-green-700 font-bold">CAP ➡️ MAJ</span>`;
                 } else if (o.rank === "CAP") {
                     if (!o.intersticio_ok) {
-                        rankCell = `<div class="font-semibold text-red-600">${o.rank}</div><span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-bold bg-red-100 text-red-800 border border-red-300">🚫 Sem Interstício</span>`;
+                        rankCell = `<span class="text-red-500 font-semibold">CAP (S/Int)</span>`;
                     } else if (o.within_limit) {
-                        rankCell = `<div class="font-semibold text-slate-700">${o.rank}</div><span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">✔️ Faixa de Acesso</span>`;
+                        rankCell = `<span class="text-emerald-600 font-semibold">CAP (QA)</span>`;
                     } else {
-                        rankCell = `<div class="font-semibold text-slate-500">${o.rank}</div><span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">⚠️ Excedente Art. 4º</span>`;
+                        rankCell = `<span class="text-slate-400">CAP (Exc)</span>`;
                     }
+                } else if (o.rank === "MAJ") {
+                    rankCell = `<span class="text-slate-700">MAJ</span>`;
                 }
 
                 tr.innerHTML = `
@@ -1580,9 +1507,11 @@
                 return;
             }
             
-            const projInput = document.getElementById("projection-date").value || "2026-08-19";
-            const [y, m, d] = projInput.split("-").map(Number);
-            const currentDateStr = `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y}`;
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            const currentDateStr = `${dd}/${mm}/${yyyy}`;
             
             const knownBugs = {
                 37: "No arquivo de planilha original, a soma de dias de PMDF + Civil deu 47 dias. O correto leva ao carry de 1 mês para a coluna de meses, totalizando 32a 0m 17d em vez de 31a 11m 17d.",
@@ -1655,57 +1584,6 @@
                     </div>
                 </div>
             `;
-        }
-
-        // Handle Add Form Submission
-        function handleAdd(e) {
-            e.preventDefault();
-            const id = parseInt(document.getElementById("add-id").value);
-            const name = document.getElementById("add-name").value.trim().toUpperCase();
-            const rank = document.getElementById("add-rank").value;
-            const agregado = document.getElementById("add-agregado").checked;
-            
-            const entryInput = document.getElementById("add-entry").value;
-            const [y, m, d] = entryInput.split("-");
-            const entry_date = `${d}/${m}/${y}`;
-            
-            const promoDateInput = document.getElementById("add-promotion-date").value;
-            let promotion_date = "";
-            if (promoDateInput) {
-                const [py, pm, pd] = promoDateInput.split("-");
-                promotion_date = `${pd}/${pm}/${py}`;
-            }
-            
-            const ffaa_y = parseInt(document.getElementById("add-ffaa-y").value) || 0;
-            const ffaa_m = parseInt(document.getElementById("add-ffaa-m").value) || 0;
-            const ffaa_d = parseInt(document.getElementById("add-ffaa-d").value) || 0;
-            
-            const civil_y = parseInt(document.getElementById("add-civil-y").value) || 0;
-            const civil_m = parseInt(document.getElementById("add-civil-m").value) || 0;
-            const civil_d = parseInt(document.getElementById("add-civil-d").value) || 0;
-            
-            if (officers.some(o => o.id === id)) {
-                alert(`Erro: Já existe um oficial com o número ${id}!`);
-                return;
-            }
-            
-            const newOff = {
-                id,
-                rank,
-                name,
-                agregado,
-                entry_date,
-                promotion_date,
-                ffaa_time: [ffaa_y, ffaa_m, ffaa_d],
-                civil_time: [civil_y, civil_m, civil_d]
-            };
-            
-            officers.push(newOff);
-            saveToStorage();
-            
-            alert(`${rank} ${name} cadastrado com sucesso!`);
-            e.target.reset();
-            switchPage('dashboard');
         }
 
         // Edit Tab operations
@@ -1821,7 +1699,7 @@
             
             const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
             const link = document.createElement("a");
-            const projInput = document.getElementById("projection-date").value.replace(/-/g, "");
+            const projInput = new Date().toISOString().slice(0, 10).replace(/-/g, "");
             
             link.href = URL.createObjectURL(blob);
             link.setAttribute("download", `tempo_servico_qopma_${projInput}.csv`);
@@ -1831,7 +1709,6 @@
         }
 
         // Initialize Listeners
-        document.getElementById("projection-date").addEventListener("change", renderAll);
         document.getElementById("filter-name").addEventListener("input", renderAll);
         document.getElementById("filter-rank").addEventListener("change", renderAll);
         document.getElementById("filter-rr").addEventListener("change", renderAll);
