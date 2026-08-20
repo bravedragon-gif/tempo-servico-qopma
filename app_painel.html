@@ -433,11 +433,22 @@
                             </div>
                         </div>
 
+                        <!-- Captains RR list -->
+                        <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+                            <h3 class="text-base font-bold text-slate-800 border-b pb-2 mb-4 flex justify-between items-center">
+                                <span>🚪 2. Simular Reserva Remunerada de Capitães (Apto RR: SIM)</span>
+                                <span class="text-xs font-normal text-slate-500">Selecionar transfere o Capitão para a reserva (CAP RR), retirando-o da fila de promoção.</span>
+                            </h3>
+                            <div class="max-h-60 overflow-y-auto space-y-2 pr-2" id="strat-captains-rr-list">
+                                <!-- Loaded by JS -->
+                            </div>
+                        </div>
+
                         <!-- Captains list -->
                         <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
                             <h3 class="text-base font-bold text-slate-800 border-b pb-2 mb-4 flex justify-between items-center">
-                                <span>👥 2. Simular Agregação de Capitães na Fila</span>
-                                <span class="text-xs font-normal text-slate-500">Agregados são promovidos por antiguidade sem consuming vagas (Art. 53/54).</span>
+                                <span>👥 3. Simular Agregação de Capitães na Fila</span>
+                                <span class="text-xs font-normal text-slate-500">Agregados são promovidos por antiguidade sem consumir vagas (Art. 53/54).</span>
                             </h3>
                             <div class="max-h-80 overflow-y-auto space-y-2 pr-2" id="strat-captains-list">
                                 <!-- Loaded by JS -->
@@ -594,6 +605,7 @@
 
         // Strategy simulation state
         let stratRetiredMajors = new Set();
+        let stratRetiredCaptains = new Set();
         let stratAggregatedCaptains = new Set();
 
         const cookieStorage = {
@@ -1889,11 +1901,40 @@
                 });
             }
 
+            // 1.5. Render Captains RR List (only Apto RR)
+            const captainsRrListEl = document.getElementById("strat-captains-rr-list");
+            captainsRrListEl.innerHTML = "";
+            let eligibleCaptainsForRR = officers.filter(o => o.rank === "CAP" && o.rr_status);
+            
+            if (eligibleCaptainsForRR.length === 0) {
+                captainsRrListEl.innerHTML = "<p class='text-slate-500 text-xs italic p-3'>Nenhum Capitão ativo está elegível para a reserva (Apto RR: SIM) no momento.</p>";
+            } else {
+                eligibleCaptainsForRR.forEach(c => {
+                    const isChecked = stratRetiredCaptains.has(c.id);
+                    const div = document.createElement("div");
+                    div.className = `flex items-center justify-between p-3 rounded border text-xs ${isChecked ? 'bg-blue-50 border-blue-200' : 'bg-slate-50 border-slate-200'}`;
+                    div.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox" id="strat-cap-rr-chk-${c.id}" ${isChecked ? 'checked' : ''} onchange="toggleStratCaptainRR(${c.id})" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                            <div>
+                                <span class="font-bold text-slate-800">${c.name}</span>
+                                <span class="text-slate-400 block">ID: ${c.id} • Entrada: ${c.entry_date} • Tempo Total: ${formatYmd(c.total_time)}</span>
+                            </div>
+                        </div>
+                        <span class="text-[10px] font-bold text-blue-600 uppercase bg-blue-100 px-2 py-0.5 rounded">Apto RR</span>
+                    `;
+                    captainsRrListEl.appendChild(div);
+                });
+            }
+
             // 2. Clone database for simulated state
             let tempOfficers = JSON.parse(JSON.stringify(officers));
             tempOfficers.forEach(o => {
                 if (o.rank === "MAJ" && stratRetiredMajors.has(o.id)) {
                     o.rank = "MAJ RR";
+                }
+                if (o.rank === "CAP" && stratRetiredCaptains.has(o.id)) {
+                    o.rank = "CAP RR";
                 }
                 if (o.rank === "CAP" && stratAggregatedCaptains.has(o.id)) {
                     o.agregado = true;
@@ -2017,8 +2058,8 @@
             const resultsEl = document.getElementById("strat-results-container");
             let resultsHtml = "";
 
-            if (totalVacancies === 0) {
-                resultsHtml = "<p class='text-slate-500 italic p-4'>Defina vagas ou aposente Majors para iniciar a projeção.</p>";
+            if (totalVacancies === 0 && stratRetiredCaptains.size === 0) {
+                resultsHtml = "<p class='text-slate-500 italic p-4'>Defina vagas, aposente Majors ou envie Capitães para a reserva para iniciar a projeção.</p>";
             } else {
                 resultsHtml += `
                     <div class="space-y-4">
@@ -2031,7 +2072,20 @@
                                         return `<li>${m.name} (ID: ${m.id})</li>`;
                                     }).join("")}
                                 </ul>` : 
-                                `<p class="text-slate-400 italic">Nenhum Major transferído.</p>`
+                                `<p class="text-slate-400 italic">Nenhum Major transferido.</p>`
+                            }
+                        </div>
+
+                        <div>
+                            <h4 class="font-bold text-slate-700 uppercase tracking-wider text-[10px] mb-2 border-b pb-1">Capitães na Reserva (${stratRetiredCaptains.size}):</h4>
+                            ${stratRetiredCaptains.size > 0 ? 
+                                `<ul class="list-disc pl-4 space-y-1 text-slate-600 font-medium">
+                                    ${Array.from(stratRetiredCaptains).map(id => {
+                                        const c = officers.find(o => o.id === id);
+                                        return `<li>${c.name} (ID: ${c.id})</li>`;
+                                    }).join("")}
+                                </ul>` : 
+                                `<p class="text-slate-400 italic">Nenhum Capitão transferido.</p>`
                             }
                         </div>
 
@@ -2079,11 +2133,22 @@
             renderStrategy();
         }
 
+        function toggleStratCaptainRR(id) {
+            if (stratRetiredCaptains.has(id)) {
+                stratRetiredCaptains.delete(id);
+            } else {
+                stratRetiredCaptains.add(id);
+                stratAggregatedCaptains.delete(id);
+            }
+            renderStrategy();
+        }
+
         function toggleStratCaptain(id) {
             if (stratAggregatedCaptains.has(id)) {
                 stratAggregatedCaptains.delete(id);
             } else {
                 stratAggregatedCaptains.add(id);
+                stratRetiredCaptains.delete(id);
             }
             renderStrategy();
         }
@@ -2117,6 +2182,7 @@
         function applyMaxStrategy() {
             // Clear current simulation state
             stratRetiredMajors.clear();
+            stratRetiredCaptains.clear();
             stratAggregatedCaptains.clear();
 
             // 1. Auto-retire all Majors who are Apto RR
@@ -2132,6 +2198,9 @@
                 tempOfficers.forEach(o => {
                     if (o.rank === "MAJ" && stratRetiredMajors.has(o.id)) {
                         o.rank = "MAJ RR";
+                    }
+                    if (o.rank === "CAP" && stratRetiredCaptains.has(o.id)) {
+                        o.rank = "CAP RR";
                     }
                     if (o.rank === "CAP" && stratAggregatedCaptains.has(o.id)) {
                         o.agregado = true;
@@ -2194,8 +2263,8 @@
             const baseVacancies = parseInt(document.getElementById("strat-base-vacancies").value) || 0;
             const totalVacancies = baseVacancies + stratRetiredMajors.size;
             
-            if (totalVacancies === 0) {
-                alert("Nenhuma vaga para efetivar promoções neste plano!");
+            if (totalVacancies === 0 && stratRetiredCaptains.size === 0) {
+                alert("Nenhuma alteração de vagas ou reserva simulada neste plano!");
                 return;
             }
 
@@ -2210,6 +2279,9 @@
             tempOfficers.forEach(o => {
                 if (o.rank === "MAJ" && stratRetiredMajors.has(o.id)) {
                     o.rank = "MAJ RR";
+                }
+                if (o.rank === "CAP" && stratRetiredCaptains.has(o.id)) {
+                    o.rank = "CAP RR";
                 }
                 if (o.rank === "CAP" && stratAggregatedCaptains.has(o.id)) {
                     o.agregado = true;
@@ -2249,7 +2321,7 @@
                 }
             }
 
-            if (promotedAntiguidade.length === 0 && stratRetiredMajors.size === 0) {
+            if (promotedAntiguidade.length === 0 && stratRetiredMajors.size === 0 && stratRetiredCaptains.size === 0) {
                 alert("Nenhuma alteração simulada para ser efetivada.");
                 return;
             }
@@ -2275,12 +2347,16 @@
                         o.rank = "MAJ RR";
                     }
                     if (o.rank === "CAP") {
-                        if (stratAggregatedCaptains.has(o.id)) {
-                            o.agregado = true;
-                        }
-                        if (promotedAntiguidade.includes(o.id)) {
-                            o.rank = "MAJ";
-                            o.promotion_date = currentDateStr;
+                        if (stratRetiredCaptains.has(o.id)) {
+                            o.rank = "CAP RR";
+                        } else {
+                            if (stratAggregatedCaptains.has(o.id)) {
+                                o.agregado = true;
+                            }
+                            if (promotedAntiguidade.includes(o.id)) {
+                                o.rank = "MAJ";
+                                o.promotion_date = currentDateStr;
+                            }
                         }
                     }
                 });
@@ -2289,6 +2365,7 @@
                 
                 // Clear strategy simulation variables
                 stratRetiredMajors.clear();
+                stratRetiredCaptains.clear();
                 stratAggregatedCaptains.clear();
 
                 alert("Plano Estratégico efetivado com sucesso!");
