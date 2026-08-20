@@ -434,7 +434,7 @@
                         <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
                             <h3 class="text-base font-bold text-slate-800 border-b pb-2 mb-4 flex justify-between items-center">
                                 <span>👥 2. Simular Agregação de Capitães na Fila</span>
-                                <span class="text-xs font-normal text-slate-500">Agregados são promovidos por antiguidade sem consumir vagas (Art. 53/54).</span>
+                                <span class="text-xs font-normal text-slate-500">Agregados são promovidos por antiguidade sem consuming vagas (Art. 53/54).</span>
                             </h3>
                             <div class="max-h-80 overflow-y-auto space-y-2 pr-2" id="strat-captains-list">
                                 <!-- Loaded by JS -->
@@ -591,10 +591,12 @@
         // Safe Storage wrappers to handle strict corporate firewall policies blocking localStorage/sessionStorage
         const safeStorage = {
             memoryStore: {},
+            isFallback: false,
             getItem(key) {
                 try {
                     return localStorage.getItem(key);
                 } catch (e) {
+                    this.isFallback = true;
                     console.warn("safeStorage: localStorage blocked, reading from memory.", e);
                     return this.memoryStore[key] || null;
                 }
@@ -603,6 +605,7 @@
                 try {
                     localStorage.setItem(key, value);
                 } catch (e) {
+                    this.isFallback = true;
                     console.warn("safeStorage: localStorage blocked, writing to memory.", e);
                     this.memoryStore[key] = String(value);
                 }
@@ -611,6 +614,7 @@
                 try {
                     localStorage.removeItem(key);
                 } catch (e) {
+                    this.isFallback = true;
                     console.warn("safeStorage: localStorage blocked, removing from memory.", e);
                     delete this.memoryStore[key];
                 }
@@ -619,10 +623,12 @@
 
         const safeSessionStorage = {
             memoryStore: {},
+            isFallback: false,
             getItem(key) {
                 try {
                     return sessionStorage.getItem(key);
                 } catch (e) {
+                    this.isFallback = true;
                     console.warn("safeSessionStorage: sessionStorage blocked, reading from memory.", e);
                     return this.memoryStore[key] || null;
                 }
@@ -631,6 +637,7 @@
                 try {
                     sessionStorage.setItem(key, value);
                 } catch (e) {
+                    this.isFallback = true;
                     console.warn("safeSessionStorage: sessionStorage blocked, writing to memory.", e);
                     this.memoryStore[key] = String(value);
                 }
@@ -639,11 +646,33 @@
                 try {
                     sessionStorage.removeItem(key);
                 } catch (e) {
+                    this.isFallback = true;
                     console.warn("safeSessionStorage: sessionStorage blocked, removing from memory.", e);
                     delete this.memoryStore[key];
                 }
             }
         };
+
+        // Check browser storage permissions status and render user warning if blocked
+        function checkStorageStatus() {
+            try {
+                localStorage.setItem("qopma_test_storage", "test");
+                localStorage.removeItem("qopma_test_storage");
+            } catch (e) {
+                safeStorage.isFallback = true;
+            }
+
+            if (safeStorage.isFallback) {
+                const warningDiv = document.createElement("div");
+                warningDiv.className = "bg-amber-50 border border-amber-300 text-amber-900 text-xs p-3 rounded mt-4 text-center font-semibold";
+                warningDiv.innerHTML = "⚠️ Atenção: O armazenamento local do seu navegador está bloqueado por diretivas de segurança de TI. Suas contas cadastradas e alterações de simulação serão perdidas caso você recarregue ou feche a página.";
+                
+                const loginForm = document.getElementById("form-login");
+                if (loginForm) {
+                    loginForm.appendChild(warningDiv);
+                }
+            }
+        }
 
         // AUTHENTICATION AND USERS MANAGEMENT
         function initUsers() {
@@ -1735,7 +1764,7 @@
                 captainsListEl.appendChild(div);
             });
 
-            // Render Projection Results
+            // Render Simulation Results
             const resultsEl = document.getElementById("strat-results-container");
             let resultsHtml = "";
 
@@ -2277,6 +2306,7 @@
         initUsers();
         initDB();
         checkSession();
+        checkStorageStatus();
     </script>
 </body>
 </html>
