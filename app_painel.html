@@ -299,6 +299,7 @@
                                     <th onclick="setSort('toll_time')" class="sortable-header px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">Pedágio<span id="sort-icon-toll_time"></span></th>
                                     <th class="px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider w-16">Apto RR</th>
                                     <th onclick="setSort('missing_time')" class="sortable-header px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider text-orange-600">Tempo Faltante<span id="sort-icon-missing_time"></span></th>
+                                    <th onclick="setSort('predicted_date')" class="sortable-header px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider text-indigo-600">Data Prevista<span id="sort-icon-predicted_date"></span></th>
                                 </tr>
                             </thead>
                             <tbody id="table-body" class="bg-white divide-y divide-gray-200">
@@ -1338,6 +1339,12 @@
             return [years, months, d];
         }
 
+        function addYmdToDate(baseDate, ymd) {
+            if (!ymd || !Array.isArray(ymd) || ymd.length < 3) return baseDate;
+            const [y, m, d] = ymd;
+            return new Date(baseDate.getFullYear() + y, baseDate.getMonth() + m, baseDate.getDate() + d);
+        }
+
         // Calculate Retirement details, including averbado external times in Toll math
         function calculateRetirement(entryDateStr, ffaaTime, civilTime, currentDateStr) {
             const entryDate = parseDate(entryDateStr);
@@ -1390,6 +1397,24 @@
             } else {
                 missingTime = subYmd(requiredTime, totalTime);
             }
+
+            let predictedDateStr = "";
+            let predictedDateSortVal = 0;
+            
+            if (rrStatus) {
+                const ffaaDays = ffaa[0] * 365 + ffaa[1] * 30 + ffaa[2];
+                const civilDays = civil[0] * 365 + civil[1] * 30 + civil[2];
+                const externalDays = ffaaDays + civilDays;
+                const requiredPmdfDays = (30 * 365 + tollDays) - externalDays;
+                const aptoDate = new Date(entryDate.getTime() + requiredPmdfDays * 24 * 60 * 60 * 1000);
+                
+                predictedDateStr = `Apto (${formatDate(aptoDate)})`;
+                predictedDateSortVal = aptoDate.getTime();
+            } else {
+                const predDate = addYmdToDate(currentDate, missingTime);
+                predictedDateStr = formatDate(predDate);
+                predictedDateSortVal = predDate.getTime();
+            }
             
             return {
                 pmdf_time: pmdfTime,
@@ -1400,7 +1425,9 @@
                 rr_status: rrStatus,
                 target_date: formatDate(targetDate),
                 missing_days_at_cutoff: Math.max(0, missingDays),
-                toll_days: tollDays
+                toll_days: tollDays,
+                predicted_date: predictedDateStr,
+                predicted_date_sort: predictedDateSortVal
             };
         }
 
@@ -1691,6 +1718,9 @@
                 } else if (sortCol === "missing_time") {
                     valA = a.rr_status ? 0 : ymdToTotalDays(a.missing_time);
                     valB = b.rr_status ? 0 : ymdToTotalDays(b.missing_time);
+                } else if (sortCol === "predicted_date") {
+                    valA = a.predicted_date_sort;
+                    valB = b.predicted_date_sort;
                 }
                 
                 if (valA < valB) return sortAsc ? -1 : 1;
@@ -1699,7 +1729,7 @@
             });
 
             // Update sorting headers icons
-            const cols = ["id", "rank", "name", "entry_date", "pmdf_time", "total_time", "toll_time", "missing_time"];
+            const cols = ["id", "rank", "name", "entry_date", "pmdf_time", "total_time", "toll_time", "missing_time", "predicted_date"];
             cols.forEach(c => {
                 const iconSpan = document.getElementById(`sort-icon-${c}`);
                 if (iconSpan) {
@@ -1774,6 +1804,7 @@
                         </span>
                     </td>
                     <td class="px-2 py-1.5 whitespace-nowrap text-[11px] font-semibold ${o.rr_status ? 'text-gray-400' : 'text-orange-600'}">${o.rr_status ? 'Apto' : formatYmd(o.missing_time)}</td>
+                    <td class="px-2 py-1.5 whitespace-nowrap text-[11px] font-semibold ${o.rr_status ? 'text-green-700 bg-green-50' : 'text-indigo-900'}">${o.predicted_date}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -2507,10 +2538,10 @@
         // CSV Export
         function exportCSV() {
             let csv = "﻿"; // UTF-8 BOM for Excel compatibility
-            csv += "N.º;Posto;Nome;Agregado;Entrada PMDF;Tempo PMDF;Tempo FFAA;Tempo Civil;Tempo Total;Pedagio;Apto RR;Tempo Faltante\n";
+            csv += "N.º;Posto;Nome;Agregado;Entrada PMDF;Tempo PMDF;Tempo FFAA;Tempo Civil;Tempo Total;Pedagio;Apto RR;Tempo Faltante;Data Prevista\n";
             
             officers.forEach(o => {
-                csv += `${o.id};${o.rank};${o.name};${o.agregado ? "SIM" : "NÃO"};${o.entry_date};${formatYmdVerbose(o.pmdf_time)};${formatYmdVerbose(o.ffaa_time)};${formatYmdVerbose(o.civil_time)};${formatYmdVerbose(o.total_time)};${formatYmdVerbose(o.toll_time)};${o.rr_status ? "SIM" : "NÃO"};${o.rr_status ? "Apto" : formatYmdVerbose(o.missing_time)}\n`;
+                csv += `${o.id};${o.rank};${o.name};${o.agregado ? "SIM" : "NÃO"};${o.entry_date};${formatYmdVerbose(o.pmdf_time)};${formatYmdVerbose(o.ffaa_time)};${formatYmdVerbose(o.civil_time)};${formatYmdVerbose(o.total_time)};${formatYmdVerbose(o.toll_time)};${o.rr_status ? "SIM" : "NÃO"};${o.rr_status ? "Apto" : formatYmdVerbose(o.missing_time)};${o.predicted_date}\n`;
             });
             
             const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
