@@ -289,7 +289,7 @@
                                 <tr>
                                     <th onclick="setSort('id')" class="sortable-header px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider w-12">N.º<span id="sort-icon-id"></span></th>
                                     <th onclick="setSort('rank')" class="sortable-header px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider w-24">Posto<span id="sort-icon-rank"></span></th>
-                                    <th onclick="setSort('name')" class="sortable-header px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">Nome<span id="sort-icon-name"></span></th>
+                                    <th onclick="setSort('name')" class="sortable-header px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider max-w-[180px]">Nome<span id="sort-icon-name"></span></th>
                                     <th class="px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider w-12">Agr.</th>
                                     <th onclick="setSort('entry_date')" class="sortable-header px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider w-24">Entrada PMDF<span id="sort-icon-entry_date"></span></th>
                                     <th onclick="setSort('pmdf_time')" class="sortable-header px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">Tempo PMDF<span id="sort-icon-pmdf_time"></span></th>
@@ -1790,7 +1790,7 @@
                 tr.innerHTML = `
                     <td class="px-2 py-1.5 whitespace-nowrap text-[11px] text-gray-500 font-bold">${o.id}</td>
                     <td class="px-2 py-1.5 whitespace-nowrap text-[11px]">${rankCell}</td>
-                    <td class="px-2 py-1.5 whitespace-nowrap text-[11px] font-medium ${isPromoted ? 'text-green-950 font-semibold' : 'text-gray-900'}">${o.name}</td>
+                    <td class="px-2 py-1.5 whitespace-nowrap text-[11px] font-medium max-w-[180px] truncate ${isPromoted ? 'text-green-950 font-semibold' : 'text-gray-900'}" title="${o.name}">${o.name}</td>
                     <td class="px-2 py-1.5 whitespace-nowrap text-[11px] text-gray-500">${o.agregado ? "SIM" : "NÃO"}</td>
                     <td class="px-2 py-1.5 whitespace-nowrap text-[11px] text-gray-500">${o.entry_date}</td>
                     <td class="px-2 py-1.5 whitespace-nowrap text-[11px] text-gray-600">${formatYmd(o.pmdf_time)}</td>
