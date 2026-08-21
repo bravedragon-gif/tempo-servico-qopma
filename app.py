@@ -66,7 +66,7 @@ st.sidebar.header("Filtros & Configurações")
 # Reference/Current Date
 ref_date_input = st.sidebar.date_input(
     "Data de Projeção / Cálculo",
-    value=datetime.date(2026, 8, 19),
+    value=datetime.date.today(),
     help="Altere esta data para projetar quem estará apto para a reserva no futuro!"
 )
 ref_date_str = ref_date_input.strftime("%d/%m/%Y")
@@ -115,9 +115,12 @@ if agregado_filter != "Todos":
 
 # 2. KPI Metrics Row
 st.markdown("### 📊 Indicadores Gerais")
-col1, col2, col3, col4 = st.columns(4)
+col1, col2, col3, col4, col5, col6, col7 = st.columns(7)
 
 total_count = len(officers)
+majores_count = sum(1 for o in officers if o['rank'] == 'MAJ')
+capitaes_count = sum(1 for o in officers if o['rank'] == 'CAP')
+agregados_count = sum(1 for o in officers if o['agregado'])
 apto_count = sum(1 for o in officers if o['rr_status'])
 nao_apto_count = total_count - apto_count
 pct_apto = (apto_count / total_count * 100) if total_count > 0 else 0
@@ -125,10 +128,16 @@ pct_apto = (apto_count / total_count * 100) if total_count > 0 else 0
 with col1:
     st.markdown(f"<div class='kpi-card'><div class='kpi-title'>Total de Oficiais</div><div class='kpi-val'>{total_count}</div></div>", unsafe_allow_html=True)
 with col2:
-    st.markdown(f"<div class='kpi-card'><div class='kpi-title'>Apto para Reserva (RR)</div><div class='kpi-val' style='color:green;'>{apto_count}</div></div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='kpi-card'><div class='kpi-title'>Total de Majores</div><div class='kpi-val' style='color:#0d9488;'>{majores_count}</div></div>", unsafe_allow_html=True)
 with col3:
-    st.markdown(f"<div class='kpi-card'><div class='kpi-title'>Não Apto Faltando Tempo</div><div class='kpi-val' style='color:orange;'>{nao_apto_count}</div></div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='kpi-card'><div class='kpi-title'>Total de Capitães</div><div class='kpi-val' style='color:#7c3aed;'>{capitaes_count}</div></div>", unsafe_allow_html=True)
 with col4:
+    st.markdown(f"<div class='kpi-card'><div class='kpi-title'>Total de Agregados</div><div class='kpi-val' style='color:#64748b;'>{agregados_count}</div></div>", unsafe_allow_html=True)
+with col5:
+    st.markdown(f"<div class='kpi-card'><div class='kpi-title'>Apto para Reserva (RR)</div><div class='kpi-val' style='color:green;'>{apto_count}</div></div>", unsafe_allow_html=True)
+with col6:
+    st.markdown(f"<div class='kpi-card'><div class='kpi-title'>Não Apto Faltando Tempo</div><div class='kpi-val' style='color:orange;'>{nao_apto_count}</div></div>", unsafe_allow_html=True)
+with col7:
     st.markdown(f"<div class='kpi-card'><div class='kpi-title'>Taxa de Elegibilidade</div><div class='kpi-val'>{pct_apto:.1f}%</div></div>", unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)

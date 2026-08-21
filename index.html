@@ -185,11 +185,11 @@
                 </div>
             </div>
             
-            <!-- Global Settings Panel in Sidebar (Locked to Today) -->
+            <!-- Global Settings Panel in Sidebar (Projection Date Selector) -->
             <div class="p-6 border-t border-slate-700 bg-slate-900 space-y-4">
                 <div class="text-xs text-slate-400 space-y-1">
-                    <span class="block font-semibold uppercase tracking-wider text-[10px] text-slate-500">Data de Referência</span>
-                    <span id="projection-date-display" class="block text-white font-bold text-sm bg-slate-800 px-3 py-2 rounded">Carregando...</span>
+                    <label for="global-projection-date" class="block font-semibold uppercase tracking-wider text-[10px] text-slate-500">Data de Projeção / Referência</label>
+                    <input type="date" id="global-projection-date" onchange="renderAll()" class="w-full text-slate-200 font-bold text-xs bg-slate-800 hover:bg-slate-700 px-3 py-2 rounded border border-slate-700 focus:outline-none focus:border-blue-500 cursor-pointer">
                 </div>
                 <button id="admin-reset-btn" onclick="restoreOriginalDB()" class="admin-only w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium px-4 py-2 rounded text-xs transition border border-slate-700">
                     🔄 Restaurar Banco Original
@@ -213,10 +213,22 @@
                 </div>
 
                 <!-- KPIs -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-6 mb-8">
                     <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 text-center">
                         <div class="text-slate-400 text-sm font-semibold uppercase tracking-wider">Total de Oficiais</div>
                         <div id="kpi-total" class="text-3xl font-bold text-blue-600 mt-1">0</div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 text-center">
+                        <div class="text-slate-400 text-sm font-semibold uppercase tracking-wider">Total de Majores</div>
+                        <div id="kpi-majores" class="text-3xl font-bold text-teal-600 mt-1">0</div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 text-center">
+                        <div class="text-slate-400 text-sm font-semibold uppercase tracking-wider">Total de Capitães</div>
+                        <div id="kpi-capitaes" class="text-3xl font-bold text-purple-600 mt-1">0</div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 text-center">
+                        <div class="text-slate-400 text-sm font-semibold uppercase tracking-wider">Total de Agregados</div>
+                        <div id="kpi-agregados" class="text-3xl font-bold text-slate-500 mt-1">0</div>
                     </div>
                     <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 text-center">
                         <div class="text-slate-400 text-sm font-semibold uppercase tracking-wider">Apto para Reserva (RR)</div>
@@ -433,6 +445,17 @@
                             </div>
                         </div>
 
+                        <!-- Majors aggregation list -->
+                        <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+                            <h3 class="text-base font-bold text-slate-800 border-b pb-2 mb-4 flex justify-between items-center">
+                                <span>👥 1.2. Simular Agregação de Majors</span>
+                                <span class="text-xs font-normal text-slate-500">Selecionar agrega o Major, abrindo +1 vaga de promoção.</span>
+                            </h3>
+                            <div class="max-h-60 overflow-y-auto space-y-2 pr-2" id="strat-majors-aggregation-list">
+                                <!-- Loaded by JS -->
+                            </div>
+                        </div>
+
                         <!-- Captains RR list -->
                         <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
                             <h3 class="text-base font-bold text-slate-800 border-b pb-2 mb-4 flex justify-between items-center">
@@ -605,6 +628,7 @@
 
         // Strategy simulation state
         let stratRetiredMajors = new Set();
+        let stratAggregatedMajors = new Set();
         let stratRetiredCaptains = new Set();
         let stratAggregatedCaptains = new Set();
 
@@ -1069,12 +1093,8 @@
                 return;
             }
             
-            // Get eligible queue for Antiguidade based on current date (Today)
-            const today = new Date();
-            const yyyy = today.getFullYear();
-            const mm = String(today.getMonth() + 1).padStart(2, '0');
-            const dd = String(today.getDate()).padStart(2, '0');
-            const currentDateStr = `${dd}/${mm}/${yyyy}`;
+            // Get eligible queue for Antiguidade based on projection date
+            const currentDateStr = getProjectionDateStr();
             
             // Recalculate inside execution context
             officers.forEach(off => {
@@ -1248,6 +1268,19 @@
         }
 
         // Date Mathematics
+        function getProjectionDateStr() {
+            const dateInputEl = document.getElementById("global-projection-date");
+            if (dateInputEl && dateInputEl.value) {
+                const parts = dateInputEl.value.split('-');
+                return `${parts[2]}/${parts[1]}/${parts[0]}`;
+            }
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            return `${dd}/${mm}/${yyyy}`;
+        }
+
         function parseDate(dStr) {
             if (!dStr || typeof dStr !== "string") return new Date();
             const parts = dStr.split("/");
@@ -1525,18 +1558,8 @@
         function renderAll() {
             if (!currentUser) return;
 
-            // Get chosen calculation date (Now locked to "Today")
-            const today = new Date();
-            const yyyy = today.getFullYear();
-            const mm = String(today.getMonth() + 1).padStart(2, '0');
-            const dd = String(today.getDate()).padStart(2, '0');
-            const currentDateStr = `${dd}/${mm}/${yyyy}`;
-            
-            // Set the read-only display inside the sidebar
-            const sidebarDateEl = document.getElementById("projection-date-display");
-            if (sidebarDateEl) {
-                sidebarDateEl.innerText = currentDateStr;
-            }
+            // Get chosen calculation date
+            const currentDateStr = getProjectionDateStr();
             
             // Update all calculations
             officers.forEach(off => {
@@ -1756,11 +1779,17 @@
 
             // Render KPIs
             const total = officers.length;
+            const majores = officers.filter(o => o.rank === "MAJ").length;
+            const capitaes = officers.filter(o => o.rank === "CAP").length;
+            const agregados = officers.filter(o => o.agregado).length;
             const apto = officers.filter(o => o.rr_status).length;
             const naoApto = total - apto;
             const taxa = total > 0 ? (apto / total * 100).toFixed(1) : 0;
             
             document.getElementById("kpi-total").innerText = total;
+            document.getElementById("kpi-majores").innerText = majores;
+            document.getElementById("kpi-capitaes").innerText = capitaes;
+            document.getElementById("kpi-agregados").innerText = agregados;
             document.getElementById("kpi-apto").innerText = apto;
             document.getElementById("kpi-nao-apto").innerText = naoApto;
             document.getElementById("kpi-taxa").innerText = `${taxa}%`;
@@ -1861,11 +1890,7 @@
         function renderStrategy() {
             if (!currentUser) return;
 
-            const today = new Date();
-            const yyyy = today.getFullYear();
-            const mm = String(today.getMonth() + 1).padStart(2, '0');
-            const dd = String(today.getDate()).padStart(2, '0');
-            const currentDateStr = `${dd}/${mm}/${yyyy}`;
+            const currentDateStr = getProjectionDateStr();
 
             // Make sure general calculations are current
             officers.forEach(off => {
@@ -1901,6 +1926,38 @@
                 });
             }
 
+            // 1.2. Render Majors Aggregation List
+            const majorsAggListEl = document.getElementById("strat-majors-aggregation-list");
+            majorsAggListEl.innerHTML = "";
+            let eligibleMajorsForAgg = officers.filter(o => o.rank === "MAJ" && !stratRetiredMajors.has(o.id));
+            
+            if (eligibleMajorsForAgg.length === 0) {
+                majorsAggListEl.innerHTML = "<p class='text-slate-500 text-xs italic p-3'>Nenhum Major ativo disponível para agregação no momento.</p>";
+            } else {
+                eligibleMajorsForAgg.forEach(m => {
+                    const isAggregatedSim = stratAggregatedMajors.has(m.id);
+                    const originallyAggregated = m.agregado;
+                    
+                    const checkboxHtml = originallyAggregated ? 
+                        `<input type="checkbox" checked disabled class="w-4 h-4 text-purple-600 border-gray-300 rounded cursor-not-allowed bg-purple-100 focus:outline-none">` : 
+                        `<input type="checkbox" id="strat-maj-agg-chk-${m.id}" ${isAggregatedSim ? 'checked' : ''} onchange="toggleStratMajorAggregation(${m.id})" class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">`;
+                        
+                    const div = document.createElement("div");
+                    div.className = `flex items-center justify-between p-2.5 rounded border text-xs ${isAggregatedSim || originallyAggregated ? 'bg-purple-50/40 border-purple-200' : 'bg-slate-50 border-slate-200'}`;
+                    div.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            ${checkboxHtml}
+                            <div>
+                                <span class="font-bold text-slate-800">${m.name}</span>
+                                <span class="text-slate-400 block">ID: ${m.id} • Entrada: ${m.entry_date} ${originallyAggregated ? '• Agregado originalmente' : ''}</span>
+                            </div>
+                        </div>
+                        <span class="text-[10px] font-bold text-purple-600 uppercase bg-purple-100 px-2 py-0.5 rounded">Agregado</span>
+                    `;
+                    majorsAggListEl.appendChild(div);
+                });
+            }
+
             // 1.5. Render Captains RR List (only Apto RR)
             const captainsRrListEl = document.getElementById("strat-captains-rr-list");
             captainsRrListEl.innerHTML = "";
@@ -1933,6 +1990,9 @@
                 if (o.rank === "MAJ" && stratRetiredMajors.has(o.id)) {
                     o.rank = "MAJ RR";
                 }
+                if (o.rank === "MAJ" && stratAggregatedMajors.has(o.id)) {
+                    o.agregado = true;
+                }
                 if (o.rank === "CAP" && stratRetiredCaptains.has(o.id)) {
                     o.rank = "CAP RR";
                 }
@@ -1964,7 +2024,7 @@
             });
 
             const baseVacancies = parseInt(document.getElementById("strat-base-vacancies").value) || 0;
-            const createdVacancies = stratRetiredMajors.size;
+            const createdVacancies = stratRetiredMajors.size + stratAggregatedMajors.size;
             const totalVacancies = baseVacancies + createdVacancies;
 
             document.getElementById("strat-kpi-created-vacancies").innerText = createdVacancies;
@@ -2077,6 +2137,19 @@
                         </div>
 
                         <div>
+                            <h4 class="font-bold text-slate-700 uppercase tracking-wider text-[10px] mb-2 border-b pb-1">Majors Agregados (${stratAggregatedMajors.size}):</h4>
+                            ${stratAggregatedMajors.size > 0 ? 
+                                `<ul class="list-disc pl-4 space-y-1 text-slate-600 font-medium">
+                                    ${Array.from(stratAggregatedMajors).map(id => {
+                                        const m = officers.find(o => o.id === id);
+                                        return `<li>${m.name} (ID: ${m.id})</li>`;
+                                    }).join("")}
+                                </ul>` : 
+                                `<p class="text-slate-400 italic">Nenhum Major agregado.</p>`
+                            }
+                        </div>
+
+                        <div>
                             <h4 class="font-bold text-slate-700 uppercase tracking-wider text-[10px] mb-2 border-b pb-1">Capitães na Reserva (${stratRetiredCaptains.size}):</h4>
                             ${stratRetiredCaptains.size > 0 ? 
                                 `<ul class="list-disc pl-4 space-y-1 text-slate-600 font-medium">
@@ -2129,6 +2202,17 @@
                 stratRetiredMajors.delete(id);
             } else {
                 stratRetiredMajors.add(id);
+                stratAggregatedMajors.delete(id);
+            }
+            renderStrategy();
+        }
+
+        function toggleStratMajorAggregation(id) {
+            if (stratAggregatedMajors.has(id)) {
+                stratAggregatedMajors.delete(id);
+            } else {
+                stratAggregatedMajors.add(id);
+                stratRetiredMajors.delete(id);
             }
             renderStrategy();
         }
@@ -2182,6 +2266,7 @@
         function applyMaxStrategy() {
             // Clear current simulation state
             stratRetiredMajors.clear();
+            stratAggregatedMajors.clear();
             stratRetiredCaptains.clear();
             stratAggregatedCaptains.clear();
 
@@ -2199,6 +2284,9 @@
                     if (o.rank === "MAJ" && stratRetiredMajors.has(o.id)) {
                         o.rank = "MAJ RR";
                     }
+                    if (o.rank === "MAJ" && stratAggregatedMajors.has(o.id)) {
+                        o.agregado = true;
+                    }
                     if (o.rank === "CAP" && stratRetiredCaptains.has(o.id)) {
                         o.rank = "CAP RR";
                     }
@@ -2208,11 +2296,7 @@
                 });
 
                 // Recalculate
-                const today = new Date();
-                const yyyy = today.getFullYear();
-                const mm = String(today.getMonth() + 1).padStart(2, '0');
-                const dd = String(today.getDate()).padStart(2, '0');
-                const currentDateStr = `${dd}/${mm}/${yyyy}`;
+                const currentDateStr = getProjectionDateStr();
                 
                 tempOfficers.forEach(off => {
                     const calcs = calculateRetirement(off.entry_date, off.ffaa_time, off.civil_time, currentDateStr);
@@ -2235,7 +2319,7 @@
 
                 let eligibleQueue = captains.filter(c => c.within_limit && c.intersticio_ok);
                 const baseVacancies = parseInt(document.getElementById("strat-base-vacancies").value) || 0;
-                const totalVacancies = baseVacancies + stratRetiredMajors.size;
+                const totalVacancies = baseVacancies + stratRetiredMajors.size + stratAggregatedMajors.size;
                 const v_ant = Math.ceil(totalVacancies / 2);
 
                 let seniorityVacsConsumed = 0;
@@ -2261,24 +2345,23 @@
             }
 
             const baseVacancies = parseInt(document.getElementById("strat-base-vacancies").value) || 0;
-            const totalVacancies = baseVacancies + stratRetiredMajors.size;
+            const totalVacancies = baseVacancies + stratRetiredMajors.size + stratAggregatedMajors.size;
             
-            if (totalVacancies === 0 && stratRetiredCaptains.size === 0) {
+            if (totalVacancies === 0 && stratRetiredCaptains.size === 0 && stratAggregatedMajors.size === 0 && stratAggregatedCaptains.size === 0) {
                 alert("Nenhuma alteração de vagas ou reserva simulada neste plano!");
                 return;
             }
 
             // Calculate final list of promoted captains under current strategy
-            const today = new Date();
-            const yyyy = today.getFullYear();
-            const mm = String(today.getMonth() + 1).padStart(2, '0');
-            const dd = String(today.getDate()).padStart(2, '0');
-            const currentDateStr = `${dd}/${mm}/${yyyy}`;
+            const currentDateStr = getProjectionDateStr();
 
             let tempOfficers = JSON.parse(JSON.stringify(officers));
             tempOfficers.forEach(o => {
                 if (o.rank === "MAJ" && stratRetiredMajors.has(o.id)) {
                     o.rank = "MAJ RR";
+                }
+                if (o.rank === "MAJ" && stratAggregatedMajors.has(o.id)) {
+                    o.agregado = true;
                 }
                 if (o.rank === "CAP" && stratRetiredCaptains.has(o.id)) {
                     o.rank = "CAP RR";
@@ -2321,19 +2404,22 @@
                 }
             }
 
-            if (promotedAntiguidade.length === 0 && stratRetiredMajors.size === 0 && stratRetiredCaptains.size === 0) {
+            if (promotedAntiguidade.length === 0 && stratRetiredMajors.size === 0 && stratAggregatedMajors.size === 0 && stratRetiredCaptains.size === 0 && stratAggregatedCaptains.size === 0) {
                 alert("Nenhuma alteração simulada para ser efetivada.");
                 return;
             }
 
-            // Convert captain IDs to names
+            // Convert captain/major IDs to names
             const retiredNames = Array.from(stratRetiredMajors).map(id => officers.find(o => o.id === id).name);
+            const aggregatedMajorsNames = Array.from(stratAggregatedMajors).map(id => officers.find(o => o.id === id).name);
             const promotedNames = promotedAntiguidade.map(id => officers.find(o => o.id === id).name);
             const aggregatedNames = Array.from(stratAggregatedCaptains).map(id => officers.find(o => o.id === id).name);
 
             const confirmMsg = `Confirma a efetivação definitiva deste Plano Estratégico no banco local?\n\n` +
                                `• ${stratRetiredMajors.size} Major(s) serão transferidos para a Reserva (MAJ RR):\n` +
                                `${retiredNames.map(n => `  - MAJ ${n}`).join("\n")}\n\n` +
+                               `• ${stratAggregatedMajors.size} Major(s) serão agregados:\n` +
+                               `${aggregatedMajorsNames.map(n => `  - MAJ ${n}`).join("\n")}\n\n` +
                                `• ${stratAggregatedCaptains.size} Capitão(ães) serão agregados:\n` +
                                `${aggregatedNames.map(n => `  - CAP ${n}`).join("\n")}\n\n` +
                                `• ${promotedAntiguidade.length} Capitão(ães) serão PROMOVIDOS a Major (MAJ):\n` +
@@ -2343,8 +2429,12 @@
             if (confirm(confirmMsg)) {
                 // Apply changes to the real database
                 officers.forEach(o => {
-                    if (o.rank === "MAJ" && stratRetiredMajors.has(o.id)) {
-                        o.rank = "MAJ RR";
+                    if (o.rank === "MAJ") {
+                        if (stratRetiredMajors.has(o.id)) {
+                            o.rank = "MAJ RR";
+                        } else if (stratAggregatedMajors.has(o.id)) {
+                            o.agregado = true;
+                        }
                     }
                     if (o.rank === "CAP") {
                         if (stratRetiredCaptains.has(o.id)) {
@@ -2365,6 +2455,7 @@
                 
                 // Clear strategy simulation variables
                 stratRetiredMajors.clear();
+                stratAggregatedMajors.clear();
                 stratRetiredCaptains.clear();
                 stratAggregatedCaptains.clear();
 
@@ -2419,11 +2510,7 @@
                 return;
             }
             
-            const today = new Date();
-            const yyyy = today.getFullYear();
-            const mm = String(today.getMonth() + 1).padStart(2, '0');
-            const dd = String(today.getDate()).padStart(2, '0');
-            const currentDateStr = `${dd}/${mm}/${yyyy}`;
+            const currentDateStr = getProjectionDateStr();
             
             const knownBugs = {
                 37: "No arquivo de planilha original, a soma de dias de PMDF + Civil deu 47 dias. O correto leva ao carry de 1 mês para a coluna de meses, totalizando 32a 0m 17d em vez de 31a 11m 17d.",
@@ -2642,6 +2729,15 @@
 
         // Run Init
         (async () => {
+            // Set default date input value to today's date
+            const dateInputEl = document.getElementById("global-projection-date");
+            if (dateInputEl && !dateInputEl.value) {
+                const today = new Date();
+                const yyyy = today.getFullYear();
+                const mm = String(today.getMonth() + 1).padStart(2, '0');
+                const dd = String(today.getDate()).padStart(2, '0');
+                dateInputEl.value = `${yyyy}-${mm}-${dd}`;
+            }
             await initUsers();
             await initDB();
             checkSession();
