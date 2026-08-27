@@ -1,15 +1,81 @@
--- 1. Criar tabela de usuários
-create table if not exists app_users (
-  username text primary key,
-  password text not null,
+-- 1. Criar tabela de usuários integrada ao auth.users do Supabase
+drop table if exists public.app_users cascade;
+
+create table public.app_users (
+  id uuid references auth.users on delete cascade primary key,
+  username text unique not null,
   name text not null,
   profile text not null default 'usuario'
 );
 
--- Habilitar RLS e criar políticas públicas para acesso anon
-alter table app_users enable row level security;
-drop policy if exists "Acesso Público Geral" on app_users;
-create policy "Acesso Público Geral" on app_users for all using (true) with check (true);
+-- Habilitar RLS na tabela pública de perfis
+alter table public.app_users enable row level security;
+
+-- Criar políticas de acesso
+drop policy if exists "Acesso Público Leitura" on public.app_users;
+create policy "Acesso Público Leitura" on public.app_users for select using (true);
+
+drop policy if exists "Admins podem atualizar todos, users atualizam a si mesmos" on public.app_users;
+create policy "Admins podem atualizar todos, users atualizam a si mesmos" on public.app_users
+  for update using (
+    (select profile from public.app_users where id = auth.uid()) = 'admin'
+    or id = auth.uid()
+  );
+
+drop policy if exists "Admins podem deletar todos, users deletam a si mesmos" on public.app_users;
+create policy "Admins podem deletar todos, users deletam a si mesmos" on public.app_users
+  for delete using (
+    (select profile from public.app_users where id = auth.uid()) = 'admin'
+    or id = auth.uid()
+  );
+
+-- Trigger para sincronizar criação de novos usuários no Supabase Auth com app_users
+create or replace function public.handle_new_user()
+returns trigger as $$
+declare
+  is_first_user boolean;
+  user_profile text;
+begin
+  -- Se for o primeiro usuário a se registrar no sistema, ele será Administrador!
+  select not exists (select 1 from public.app_users) into is_first_user;
+  
+  if is_first_user then
+    user_profile := 'admin';
+  else
+    user_profile := coalesce(new.raw_user_meta_data->>'profile', 'usuario');
+  end if;
+
+  insert into public.app_users (id, username, name, profile)
+  values (
+    new.id,
+    coalesce(new.raw_user_meta_data->>'username', split_part(new.email, '@', 1)),
+    coalesce(new.raw_user_meta_data->>'name', 'Usuário'),
+    user_profile
+  );
+  return new;
+end;
+$$ language plpgsql security definer;
+
+create or replace trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute procedure public.handle_new_user();
+
+-- Função RPC para Administradores poderem excluir contas do auth.users
+create or replace function public.delete_user_by_id(target_user_id uuid)
+returns void as $$
+declare
+  caller_role text;
+begin
+  -- Verifica o perfil de quem está executando a função
+  select profile into caller_role from public.app_users where id = auth.uid();
+  
+  if caller_role = 'admin' or not exists (select 1 from public.app_users) then
+    delete from auth.users where id = target_user_id;
+  else
+    raise exception 'Apenas administradores podem excluir usuários do sistema.';
+  end if;
+end;
+$$ language plpgsql security definer;
 
 -- 2. Criar tabela de oficiais
 create table if not exists officers (

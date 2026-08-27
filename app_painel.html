@@ -848,8 +848,35 @@
             }
         }
         
-        function checkSession() {
+        async function checkSession() {
             try {
+                if (useSupabase) {
+                    const { data: { session }, error } = await supabaseClient.auth.getSession();
+                    if (!error && session) {
+                        const user = session.user;
+                        // Obter perfil atualizado
+                        const { data: profileData } = await supabaseClient
+                            .from("app_users")
+                            .select("*")
+                            .eq("id", user.id)
+                            .single();
+                        
+                        if (profileData) {
+                            currentUser = profileData;
+                        } else {
+                            currentUser = {
+                                id: user.id,
+                                username: user.user_metadata.username || user.email.split('@')[0],
+                                name: user.user_metadata.name || "Usuário",
+                                profile: user.user_metadata.profile || "usuario"
+                            };
+                        }
+                        safeSessionStorage.setItem("qopma_current_session", JSON.stringify(currentUser));
+                        showDashboardApp();
+                        return;
+                    }
+                }
+                
                 const savedSession = safeSessionStorage.getItem("qopma_current_session");
                 if (savedSession) {
                     currentUser = JSON.parse(savedSession);
@@ -929,19 +956,59 @@
             document.getElementById(`form-${tab}`).classList.remove("hidden");
         }
 
-        function handleLoginSubmit(e) {
+        async function handleLoginSubmit(e) {
             e.preventDefault();
             const userVal = document.getElementById("login-user").value.trim().toLowerCase();
             const passVal = document.getElementById("login-pass").value;
             
-            const matchedUser = users.find(u => u.username === userVal && u.password === passVal);
-            if (matchedUser) {
-                currentUser = matchedUser;
-                safeSessionStorage.setItem("qopma_current_session", JSON.stringify(currentUser));
-                showDashboardApp();
-                e.target.reset();
+            if (useSupabase) {
+                try {
+                    const emailVal = userVal.includes("@") ? userVal : `${userVal}@qopma.local`;
+                    const { data, error } = await supabaseClient.auth.signInWithPassword({
+                        email: emailVal,
+                        password: passVal
+                    });
+                    
+                    if (error) {
+                        alert("Usuário ou senha inválidos! (" + error.message + ")");
+                        return;
+                    }
+                    
+                    const user = data.user;
+                    const { data: profileData, error: profileError } = await supabaseClient
+                        .from("app_users")
+                        .select("*")
+                        .eq("id", user.id)
+                        .single();
+                    
+                    if (profileError || !profileData) {
+                        console.warn("Erro ao obter perfil público, gerando perfil temporário:", profileError);
+                        currentUser = {
+                            id: user.id,
+                            username: user.user_metadata.username || userVal,
+                            name: user.user_metadata.name || "Usuário",
+                            profile: user.user_metadata.profile || "usuario"
+                        };
+                    } else {
+                        currentUser = profileData;
+                    }
+                    
+                    safeSessionStorage.setItem("qopma_current_session", JSON.stringify(currentUser));
+                    showDashboardApp();
+                    e.target.reset();
+                } catch (err) {
+                    alert("Erro de conexão ao realizar login: " + err.message);
+                }
             } else {
-                alert("Usuário ou senha inválidos!");
+                const matchedUser = users.find(u => u.username === userVal && u.password === passVal);
+                if (matchedUser) {
+                    currentUser = matchedUser;
+                    safeSessionStorage.setItem("qopma_current_session", JSON.stringify(currentUser));
+                    showDashboardApp();
+                    e.target.reset();
+                } else {
+                    alert("Usuário ou senha inválidos!");
+                }
             }
         }
 
@@ -961,34 +1028,62 @@
             const hasAdmin = users.some(u => u.profile === "admin");
             const profile = hasAdmin ? "usuario" : "admin";
             
-            const newUser = { username, password, name: fullname, profile: profile };
-            
             if (useSupabase) {
                 try {
-                    const { error } = await supabaseClient.from("app_users").insert([newUser]);
+                    const emailVal = username.includes("@") ? username : `${username}@qopma.local`;
+                    const { data, error } = await supabaseClient.auth.signUp({
+                        email: emailVal,
+                        password: password,
+                        options: {
+                            data: {
+                                username: username,
+                                name: fullname,
+                                profile: profile
+                            }
+                        }
+                    });
+                    
                     if (error) {
                         alert("Erro ao salvar usuário no banco de dados Supabase: " + error.message);
                         return;
                     }
+                    
+                    if (data && data.user && data.user.identities && data.user.identities.length === 0) {
+                        alert("Este usuário já está cadastrado!");
+                        return;
+                    }
+                    
+                    alert("Cadastro realizado com sucesso! Se a confirmação de e-mail estiver ativa, verifique sua caixa de entrada.");
                 } catch (err) {
-                    alert("Erro de conexão ao salvar usuário.");
+                    alert("Erro de conexão ao realizar cadastro: " + err.message);
                     return;
                 }
-            }
-            
-            users.push(newUser);
-            safeStorage.setItem("qopma_users_db", JSON.stringify(users));
-            
-            if (profile === "admin") {
-                alert("Cadastro realizado! Como você é o primeiro usuário do sistema, sua conta foi configurada como Administrador.");
             } else {
-                alert("Cadastro realizado com sucesso! Sua conta foi criada como Usuário (Consulta).");
+                const newUser = { username, password, name: fullname, profile: profile };
+                users.push(newUser);
+                safeStorage.setItem("qopma_users_db", JSON.stringify(users));
+                
+                if (profile === "admin") {
+                    alert("Cadastro realizado! Como você é o primeiro usuário do sistema, sua conta foi configurada como Administrador.");
+                } else {
+                    alert("Cadastro realizado com sucesso! Sua conta foi criada como Usuário (Consulta).");
+                }
             }
             switchLoginTab("login");
             e.target.reset();
+            
+            // Atualiza a lista de usuários local/global
+            await initUsers();
         }
         
-        function handleLogout() {
+        async function handleLogout() {
+            if (useSupabase) {
+                try {
+                    await supabaseClient.auth.signOut();
+                } catch (e) {
+                    console.error("Erro ao deslogar do Supabase:", e);
+                }
+            }
             safeSessionStorage.removeItem("qopma_current_session");
             currentUser = null;
             showLoginScreen();
@@ -1051,13 +1146,13 @@
             if (confirm(`Tem certeza absoluta que deseja excluir a conta de usuário "${username}"?`)) {
                 if (useSupabase) {
                     try {
-                        const { error } = await supabaseClient.from("app_users").delete().eq("username", username);
+                        const { error } = await supabaseClient.rpc("delete_user_by_id", { target_user_id: targetUser.id });
                         if (error) {
                             alert("Erro ao excluir conta do Supabase: " + error.message);
                             return;
                         }
                     } catch (e) {
-                        alert("Erro de conexão ao Supabase.");
+                        alert("Erro de conexão ao Supabase: " + e.message);
                         return;
                     }
                 }
@@ -2740,7 +2835,7 @@
             }
             await initUsers();
             await initDB();
-            checkSession();
+            await checkSession();
             checkStorageStatus();
         })();
     </script>
