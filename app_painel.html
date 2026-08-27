@@ -956,6 +956,14 @@
             document.getElementById(`form-${tab}`).classList.remove("hidden");
         }
 
+        function sanitizeUsernameForEmail(username) {
+            return username
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "") // Remove acentos
+                .replace(/\s+/g, "")            // Remove espacos
+                .replace(/[^a-z0-9._-]/g, "");    // Apenas caracteres validos
+        }
+
         async function handleLoginSubmit(e) {
             e.preventDefault();
             const userVal = document.getElementById("login-user").value.trim().toLowerCase();
@@ -963,7 +971,8 @@
             
             if (useSupabase) {
                 try {
-                    const emailVal = userVal.includes("@") ? userVal : `${userVal}@qopma.com`;
+                    const sanitizedUser = userVal.includes("@") ? userVal : sanitizeUsernameForEmail(userVal);
+                    const emailVal = userVal.includes("@") ? userVal : `${sanitizedUser}@qopma.com`;
                     const { data, error } = await supabaseClient.auth.signInWithPassword({
                         email: emailVal,
                         password: passVal
@@ -985,7 +994,7 @@
                         console.warn("Erro ao obter perfil público, gerando perfil temporário:", profileError);
                         currentUser = {
                             id: user.id,
-                            username: user.user_metadata.username || userVal,
+                            username: user.user_metadata.username || sanitizedUser,
                             name: user.user_metadata.name || "Usuário",
                             profile: user.user_metadata.profile || "usuario"
                         };
@@ -1016,8 +1025,10 @@
         async function handleRegisterSubmit(e) {
             e.preventDefault();
             const fullname = document.getElementById("reg-fullname").value.trim();
-            const username = document.getElementById("reg-user").value.trim().toLowerCase();
+            const usernameInput = document.getElementById("reg-user").value.trim().toLowerCase();
             const password = document.getElementById("reg-pass").value;
+            
+            const username = usernameInput.includes("@") ? usernameInput : sanitizeUsernameForEmail(usernameInput);
             
             if (users.some(u => u.username === username)) {
                 alert("Este nome de usuário já está sendo utilizado!");
