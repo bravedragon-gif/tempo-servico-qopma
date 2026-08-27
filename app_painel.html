@@ -428,7 +428,10 @@
                         <h3 class="text-lg font-bold flex items-center gap-2">💡 Assessor de Estratégias PMDF</h3>
                         <p class="text-sm text-indigo-200 mt-1" id="strat-recommendation-text">Carregando recomendações...</p>
                     </div>
-                    <button onclick="applyMaxStrategy()" class="bg-white hover:bg-slate-100 text-indigo-900 font-bold px-4 py-2.5 rounded shadow transition text-xs whitespace-nowrap">⚡ Aplicar Estratégia Máxima</button>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="applyMaxStrategy()" class="bg-white hover:bg-slate-100 text-indigo-900 font-bold px-4 py-2.5 rounded shadow transition text-xs whitespace-nowrap">⚡ Aplicar Estratégia Máxima</button>
+                        <button onclick="clearStrategy()" class="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2.5 rounded shadow transition text-xs whitespace-nowrap">🧹 Limpar Estratégia</button>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -481,9 +484,12 @@
 
                     <!-- Right: Simulation Results -->
                     <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 h-fit space-y-6">
-                        <div class="flex justify-between items-center border-b pb-2">
+                        <div class="flex justify-between items-center border-b pb-2 gap-2">
                             <h3 class="text-base font-bold text-slate-800">📋 Projeção do Plano Estratégico</h3>
-                            <button onclick="commitStrategicPlan()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded shadow transition text-xs">Efetivar Plano</button>
+                            <div class="flex gap-1.5 flex-wrap justify-end">
+                                <button onclick="clearStrategy()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-3 py-1.5 rounded shadow transition text-xs">Limpar</button>
+                                <button onclick="commitStrategicPlan()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded shadow transition text-xs">Efetivar Plano</button>
+                            </div>
                         </div>
                         <div id="strat-results-container" class="space-y-4 text-xs">
                             <!-- Loaded by JS -->
@@ -2340,6 +2346,14 @@
                 stratAggregatedCaptains.add(id);
                 stratRetiredCaptains.delete(id);
             }
+            renderStrategy();
+        }
+
+        function clearStrategy() {
+            stratRetiredMajors.clear();
+            stratAggregatedMajors.clear();
+            stratRetiredCaptains.clear();
+            stratAggregatedCaptains.clear();
             renderStrategy();
         }
 
