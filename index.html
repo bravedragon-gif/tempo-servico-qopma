@@ -963,7 +963,7 @@
             
             if (useSupabase) {
                 try {
-                    const emailVal = userVal.includes("@") ? userVal : `${userVal}@qopma.local`;
+                    const emailVal = userVal.includes("@") ? userVal : `${userVal}@qopma.com`;
                     const { data, error } = await supabaseClient.auth.signInWithPassword({
                         email: emailVal,
                         password: passVal
@@ -1030,7 +1030,7 @@
             
             if (useSupabase) {
                 try {
-                    const emailVal = username.includes("@") ? username : `${username}@qopma.local`;
+                    const emailVal = username.includes("@") ? username : `${username}@qopma.com`;
                     const { data, error } = await supabaseClient.auth.signUp({
                         email: emailVal,
                         password: password,
