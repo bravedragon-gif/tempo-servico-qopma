@@ -73,6 +73,8 @@ ref_date_str = ref_date_input.strftime("%d/%m/%Y")
 
 # Load data and apply calculations based on chosen reference date
 officers = load_officers()
+maj_idx = 0
+cap_idx = 0
 for off in officers:
     # Recalculate with chosen calculation date
     calcs = calculate_officer_retirement(
@@ -82,6 +84,16 @@ for off in officers:
         ref_date_str
     )
     off.update(calcs)
+    
+    # Assign rank-specific number starting from 1
+    if "MAJ" in off['rank']:
+        maj_idx += 1
+        off['rank_number'] = maj_idx
+    elif "CAP" in off['rank']:
+        cap_idx += 1
+        off['rank_number'] = cap_idx
+    else:
+        off['rank_number'] = off['id']
 
 # Search
 search_query = st.sidebar.text_input("Buscar por Nome", "").strip()
@@ -149,7 +161,7 @@ st.markdown(f"### 📋 Lista de Oficiais (Calculado para {ref_date_str})")
 rows = []
 for o in filtered_officers:
     rows.append({
-        'N.º': o['id'],
+        'N.º': o.get('rank_number', o['id']),
         'Posto': o['rank'],
         'Nome': o['name'],
         'Agregado': "SIM" if o['agregado'] else "NÃO",
@@ -236,13 +248,13 @@ with tab_detail:
                 
             # Check for known spreadsheet anomalies
             known_anomalies = {
-                37: "No arquivo original, a soma de dias de PMDF + Civil deu 47 dias. O correto leva ao carry de 1 mês para a coluna de meses, totalizando 32a 0m 17d em vez de 31a 11m 17d.",
-                41: "No arquivo original, o mês da coluna FFAA (1 mês) não foi somado na planilha original (exibindo 31a 5m em vez de 31a 6m).",
-                43: "No arquivo original, o mês da coluna Civil (1 mês) não foi somado na planilha original (exibindo 27a 10m em vez de 27a 11m).",
-                45: "No arquivo original, a soma de dias deu 33 dias. O correto leva ao carry de 1 mês, resultando em 28a 0m 3d em vez de 27a 11m 3d."
+                "JOSE WELLINGTON DE OLIVEIRA BARROS JR": "No arquivo original, a soma de dias de PMDF + Civil deu 47 dias. O correto leva ao carry de 1 mês para a coluna de meses, totalizando 32a 0m 17d em vez de 31a 11m 17d.",
+                "GLAUCO SOARES DE ALMEIDA": "No arquivo original, o mês da coluna FFAA (1 mês) não foi somado na planilha original (exibindo 31a 5m em vez de 31a 6m).",
+                "WELLINGTON LEITE DE SOUZA": "No arquivo original, o mês da coluna Civil (1 mês) não foi somado na planilha original (exibindo 27a 10m em vez de 27a 11m).",
+                "CLAUDIO JEAN DA SILVA PIRES": "No arquivo original, a soma de dias deu 33 dias. O correto leva ao carry de 1 mês, resultando em 28a 0m 3d em vez de 27a 11m 3d."
             }
-            if o['id'] in known_anomalies:
-                st.info(f"💡 **Nota de Consistência:** {known_anomalies[o['id']]}")
+            if o['name'] in known_anomalies:
+                st.info(f"💡 **Nota de Consistência:** {known_anomalies[o['name']]}")
     else:
         st.write("Nenhum policial carregado.")
 
@@ -368,6 +380,9 @@ with tab_edit_del:
                 if submit_del:
                     all_offs = load_officers()
                     all_offs = [item for item in all_offs if item['id'] != o['id']]
+                    # Re-number the remaining officers' IDs sequentially starting from 1
+                    for idx, item in enumerate(all_offs):
+                        item['id'] = idx + 1
                     save_officers(all_offs)
                     st.success("Registro excluído com sucesso! Recarregando...")
                     st.rerun()

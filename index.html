@@ -628,6 +628,22 @@
         let users = [];
         let currentUser = null;
         
+        function calculateRankNumbers() {
+            let majCount = 0;
+            let capCount = 0;
+            officers.forEach(o => {
+                if (o.rank && o.rank.includes("MAJ")) {
+                    majCount++;
+                    o.rank_number = majCount;
+                } else if (o.rank && o.rank.includes("CAP")) {
+                    capCount++;
+                    o.rank_number = capCount;
+                } else {
+                    o.rank_number = o.id;
+                }
+            });
+        }
+        
         let sortCol = "id";
         let sortAsc = true;
         let activePage = "dashboard";
@@ -1288,6 +1304,7 @@
                             ffaa_time: [o.ffaa_years, o.ffaa_months, o.ffaa_days],
                             civil_time: [o.civil_years, o.civil_months, o.civil_days]
                         }));
+                        calculateRankNumbers();
                         return;
                     }
                     console.error("Erro ao carregar oficiais do Supabase (caindo para local):", error);
@@ -1315,23 +1332,27 @@
                             patched = true;
                         }
                     });
+                    calculateRankNumbers();
                     if (patched) {
                         await saveToStorage();
                     }
                 } catch (e) {
                     console.error("Erro ao ler banco local. Restaurando originais...", e);
                     officers = JSON.parse(JSON.stringify(INITIAL_OFFICERS));
+                    calculateRankNumbers();
                     await saveToStorage();
                 }
             } else {
                 officers = JSON.parse(JSON.stringify(INITIAL_OFFICERS));
                 officers.forEach(o => o.promotion_date = "");
+                calculateRankNumbers();
                 await saveToStorage();
             }
         }
 
         // Save DB to localStorage / Supabase
         async function saveToStorage() {
+            calculateRankNumbers();
             if (useSupabase) {
                 try {
                     const mapped = officers.map(o => ({
@@ -1941,7 +1962,7 @@
                 }
 
                 tr.innerHTML = `
-                    <td class="px-2 py-1.5 whitespace-nowrap text-[11px] text-gray-500 font-bold">${o.id}</td>
+                    <td class="px-2 py-1.5 whitespace-nowrap text-[11px] text-gray-500 font-bold">${o.rank_number || o.id}</td>
                     <td class="px-2 py-1.5 whitespace-nowrap text-[11px]">${rankCell}</td>
                     <td class="px-2 py-1.5 whitespace-nowrap text-[11px] font-medium max-w-[180px] truncate ${isPromoted ? 'text-green-950 font-semibold' : 'text-gray-900'}" title="${o.name}">${o.name}</td>
                     <td class="px-2 py-1.5 whitespace-nowrap text-[11px] text-gray-500">${o.agregado ? "SIM" : "NÃO"}</td>
@@ -2633,17 +2654,17 @@
             const currentDateStr = getProjectionDateStr();
             
             const knownBugs = {
-                37: "No arquivo de planilha original, a soma de dias de PMDF + Civil deu 47 dias. O correto leva ao carry de 1 mês para a coluna de meses, totalizando 32a 0m 17d em vez de 31a 11m 17d.",
-                41: "No arquivo de planilha original, o mês da coluna FFAA (1 mês) não foi somado na planilha original (exibindo 31a 5m em vez de 31a 6m).",
-                43: "No arquivo de planilha original, o mês da coluna Civil (1 mês) não foi somado na planilha original (exibindo 27a 10m em vez de 27a 11m).",
-                45: "No arquivo de planilha original, a soma de dias deu 33 dias. O correto leva ao carry de 1 mês, resultando em 28a 0m 3d em vez de 27a 11m 3d."
+                "JOSE WELLINGTON DE OLIVEIRA BARROS JR": "No arquivo de planilha original, a soma de dias de PMDF + Civil deu 47 dias. O correto leva ao carry de 1 mês para a coluna de meses, totalizando 32a 0m 17d em vez de 31a 11m 17d.",
+                "GLAUCO SOARES DE ALMEIDA": "No arquivo de planilha original, o mês da coluna FFAA (1 mês) não foi somado na planilha original (exibindo 31a 5m em vez de 31a 6m).",
+                "WELLINGTON LEITE DE SOUZA": "No arquivo de planilha original, o mês da coluna Civil (1 mês) não foi somado na planilha original (exibindo 27a 10m em vez de 27a 11m).",
+                "CLAUDIO JEAN DA SILVA PIRES": "No arquivo de planilha original, a soma de dias deu 33 dias. O correto leva ao carry de 1 mês, resultando em 28a 0m 3d em vez de 27a 11m 3d."
             };
             
             let anomalyHtml = "";
-            if (knownBugs[o.id]) {
+            if (knownBugs[o.name]) {
                 anomalyHtml = `
                     <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded text-sm text-blue-700">
-                        💡 <strong>Nota de Consistência:</strong> ${knownBugs[o.id]}
+                        💡 <strong>Nota de Consistência:</strong> ${knownBugs[o.name]}
                     </div>
                 `;
             }
@@ -2802,7 +2823,9 @@
             if (confirm(`Tem certeza que deseja EXCLUIR o registro de ${o.rank} ${o.name}?`)) {
                 if (useSupabase) {
                     try {
-                        const { error } = await supabaseClient.from("officers").delete().eq("id", id);
+                        // Delete the highest ID currently in the database to prevent duplicate/leftover rows after renumbering
+                        const highestId = Math.max(...officers.map(item => item.id));
+                        const { error } = await supabaseClient.from("officers").delete().eq("id", highestId);
                         if (error) {
                             alert("Erro ao excluir oficial do Supabase: " + error.message);
                             return;
@@ -2813,6 +2836,10 @@
                     }
                 }
                 officers = officers.filter(item => item.id !== id);
+                // Renumber the remaining officers' IDs sequentially starting from 1
+                officers.forEach((item, index) => {
+                    item.id = index + 1;
+                });
                 await saveToStorage();
                 alert("Registro excluído com sucesso!");
                 switchPage('dashboard');
@@ -2825,7 +2852,7 @@
             csv += "N.º;Posto;Nome;Agregado;Entrada PMDF;Tempo PMDF;Tempo FFAA;Tempo Civil;Tempo Total;Pedagio;Apto RR;Tempo Faltante;Data Prevista\n";
             
             officers.forEach(o => {
-                csv += `${o.id};${o.rank};${o.name};${o.agregado ? "SIM" : "NÃO"};${o.entry_date};${formatYmdVerbose(o.pmdf_time)};${formatYmdVerbose(o.ffaa_time)};${formatYmdVerbose(o.civil_time)};${formatYmdVerbose(o.total_time)};${formatYmdVerbose(o.toll_time)};${o.rr_status ? "SIM" : "NÃO"};${o.rr_status ? "Apto" : formatYmdVerbose(o.missing_time)};${o.predicted_date}\n`;
+                csv += `${o.rank_number || o.id};${o.rank};${o.name};${o.agregado ? "SIM" : "NÃO"};${o.entry_date};${formatYmdVerbose(o.pmdf_time)};${formatYmdVerbose(o.ffaa_time)};${formatYmdVerbose(o.civil_time)};${formatYmdVerbose(o.total_time)};${formatYmdVerbose(o.toll_time)};${o.rr_status ? "SIM" : "NÃO"};${o.rr_status ? "Apto" : formatYmdVerbose(o.missing_time)};${o.predicted_date}\n`;
             });
             
             const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
