@@ -73,6 +73,7 @@ ref_date_str = ref_date_input.strftime("%d/%m/%Y")
 
 # Load data and apply calculations based on chosen reference date
 officers = load_officers()
+officers.sort(key=lambda x: x['id'])
 maj_idx = 0
 cap_idx = 0
 for off in officers:

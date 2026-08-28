@@ -629,6 +629,9 @@
         let currentUser = null;
         
         function calculateRankNumbers() {
+            // Sort officers by ID ascending first to ensure rank numbering follows seniority order
+            officers.sort((a, b) => a.id - b.id);
+            
             let majCount = 0;
             let capCount = 0;
             officers.forEach(o => {
