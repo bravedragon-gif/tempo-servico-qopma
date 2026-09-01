@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import datetime
-from data_loader import load_officers, save_officers, calculate_officer_retirement, add_ymd, sub_ymd
+from data_loader import load_officers, save_officers, calculate_officer_retirement, add_ymd, sub_ymd, calculate_major_vacancies
 import io
 
 # Set page config
@@ -126,8 +126,24 @@ if agregado_filter != "Todos":
     is_agr = agregado_filter == "SIM"
     filtered_officers = [o for o in filtered_officers if o['agregado'] == is_agr]
 
-# 2. KPI Metrics Row
-st.markdown("### 📊 Indicadores Gerais")
+# 2. Quadro de Fixação e Vagas de Major (20 Vagas - Agregados não contam vaga)
+vac_stats = calculate_major_vacancies(officers, total_quota=20)
+
+st.markdown("### 🎖️ Quadro de Vagas de Major (QOPMA)")
+vcol1, vcol2, vcol3, vcol4 = st.columns(4)
+with vcol1:
+    st.markdown(f"<div class='kpi-card' style='border-top: 4px solid #1f77b4;'><div class='kpi-title'>Quadro Previsto (Lei)</div><div class='kpi-val'>{vac_stats['total_quota']} vagas</div></div>", unsafe_allow_html=True)
+with vcol2:
+    st.markdown(f"<div class='kpi-card' style='border-top: 4px solid #eab308;'><div class='kpi-title'>Majores Ocupando Vaga (Ativos)</div><div class='kpi-val' style='color:#ca8a04;'>{vac_stats['occupied']}</div></div>", unsafe_allow_html=True)
+with vcol3:
+    st.markdown(f"<div class='kpi-card' style='border-top: 4px solid #8b5cf6;'><div class='kpi-title'>Majores Agregados (Não Ocupam Vaga)</div><div class='kpi-val' style='color:#7c3aed;'>{vac_stats['aggregated']}</div></div>", unsafe_allow_html=True)
+with vcol4:
+    st.markdown(f"<div class='kpi-card' style='border-top: 4px solid #10b981;'><div class='kpi-title'>Vagas Abertas / Disponíveis</div><div class='kpi-val' style='color:#059669;'>{vac_stats['available']} vagas</div></div>", unsafe_allow_html=True)
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+# 3. KPI Metrics Row
+st.markdown("### 📊 Indicadores Gerais de Tempo e Reserva")
 col1, col2, col3, col4, col5, col6, col7 = st.columns(7)
 
 total_count = len(officers)

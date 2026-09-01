@@ -180,3 +180,28 @@ def save_officers(officers_list):
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
     with open(DB_PATH, "w", encoding="utf-8") as f:
         json.dump(stripped_list, f, ensure_ascii=False, indent=2)
+
+def calculate_major_vacancies(officers_list, total_quota=20):
+    """
+    Calculates vacancy statistics for the Major rank in QOPMA.
+    - Total quota (Quadro Fixado): 20
+    - Occupied: rank == 'MAJ' and not agregado
+    - Aggregated (not occupying vacancy): rank == 'MAJ' and agregado
+    - Available: max(0, total_quota - occupied)
+    """
+    majors_active = [o for o in officers_list if o.get('rank') == 'MAJ' and not o.get('agregado', False)]
+    majors_aggregated = [o for o in officers_list if o.get('rank') == 'MAJ' and o.get('agregado', False)]
+    majors_rr = [o for o in officers_list if o.get('rank') == 'MAJ RR']
+    
+    occupied = len(majors_active)
+    available = max(0, total_quota - occupied)
+    
+    return {
+        'total_quota': total_quota,
+        'occupied': occupied,
+        'aggregated': len(majors_aggregated),
+        'majors_rr': len(majors_rr),
+        'total_majors_active_cadre': len(majors_active) + len(majors_aggregated),
+        'available': available
+    }
+

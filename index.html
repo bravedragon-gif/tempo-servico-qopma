@@ -212,6 +212,38 @@
                     </div>
                 </div>
 
+                <!-- Quadro de Vagas de Major (Fixação 20 Vagas) -->
+                <div class="mb-8">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                            <span>🎖️ Quadro de Vagas de Major (QOPMA)</span>
+                            <span class="text-[11px] font-normal text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">20 vagas previstas • agregados não contam vaga</span>
+                        </h3>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="bg-gradient-to-br from-blue-50 to-white p-5 rounded-lg shadow-sm border border-blue-200">
+                            <div class="text-blue-600 text-xs font-bold uppercase tracking-wider">Quadro Previsto (Lei)</div>
+                            <div id="kpi-maj-previsto" class="text-2xl font-black text-blue-900 mt-1">20 <span class="text-xs font-normal text-slate-500">vagas</span></div>
+                            <div class="text-[11px] text-slate-500 mt-1">Fixação de Efetivo do Quadro</div>
+                        </div>
+                        <div class="bg-gradient-to-br from-amber-50 to-white p-5 rounded-lg shadow-sm border border-amber-200">
+                            <div class="text-amber-700 text-xs font-bold uppercase tracking-wider">Ocupando Vaga (Ativos)</div>
+                            <div id="kpi-maj-ocupadas" class="text-2xl font-black text-amber-900 mt-1">0 <span class="text-xs font-normal text-slate-500">oficiais</span></div>
+                            <div class="text-[11px] text-slate-500 mt-1">Majores em atividade efetiva</div>
+                        </div>
+                        <div class="bg-gradient-to-br from-purple-50 to-white p-5 rounded-lg shadow-sm border border-purple-200">
+                            <div class="text-purple-700 text-xs font-bold uppercase tracking-wider">Agregados (Não Ocupam Vaga)</div>
+                            <div id="kpi-maj-agregados" class="text-2xl font-black text-purple-900 mt-1">0 <span class="text-xs font-normal text-slate-500">oficiais</span></div>
+                            <div class="text-[11px] text-slate-500 mt-1">Fora do cômputo de vagas (Art. 77/78)</div>
+                        </div>
+                        <div class="bg-gradient-to-br from-emerald-50 to-white p-5 rounded-lg shadow-sm border border-emerald-300">
+                            <div class="text-emerald-700 text-xs font-bold uppercase tracking-wider">Vagas Abertas / Disponíveis</div>
+                            <div id="kpi-maj-disponiveis" class="text-2xl font-black text-emerald-800 mt-1">0 <span class="text-xs font-normal text-slate-500">vagas</span></div>
+                            <div class="text-[11px] text-emerald-700 font-semibold mt-1">Disponíveis para promoção imediata</div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- KPIs -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-6 mb-8">
                     <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 text-center">
@@ -330,12 +362,44 @@
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <!-- Left: Inputs -->
                     <div class="bg-white p-8 rounded-lg shadow-sm border border-slate-200 space-y-6">
-                        <div>
-                            <label class="block text-sm font-semibold text-slate-700 mb-2">Vagas de Major Disponíveis</label>
-                            <div class="flex gap-2">
-                                <input type="number" id="promo-vacancies" value="4" min="0" class="w-full border rounded px-3 py-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none text-lg">
-                                <button onclick="saveVacancyConfig()" id="save-vacancy-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded shadow transition text-sm">Salvar</button>
+                        <!-- Automatic Vacancy Computation Banner -->
+                        <div class="bg-gradient-to-br from-slate-50 to-blue-50/40 p-4 rounded-lg border border-slate-200 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">⚖️ Cálculo Automático de Vagas</span>
+                                <span class="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded">Tempo Real</span>
                             </div>
+                            <div class="grid grid-cols-2 gap-2 text-xs">
+                                <div class="bg-white p-2.5 rounded border border-slate-100 shadow-2xs">
+                                    <span class="text-slate-400 block text-[10px] uppercase font-bold">Previsto (Lei)</span>
+                                    <span class="font-bold text-blue-900 text-base" id="promo-calc-previsto">20</span> <span class="text-[10px] text-slate-500">vagas</span>
+                                </div>
+                                <div class="bg-white p-2.5 rounded border border-slate-100 shadow-2xs">
+                                    <span class="text-slate-400 block text-[10px] uppercase font-bold">Ocupadas (Ativos)</span>
+                                    <span class="font-bold text-amber-700 text-base" id="promo-calc-ocupadas">0</span> <span class="text-[10px] text-slate-500">oficiais</span>
+                                </div>
+                                <div class="bg-white p-2.5 rounded border border-slate-100 shadow-2xs">
+                                    <span class="text-slate-400 block text-[10px] uppercase font-bold">Agregados</span>
+                                    <span class="font-bold text-purple-700 text-base" id="promo-calc-agregados">0</span> <span class="text-[9px] text-purple-600 font-semibold block">(não contam)</span>
+                                </div>
+                                <div class="bg-emerald-50 p-2.5 rounded border border-emerald-200 shadow-2xs">
+                                    <span class="text-emerald-700 block text-[10px] uppercase font-bold">Vagas Abertas</span>
+                                    <span class="font-bold text-emerald-800 text-base" id="promo-calc-abertas">0</span> <span class="text-[10px] text-emerald-700 font-bold">vagas</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between items-center mb-1.5 flex-wrap gap-1">
+                                <label class="block text-sm font-semibold text-slate-700">Vagas de Major para Simulação</label>
+                                <button type="button" onclick="resetToAutoVacancies()" class="text-[11px] text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1 cursor-pointer">
+                                    🔄 Sincronizar Automático
+                                </button>
+                            </div>
+                            <div class="flex gap-2">
+                                <input type="number" id="promo-vacancies" value="9" min="0" class="w-full border rounded px-3 py-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none text-lg font-bold text-slate-900">
+                                <button onclick="saveVacancyConfig()" id="save-vacancy-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded shadow transition text-sm whitespace-nowrap">Salvar</button>
+                            </div>
+                            <span class="text-[11px] text-slate-400 mt-1 block">O sistema calcula as vagas abertas automaticamente (20 - ativos), mas permite ajustar livremente para testes.</span>
                         </div>
                         
                         <div class="border-t pt-4 space-y-3 text-sm text-slate-600">
@@ -627,6 +691,26 @@
         let officers = [];
         let users = [];
         let currentUser = null;
+        
+        // Lei de Fixação de Efetivo: 20 Vagas de Major no QOPMA (Agregados não contam vaga)
+        const TOTAL_MAJOR_QUOTA = 20;
+
+        function getMajorVacancyStats(customOfficers = null, totalQuota = TOTAL_MAJOR_QUOTA) {
+            const list = customOfficers || officers;
+            const activeMajors = list.filter(o => o.rank === "MAJ" && !o.agregado);
+            const aggregatedMajors = list.filter(o => o.rank === "MAJ" && o.agregado);
+            const retiredMajors = list.filter(o => o.rank === "MAJ RR");
+            const occupied = activeMajors.length;
+            const available = Math.max(0, totalQuota - occupied);
+            return {
+                totalQuota,
+                occupied,
+                aggregated: aggregatedMajors.length,
+                retired: retiredMajors.length,
+                totalInCadre: activeMajors.length + aggregatedMajors.length,
+                available
+            };
+        }
         
         function calculateRankNumbers() {
             // Sort officers by ID ascending first to ensure rank numbering follows seniority order
@@ -958,14 +1042,15 @@
                 if (saveBtn) saveBtn.classList.add("hidden");
             }
             
-            // Save global promotion vacancies default if not saved
-            const savedVacs = safeStorage.getItem("qopma_global_vacancies");
-            if (savedVacs) {
-                document.getElementById("promo-vacancies").value = savedVacs;
-                document.getElementById("strat-base-vacancies").value = savedVacs;
-            } else {
-                safeStorage.setItem("qopma_global_vacancies", "4");
-            }
+            // Initialize promotion vacancies with automatic calculation from cadre state (or manual override if set)
+            const autoVacs = getMajorVacancyStats().available;
+            const savedVacs = safeStorage.getItem("qopma_manual_vacancies");
+            const finalVacs = savedVacs !== null ? savedVacs : autoVacs;
+            
+            const promoVacEl = document.getElementById("promo-vacancies");
+            const stratVacEl = document.getElementById("strat-base-vacancies");
+            if (promoVacEl) promoVacEl.value = finalVacs;
+            if (stratVacEl) stratVacEl.value = finalVacs;
             
             switchPage('dashboard');
         }
@@ -1206,9 +1291,23 @@
                 return;
             }
             const vacanciesInput = parseInt(document.getElementById("promo-vacancies").value) || 0;
-            safeStorage.setItem("qopma_global_vacancies", String(vacanciesInput));
+            safeStorage.setItem("qopma_manual_vacancies", String(vacanciesInput));
             document.getElementById("strat-base-vacancies").value = vacanciesInput;
-            alert(`Configuração salva: O padrão de vagas para promoção agora é ${vacanciesInput}.`);
+            alert(`Configuração salva: O padrão de vagas para simulação agora é ${vacanciesInput}.`);
+            renderAll();
+        }
+
+        function resetToAutoVacancies() {
+            safeStorage.removeItem("qopma_manual_vacancies");
+            const autoVacs = getMajorVacancyStats().available;
+            const promoVacEl = document.getElementById("promo-vacancies");
+            const stratVacEl = document.getElementById("strat-base-vacancies");
+            if (promoVacEl) promoVacEl.value = autoVacs;
+            if (stratVacEl) {
+                stratVacEl.value = autoVacs;
+                delete stratVacEl.dataset.manual;
+            }
+            renderAll();
         }
 
         // Commit Promotions permanently to the local database
@@ -1282,9 +1381,8 @@
                 
                 await saveToStorage();
                 
-                // Reset simulated vacancies count to 0
-                document.getElementById("promo-vacancies").value = 0;
-                safeStorage.setItem("qopma_global_vacancies", "0");
+                // Remove manual override so vacancies are calculated fresh from new active officers count
+                safeStorage.removeItem("qopma_manual_vacancies");
                 
                 alert("Promoções efetivadas com sucesso! Os oficiais agora constam no posto de Major (MAJ).");
                 switchPage('dashboard');
@@ -1739,7 +1837,27 @@
             if (capActiveEl) capActiveEl.innerText = `Capitães Efetivos (Ativos): ${N}`;
             if (capLimitEl) capLimitEl.innerText = `Limite Faixa de Acesso (Art. 4º): ${L}`;
             
-            // 2. Calculate promotion vacancies split
+            // 2. Calculate major vacancies stats from current cadre state
+            const vacStats = getMajorVacancyStats();
+            
+            // Sync breakdown on page-promo
+            const pPrevistoEl = document.getElementById("promo-calc-previsto");
+            const pOcupadasEl = document.getElementById("promo-calc-ocupadas");
+            const pAgregadosEl = document.getElementById("promo-calc-agregados");
+            const pAbertasEl = document.getElementById("promo-calc-abertas");
+            if (pPrevistoEl) pPrevistoEl.innerText = vacStats.totalQuota;
+            if (pOcupadasEl) pOcupadasEl.innerText = vacStats.occupied;
+            if (pAgregadosEl) pAgregadosEl.innerText = vacStats.aggregated;
+            if (pAbertasEl) pAbertasEl.innerText = vacStats.available;
+            
+            // If promo input is in auto mode or empty, keep it updated
+            const promoVacInput = document.getElementById("promo-vacancies");
+            const manualSaved = safeStorage.getItem("qopma_manual_vacancies");
+            if (promoVacInput && manualSaved === null && !promoVacInput.matches(':focus')) {
+                promoVacInput.value = vacStats.available;
+            }
+            
+            // Calculate promotion vacancies split
             const vacanciesInput = parseInt(document.getElementById("promo-vacancies").value) || 0;
             
             const v_ant = Math.ceil(vacanciesInput / 2);
@@ -1922,6 +2040,16 @@
             const naoApto = total - apto;
             const taxa = total > 0 ? (apto / total * 100).toFixed(1) : 0;
             
+            // Render Major Vacancy KPIs
+            const kpiMajPrevisto = document.getElementById("kpi-maj-previsto");
+            const kpiMajOcupadas = document.getElementById("kpi-maj-ocupadas");
+            const kpiMajAgregados = document.getElementById("kpi-maj-agregados");
+            const kpiMajDisponiveis = document.getElementById("kpi-maj-disponiveis");
+            if (kpiMajPrevisto) kpiMajPrevisto.innerHTML = `${vacStats.totalQuota} <span class="text-xs font-normal text-slate-500">vagas</span>`;
+            if (kpiMajOcupadas) kpiMajOcupadas.innerHTML = `${vacStats.occupied} <span class="text-xs font-normal text-slate-500">oficiais</span>`;
+            if (kpiMajAgregados) kpiMajAgregados.innerHTML = `${vacStats.aggregated} <span class="text-xs font-normal text-slate-500">oficiais</span>`;
+            if (kpiMajDisponiveis) kpiMajDisponiveis.innerHTML = `${vacStats.available} <span class="text-xs font-normal text-slate-500">vagas</span>`;
+
             document.getElementById("kpi-total").innerText = total;
             document.getElementById("kpi-majores").innerText = majores;
             document.getElementById("kpi-capitaes").innerText = capitaes;
@@ -2158,6 +2286,14 @@
             captains.forEach(cap => {
                 cap.within_limit = cap.id <= maxActiveId;
             });
+
+            // Calculate base vacancies from current cadre (20 - active non-aggregated majors)
+            const realVacStats = getMajorVacancyStats();
+            const stratVacInput = document.getElementById("strat-base-vacancies");
+            const manualSaved = safeStorage.getItem("qopma_manual_vacancies");
+            if (stratVacInput && manualSaved === null && !stratVacInput.matches(':focus')) {
+                stratVacInput.value = realVacStats.available;
+            }
 
             const baseVacancies = parseInt(document.getElementById("strat-base-vacancies").value) || 0;
             const createdVacancies = stratRetiredMajors.size + stratAggregatedMajors.size;
