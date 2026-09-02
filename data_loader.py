@@ -1,6 +1,6 @@
 import json
 import os
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 import math
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "database", "officers.json")
@@ -77,6 +77,12 @@ def sub_ymd(t1, t2):
     y_diff = y1 - y2
     return [y_diff, m_diff, d_diff]
 
+def ymd_to_days(ymd):
+    """Converts a (years, months, days) duration into days using 365 days/year and 30 days/month."""
+    if not ymd or len(ymd) < 3:
+        return 0
+    return ymd[0] * 365 + ymd[1] * 30 + ymd[2]
+
 def days_to_ymd(days):
     """Converts a number of days to YMD using administrative conversion (365 days/year, 30 days/month)"""
     if days <= 0:
@@ -87,20 +93,37 @@ def days_to_ymd(days):
     d = rem % 30
     return [years, months, d]
 
-def calculate_officer_retirement(entry_date_str, ffaa_time, civil_time, current_date_str="19/08/2026"):
-    """Calculates PMDF service, total service, toll, required service, remaining time and RR status."""
+def calculate_officer_retirement(entry_date_str, ffaa_time, civil_time, current_date_str="02/09/2026"):
+    """
+    Calculates PMDF service, total service, toll, required service, remaining time and RR status
+    following Methodology 2 (Official SIGRH / PMDF standard):
+    - All service time is calculated in elapsed days.
+    - External time (FFAA + Civil) is converted to days (365 days/year, 30 days/month).
+    - Days are converted to (Years, Months, Days) using:
+        years = days // 365
+        months = (days % 365) // 30
+        days = (days % 365) % 30
+    - Toll (17%): floor(missing_days_at_cutoff * 0.17).
+    - Required: 30 * 365 + toll_days.
+    - Remaining: required_days - total_days.
+    """
     # Parse dates
     entry_date = datetime.strptime(entry_date_str, '%d/%m/%Y').date()
     current_date = datetime.strptime(current_date_str, '%d/%m/%Y').date()
     
-    # 1. PMDF Service
-    pmdf_time = date_diff_calendar(entry_date, current_date)
+    # 1. PMDF Service in days
+    pmdf_days = max(0, (current_date - entry_date).days)
+    pmdf_time = days_to_ymd(pmdf_days)
     
-    # 2. Total Service = PMDF + FFAA + Civil
-    total_time = add_ymd(pmdf_time, ffaa_time)
-    total_time = add_ymd(total_time, civil_time)
+    # 2. External Service & Total Service
+    ffaa_days = ymd_to_days(ffaa_time)
+    civil_days = ymd_to_days(civil_time)
+    external_days = ffaa_days + civil_days
     
-    # 3. Toll (Pedágio)
+    total_days = pmdf_days + external_days
+    total_time = days_to_ymd(total_days)
+    
+    # 3. Toll (Pedágio) - Cutoff 31/12/2019
     cutoff_date = date(2019, 12, 31)
     
     # Target: Entry Date + 30 calendar years
@@ -110,25 +133,35 @@ def calculate_officer_retirement(entry_date_str, ffaa_time, civil_time, current_
         # Handle leap year Feb 29 anniversary
         target_date = date(entry_date.year + 30, 2, 28)
         
-    missing_days = (target_date - cutoff_date).days
-    if missing_days <= 0:
+    missing_days_at_cutoff = max(0, (target_date - cutoff_date).days - external_days)
+    if missing_days_at_cutoff <= 0:
         toll_days = 0
     else:
-        # Rule determined: round(missing_days * 0.17)
-        toll_days = int(round(missing_days * 0.17))
+        # Official SIGRH rule: floor(missing_days * 0.17)
+        toll_days = math.floor(missing_days_at_cutoff * 0.17)
         
     toll_time = days_to_ymd(toll_days)
     
-    # 4. Required Service = 30 Years + Toll
-    required_time = add_ymd([30, 0, 0], toll_time)
+    # 4. Required Service = 30 Years (10.950 days) + Toll
+    required_days = 30 * 365 + toll_days
+    required_time = days_to_ymd(required_days)
     
     # 5. Remaining Time & RR Status
-    if list(total_time) >= list(required_time):
+    if total_days >= required_days:
         rr_status = True
+        missing_days = 0
         missing_time = [0, 0, 0]
+        req_pmdf_days = max(0, required_days - external_days)
+        apto_date = entry_date + timedelta(days=req_pmdf_days)
+        predicted_date = f"Apto ({apto_date.strftime('%d/%m/%Y')})"
+        predicted_date_sort = int(datetime.combine(apto_date, datetime.min.time()).timestamp() * 1000)
     else:
         rr_status = False
-        missing_time = sub_ymd(required_time, total_time)
+        missing_days = required_days - total_days
+        missing_time = days_to_ymd(missing_days)
+        pred_date = current_date + timedelta(days=missing_days)
+        predicted_date = pred_date.strftime('%d/%m/%Y')
+        predicted_date_sort = int(datetime.combine(pred_date, datetime.min.time()).timestamp() * 1000)
         
     return {
         'pmdf_time': pmdf_time,
@@ -138,8 +171,14 @@ def calculate_officer_retirement(entry_date_str, ffaa_time, civil_time, current_
         'missing_time': missing_time,
         'rr_status': rr_status,
         'target_date': target_date.strftime('%d/%m/%Y'),
-        'missing_days_at_cutoff': max(0, missing_days),
-        'toll_days': toll_days
+        'missing_days_at_cutoff': missing_days_at_cutoff,
+        'toll_days': toll_days,
+        'pmdf_days': pmdf_days,
+        'total_days': total_days,
+        'required_days': required_days,
+        'missing_days': missing_days,
+        'predicted_date': predicted_date,
+        'predicted_date_sort': predicted_date_sort
     }
 
 def load_officers():
@@ -149,13 +188,14 @@ def load_officers():
     with open(DB_PATH, "r", encoding="utf-8") as f:
         data = json.load(f)
     
+    today_str = date.today().strftime('%d/%m/%Y')
     for officer in data:
         # Re-calculate calculated fields based on current date
         calcs = calculate_officer_retirement(
             officer['entry_date'],
             officer['ffaa_time'],
             officer['civil_time'],
-            officer.get('current_date', '19/08/2026')
+            officer.get('current_date') or today_str
         )
         officer.update(calcs)
         
@@ -163,6 +203,7 @@ def load_officers():
 
 def save_officers(officers_list):
     """Saves officers list to database/officers.json after stripping calculated fields."""
+    today_str = date.today().strftime('%d/%m/%Y')
     stripped_list = []
     for off in officers_list:
         stripped = {
@@ -171,7 +212,7 @@ def save_officers(officers_list):
             'name': off['name'],
             'agregado': off['agregado'],
             'entry_date': off['entry_date'],
-            'current_date': off.get('current_date', '19/08/2026'),
+            'current_date': off.get('current_date') or today_str,
             'ffaa_time': off['ffaa_time'],
             'civil_time': off['civil_time']
         }

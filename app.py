@@ -237,31 +237,31 @@ with tab_detail:
             
             col_d1, col_d2 = st.columns(2)
             with col_d1:
-                st.markdown("**1. Composição do Tempo de Serviço**")
-                st.write(f"- **Tempo PMDF (cálculo de calendário):** {format_ymd(o['pmdf_time'])} (de {o['entry_date']} até {ref_date_str})")
+                st.markdown("**1. Composição do Tempo de Serviço (Padrão SIGRH/PMDF)**")
+                st.write(f"- **Tempo PMDF (dias corridos convertidos 365/30):** {format_ymd(o['pmdf_time'])} ({o.get('pmdf_days', 0)} dias de {o['entry_date']} até {ref_date_str})")
                 st.write(f"- **Tempo de Forças Armadas (FFAA):** {format_ymd(o['ffaa_time'])}")
                 st.write(f"- **Tempo de Serviço Civil:** {format_ymd(o['civil_time'])}")
-                st.markdown(f"**Tempo de Serviço Total (soma administrativa):** `{format_ymd(o['total_time'])}`")
+                st.markdown(f"**Tempo de Serviço Total:** `{format_ymd(o['total_time'])}` ({o.get('total_days', 0)} dias)")
                 
             with col_d2:
-                st.markdown("**2. Cálculo do Pedágio (Transição 17%)**")
+                st.markdown("**2. Cálculo do Pedágio (Transição 17% - Dec.-Lei 667/69)**")
                 st.write(f"- **Data de Corte da Reforma:** `31/12/2019`")
-                st.write(f"- **Data Limite para 30 anos (aniversário):** `{o['target_date']}`")
+                st.write(f"- **Data Limite para 30 anos (Meta):** `{o['target_date']}`")
                 st.write(f"- **Dias Faltantes em 31/12/2019:** {o['missing_days_at_cutoff']} dias")
-                st.write(f"- **Pedágio Calculado (17%):** {o['toll_days']} dias")
+                st.write(f"- **Pedágio Calculado (17% truncado):** {o['toll_days']} dias")
                 st.markdown(f"**Tempo de Pedágio Convertido:** `{format_ymd(o['toll_time'])}`")
             
             st.markdown("---")
             st.markdown("**3. Requisito e Status da Reserva**")
             
             req_time_str = format_ymd(o['required_time'])
-            st.write(f"- **Tempo Total Requerido para Reserva (30 anos + Pedágio):** `{req_time_str}`")
-            st.write(f"- **Tempo de Serviço Atual Acumulado:** `{format_ymd(o['total_time'])}`")
+            st.write(f"- **Tempo Total Requerido para Reserva (30 anos + Pedágio):** `{req_time_str}` ({o.get('required_days', 0)} dias)")
+            st.write(f"- **Tempo de Serviço Atual Acumulado:** `{format_ymd(o['total_time'])}` ({o.get('total_days', 0)} dias)")
             
             if o['rr_status']:
-                st.success(f"✔️ **APTO PARA A RESERVA REMUNERADA:** O oficial completou o requisito total de tempo!")
+                st.success(f"✔️ **APTO PARA A RESERVA REMUNERADA:** O oficial completou o requisito total de tempo! ({o.get('predicted_date')})")
             else:
-                st.warning(f"⏳ **NÃO APTO:** Faltam `{format_ymd(o['missing_time'])}` de tempo total de serviço.")
+                st.warning(f"⏳ **NÃO APTO:** Faltam `{format_ymd(o['missing_time'])}` ({o.get('missing_days', 0)} dias) para a reserva. Previsão de Aptidão: **{o.get('predicted_date')}**")
                 
             # Check for known spreadsheet anomalies
             known_anomalies = {
