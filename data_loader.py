@@ -5,83 +5,30 @@ import math
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "database", "officers.json")
 
-def date_diff_calendar(start_d, end_d):
-    """Calculates the exact calendar difference between two dates as (years, months, days)"""
-    if start_d > end_d:
-        return (0, 0, 0)
-    
-    years = end_d.year - start_d.year
-    months = end_d.month - start_d.month
-    days = end_d.day - start_d.day
-    
-    if days < 0:
-        # Borrow days from the previous month
-        # Find the number of days in the previous month of end_d
-        prev_month = end_d.month - 1 if end_d.month > 1 else 12
-        prev_year = end_d.year if end_d.month > 1 else end_d.year - 1
-        
-        # In administrative calendar diff, it's common to borrow the actual number of days in the previous month
-        # Let's determine the last day of the previous month:
-        if prev_month in [1, 3, 5, 7, 8, 10, 12]:
-            days_in_prev = 31
-        elif prev_month in [4, 6, 9, 11]:
-            days_in_prev = 30
-        else:
-            # February
-            is_leap = (prev_year % 4 == 0 and prev_year % 100 != 0) or (prev_year % 400 == 0)
-            days_in_prev = 29 if is_leap else 28
-            
-        days += days_in_prev
-        months -= 1
-        
-    if months < 0:
-        months += 12
-        years -= 1
-        
-    return (years, months, days)
-
-def add_ymd(t1, t2):
-    """Adds two YMD durations using administrative math (30 days = 1 month, 12 months = 1 year)"""
-    y1, m1, d1 = t1
-    y2, m2, d2 = t2
-    
-    d_total = d1 + d2
-    d_rem = d_total % 30
-    d_carry = d_total // 30
-    
-    m_total = m1 + m2 + d_carry
-    m_rem = m_total % 12
-    m_carry = m_total // 12
-    
-    y_total = y1 + y2 + m_carry
-    return [y_total, m_rem, d_rem]
-
-def sub_ymd(t1, t2):
-    """Subtracts t2 from t1 using administrative math (borrowing 30 days/month, 12 months/year). Returns (0, 0, 0) if t1 <= t2."""
-    if list(t1) <= list(t2):
-        return [0, 0, 0]
-        
-    y1, m1, d1 = t1
-    y2, m2, d2 = t2
-    
-    if d1 < d2:
-        d1 += 30
-        m1 -= 1
-    d_diff = d1 - d2
-    
-    if m1 < m2:
-        m1 += 12
-        y1 -= 1
-    m_diff = m1 - m2
-    
-    y_diff = y1 - y2
-    return [y_diff, m_diff, d_diff]
-
 def ymd_to_days(ymd):
     """Converts a (years, months, days) duration into days using 365 days/year and 30 days/month."""
     if not ymd or len(ymd) < 3:
         return 0
     return ymd[0] * 365 + ymd[1] * 30 + ymd[2]
+
+def date_diff_calendar(start_d, end_d):
+    """Calculates the difference between two dates as (years, months, days) following Methodology 2 (365/30 days)."""
+    if start_d > end_d:
+        return [0, 0, 0]
+    days = (end_d - start_d).days
+    return days_to_ymd(days)
+
+def add_ymd(t1, t2):
+    """Adds two YMD durations using Methodology 2 (converting to total days, then 365/30 conversion)"""
+    d1 = ymd_to_days(t1)
+    d2 = ymd_to_days(t2)
+    return days_to_ymd(d1 + d2)
+
+def sub_ymd(t1, t2):
+    """Subtracts t2 from t1 using Methodology 2 (converting to total days, then 365/30 conversion)"""
+    d1 = ymd_to_days(t1)
+    d2 = ymd_to_days(t2)
+    return days_to_ymd(max(0, d1 - d2))
 
 def days_to_ymd(days):
     """Converts a number of days to YMD using administrative conversion (365 days/year, 30 days/month)"""

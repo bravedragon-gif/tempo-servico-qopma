@@ -1542,71 +1542,27 @@
                 return [0, 0, 0];
             }
             if (start > end) return [0, 0, 0];
-            let years = end.getFullYear() - start.getFullYear();
-            let months = end.getMonth() - start.getMonth();
-            let days = end.getDate() - start.getDate();
-            
-            if (days < 0) {
-                let prevMonth = new Date(end.getFullYear(), end.getMonth(), 0);
-                let daysInPrev = prevMonth.getDate();
-                days += daysInPrev;
-                months -= 1;
-            }
-            if (months < 0) {
-                months += 12;
-                years -= 1;
-            }
-            return [years, months, days];
+            const days = Math.max(0, Math.round((end - start) / (1000 * 60 * 60 * 24)));
+            return daysToYmd(days);
         }
 
         function addYmd(t1, t2) {
-            const v1 = (t1 && Array.isArray(t1) && t1.length >= 3) ? t1 : [0, 0, 0];
-            const v2 = (t2 && Array.isArray(t2) && t2.length >= 3) ? t2 : [0, 0, 0];
-            
-            let d = v1[2] + v2[2];
-            let d_rem = d % 30;
-            let d_carry = Math.floor(d / 30);
-            
-            let m = v1[1] + v2[1] + d_carry;
-            let m_rem = m % 12;
-            let m_carry = Math.floor(m / 12);
-            
-            let y = v1[0] + v2[0] + m_carry;
-            return [y, m_rem, d_rem];
+            const d1 = ymdToTotalDays(t1);
+            const d2 = ymdToTotalDays(t2);
+            return daysToYmd(d1 + d2);
         }
 
         function subYmd(t1, t2) {
-            const v1 = (t1 && Array.isArray(t1) && t1.length >= 3) ? t1 : [0, 0, 0];
-            const v2 = (t2 && Array.isArray(t2) && t2.length >= 3) ? t2 : [0, 0, 0];
-            
-            if (compareYmd(v1, v2) <= 0) return [0, 0, 0];
-            
-            let y1 = v1[0], m1 = v1[1], d1 = v1[2];
-            let y2 = v2[0], m2 = v2[1], d2 = v2[2];
-            
-            if (d1 < d2) {
-                d1 += 30;
-                m1 -= 1;
-            }
-            let dDiff = d1 - d2;
-            
-            if (m1 < m2) {
-                m1 += 12;
-                y1 -= 1;
-            }
-            let mDiff = m1 - m2;
-            let yDiff = y1 - y2;
-            return [yDiff, mDiff, dDiff];
+            const d1 = ymdToTotalDays(t1);
+            const d2 = ymdToTotalDays(t2);
+            return daysToYmd(Math.max(0, d1 - d2));
         }
 
         // Compare two YMD array values
         function compareYmd(t1, t2) {
-            const v1 = (t1 && Array.isArray(t1) && t1.length >= 3) ? t1 : [0, 0, 0];
-            const v2 = (t2 && Array.isArray(t2) && t2.length >= 3) ? t2 : [0, 0, 0];
-            
-            if (v1[0] !== v2[0]) return v1[0] - v2[0];
-            if (v1[1] !== v2[1]) return v1[1] - v2[1];
-            return v1[2] - v2[2];
+            const d1 = ymdToTotalDays(t1);
+            const d2 = ymdToTotalDays(t2);
+            return d1 - d2;
         }
 
         function daysToYmd(days) {
@@ -1620,8 +1576,8 @@
 
         function addYmdToDate(baseDate, ymd) {
             if (!ymd || !Array.isArray(ymd) || ymd.length < 3) return baseDate;
-            const [y, m, d] = ymd;
-            return new Date(baseDate.getFullYear() + y, baseDate.getMonth() + m, baseDate.getDate() + d);
+            const days = ymdToTotalDays(ymd);
+            return new Date(baseDate.getTime() + days * 24 * 60 * 60 * 1000);
         }
 
         // Calculate Retirement details using Methodology 2 (Official SIGRH / PMDF standard: 365/30 days)
@@ -1753,11 +1709,11 @@
             
             if (rank === "CAP") {
                 if (months < 24) {
-                    return { ok: false, reason: `Possui apenas ${months} meses no posto de CAP (Exigido: 24 meses / Art. 8º)` };
+                    return { ok: false, reason: `Possui apenas ${months} meses (${formatYmd(diff)}) no posto de CAP (Exigido: 24 meses / Art. 8º)` };
                 }
             } else if (rank === "MAJ") {
                 if (months < 18) {
-                    return { ok: false, reason: `Possui apenas ${months} meses no posto de MAJ (Exigido: 18 meses / Art. 8º)` };
+                    return { ok: false, reason: `Possui apenas ${months} meses (${formatYmd(diff)}) no posto de MAJ (Exigido: 18 meses / Art. 8º)` };
                 }
             }
             return { ok: true, reason: "" };
@@ -2949,8 +2905,8 @@
                 agregado,
                 entry_date,
                 promotion_date,
-                ffaa_time: [ffaa_y, ffaa_m, ffaa_d],
-                civil_time: [civil_y, civil_m, civil_d]
+                ffaa_time: daysToYmd(ffaa_y * 365 + ffaa_m * 30 + ffaa_d),
+                civil_time: daysToYmd(civil_y * 365 + civil_m * 30 + civil_d)
             };
             
             await saveToStorage();

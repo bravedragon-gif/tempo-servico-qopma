@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import datetime
-from data_loader import load_officers, save_officers, calculate_officer_retirement, add_ymd, sub_ymd, calculate_major_vacancies
+from data_loader import load_officers, save_officers, calculate_officer_retirement, add_ymd, sub_ymd, days_to_ymd, ymd_to_days, calculate_major_vacancies
 import io
 
 # Set page config
@@ -189,7 +189,8 @@ for o in filtered_officers:
         'Tempo Total': format_ymd(o['total_time']),
         'Tempo Pedágio': format_ymd(o['toll_time']),
         'Apto RR?': "SIM" if o['rr_status'] else "NÃO",
-        'Tempo Faltante': format_ymd(o['missing_time'])
+        'Tempo Faltante': format_ymd(o['missing_time']),
+        'Data Prevista': o.get('predicted_date', '')
     })
 
 if rows:
@@ -314,8 +315,8 @@ with tab_add:
                     'agregado': new_agregado,
                     'entry_date': new_entry.strftime("%d/%m/%Y"),
                     'current_date': ref_date_str,
-                    'ffaa_time': [int(ffaa_y), int(ffaa_m), int(ffaa_d)],
-                    'civil_time': [int(civil_y), int(civil_m), int(civil_d)]
+                    'ffaa_time': days_to_ymd(ymd_to_days([int(ffaa_y), int(ffaa_m), int(ffaa_d)])),
+                    'civil_time': days_to_ymd(ymd_to_days([int(civil_y), int(civil_m), int(civil_d)]))
                 }
                 
                 # Check for duplicate ID
@@ -386,8 +387,8 @@ with tab_edit_del:
                                     'agregado': edit_agregado,
                                     'entry_date': edit_entry.strftime("%d/%m/%Y"),
                                     'current_date': ref_date_str,
-                                    'ffaa_time': [int(eff_y), int(eff_m), int(eff_d)],
-                                    'civil_time': [int(ecv_y), int(ecv_m), int(ecv_d)]
+                                    'ffaa_time': days_to_ymd(ymd_to_days([int(eff_y), int(eff_m), int(eff_d)])),
+                                    'civil_time': days_to_ymd(ymd_to_days([int(ecv_y), int(ecv_m), int(ecv_d)]))
                                 }
                                 break
                         save_officers(all_offs)
