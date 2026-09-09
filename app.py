@@ -87,12 +87,14 @@ for off in officers:
     off.update(calcs)
     
     # Assign rank-specific number starting from 1
-    if "MAJ" in off['rank']:
+    if off['rank'] == "MAJ":
         maj_idx += 1
         off['rank_number'] = maj_idx
-    elif "CAP" in off['rank']:
+    elif off['rank'] == "CAP":
         cap_idx += 1
         off['rank_number'] = cap_idx
+    elif "RR" in off.get('rank', ''):
+        off['rank_number'] = "RR"
     else:
         off['rank_number'] = off['id']
 
@@ -130,14 +132,16 @@ if agregado_filter != "Todos":
 vac_stats = calculate_major_vacancies(officers, total_quota=20)
 
 st.markdown("### 🎖️ Quadro de Vagas de Major (QOPMA)")
-vcol1, vcol2, vcol3, vcol4 = st.columns(4)
+vcol1, vcol2, vcol3, vcol4, vcol5 = st.columns(5)
 with vcol1:
     st.markdown(f"<div class='kpi-card' style='border-top: 4px solid #1f77b4;'><div class='kpi-title'>Quadro Previsto (Lei)</div><div class='kpi-val'>{vac_stats['total_quota']} vagas</div></div>", unsafe_allow_html=True)
 with vcol2:
-    st.markdown(f"<div class='kpi-card' style='border-top: 4px solid #eab308;'><div class='kpi-title'>Majores Ocupando Vaga (Ativos)</div><div class='kpi-val' style='color:#ca8a04;'>{vac_stats['occupied']}</div></div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='kpi-card' style='border-top: 4px solid #eab308;'><div class='kpi-title'>Majores Ativos na Vaga</div><div class='kpi-val' style='color:#ca8a04;'>{vac_stats['occupied']}</div></div>", unsafe_allow_html=True)
 with vcol3:
-    st.markdown(f"<div class='kpi-card' style='border-top: 4px solid #8b5cf6;'><div class='kpi-title'>Majores Agregados (Não Ocupam Vaga)</div><div class='kpi-val' style='color:#7c3aed;'>{vac_stats['aggregated']}</div></div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='kpi-card' style='border-top: 4px solid #8b5cf6;'><div class='kpi-title'>Majores Agregados</div><div class='kpi-val' style='color:#7c3aed;'>{vac_stats['aggregated']}</div></div>", unsafe_allow_html=True)
 with vcol4:
+    st.markdown(f"<div class='kpi-card' style='border-top: 4px solid #0284c7;'><div class='kpi-title'>Majores na Reserva (RR)</div><div class='kpi-val' style='color:#0284c7;'>{vac_stats['majors_rr']}</div></div>", unsafe_allow_html=True)
+with vcol5:
     st.markdown(f"<div class='kpi-card' style='border-top: 4px solid #10b981;'><div class='kpi-title'>Vagas Abertas / Disponíveis</div><div class='kpi-val' style='color:#059669;'>{vac_stats['available']} vagas</div></div>", unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
@@ -283,7 +287,7 @@ with tab_add:
         col_f1, col_f2 = st.columns(2)
         with col_f1:
             new_id = st.number_input("N.º (Identificador)", min_value=1, value=len(officers)+1)
-            new_rank = st.selectbox("Posto", ["MAJ", "CAP"])
+            new_rank = st.selectbox("Posto", ["MAJ", "CAP", "MAJ RR", "CAP RR"])
             new_name = st.text_input("Nome Completo")
             new_agregado = st.checkbox("Agregado (SIM)")
             new_entry = st.date_input("Data de Entrada na PMDF", value=datetime.date(1999, 10, 1))
@@ -349,7 +353,9 @@ with tab_edit_del:
             with st.form("edit_officer_form"):
                 col_e1, col_e2 = st.columns(2)
                 with col_e1:
-                    edit_rank = st.selectbox("Alterar Posto", ["MAJ", "CAP"], index=0 if o['rank']=="MAJ" else 1)
+                    rank_options = ["MAJ", "CAP", "MAJ RR", "CAP RR"]
+                    default_idx = rank_options.index(o['rank']) if o['rank'] in rank_options else 0
+                    edit_rank = st.selectbox("Alterar Posto", rank_options, index=default_idx)
                     edit_name = st.text_input("Alterar Nome", value=o['name'])
                     edit_agregado = st.checkbox("Agregado (SIM)", value=o['agregado'])
                     edit_entry = st.date_input("Alterar Data de Entrada", value=entry_parsed)

@@ -288,8 +288,10 @@
                             <label class="block text-sm font-medium text-slate-700 mb-1">Posto</label>
                             <select id="filter-rank" class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                                 <option value="Todos">Todos</option>
-                                <option value="MAJ">MAJ</option>
-                                <option value="CAP">CAP</option>
+                                <option value="MAJ">MAJ (Ativo)</option>
+                                <option value="CAP">CAP (Ativo)</option>
+                                <option value="MAJ RR">MAJ RR (Reserva)</option>
+                                <option value="CAP RR">CAP RR (Reserva)</option>
                             </select>
                         </div>
                         <div>
@@ -467,7 +469,7 @@
                 </div>
                 
                 <!-- Action / Strategy Header Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
                     <div class="bg-white p-5 rounded-lg shadow-sm border border-slate-200 text-center">
                         <div class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Vagas Base (Major)</div>
                         <input type="number" id="strat-base-vacancies" value="4" min="0" oninput="renderStrategy()" class="w-20 text-center border-b border-gray-300 font-bold text-xl mt-1 text-slate-900 focus:outline-none focus:border-blue-500 bg-transparent">
@@ -483,6 +485,10 @@
                     <div class="bg-white p-5 rounded-lg shadow-sm border border-slate-200 text-center">
                         <div class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Capitães Promovidos</div>
                         <div id="strat-kpi-promoted" class="text-2xl font-bold text-emerald-600 mt-1">0</div>
+                    </div>
+                    <div class="bg-white p-5 rounded-lg shadow-sm border border-amber-200 bg-gradient-to-br from-white to-amber-50/40 text-center">
+                        <div class="text-amber-800 text-xs font-bold uppercase tracking-wider">Decreto Base (MAJ RR)</div>
+                        <div id="strat-kpi-decreto-base" class="text-2xl font-bold text-amber-600 mt-1">0</div>
                     </div>
                 </div>
 
@@ -523,13 +529,21 @@
                             </div>
                         </div>
 
-                        <!-- Captains RR list -->
+                        <!-- Captains RR list: Estratégia Decreto Base -->
                         <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
-                            <h3 class="text-base font-bold text-slate-800 border-b pb-2 mb-4 flex justify-between items-center">
-                                <span>🚪 2. Simular Reserva Remunerada de Capitães (Apto RR: SIM)</span>
-                                <span class="text-xs font-normal text-slate-500">Selecionar transfere o Capitão para a reserva (CAP RR), retirando-o da fila de promoção.</span>
-                            </h3>
-                            <div class="max-h-60 overflow-y-auto space-y-2 pr-2" id="strat-captains-rr-list">
+                            <div class="border-b pb-3 mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                                <div>
+                                    <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                                        <span>🎖️ 2. Capitães Aptos à Reserva — Estratégia Decreto Base (CAP ➡️ MAJ Agregado ➡️ MAJ RR)</span>
+                                    </h3>
+                                    <span class="text-xs text-slate-500">Conforme o Decreto nº 6.791/82 (Arts. 53/54) e Lei 12.086/09 (Art. 23): O Capitão que possui tempo é agregado, promovido a Major por Antiguidade SEM consumir vaga do quadro e transferido para a Reserva como MAJOR (MAJ RR).</span>
+                                </div>
+                                <div class="flex gap-2 shrink-0">
+                                    <button type="button" onclick="selectAllCaptainsDecretoBase()" class="text-[11px] bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold px-2.5 py-1 rounded border border-emerald-200 transition cursor-pointer">⚡ Selecionar Todos</button>
+                                    <button type="button" onclick="deselectAllCaptainsDecretoBase()" class="text-[11px] bg-slate-50 hover:bg-slate-100 text-slate-600 font-medium px-2 py-1 rounded border border-slate-200 transition cursor-pointer">Desmarcar</button>
+                                </div>
+                            </div>
+                            <div class="max-h-64 overflow-y-auto space-y-2 pr-2" id="strat-captains-rr-list">
                                 <!-- Loaded by JS -->
                             </div>
                         </div>
@@ -719,10 +733,10 @@
             let majCount = 0;
             let capCount = 0;
             officers.forEach(o => {
-                if (o.rank && o.rank.includes("MAJ")) {
+                if (o.rank === "MAJ") {
                     majCount++;
                     o.rank_number = majCount;
-                } else if (o.rank && o.rank.includes("CAP")) {
+                } else if (o.rank === "CAP") {
                     capCount++;
                     o.rank_number = capCount;
                 } else {
@@ -740,6 +754,7 @@
         let stratAggregatedMajors = new Set();
         let stratRetiredCaptains = new Set();
         let stratAggregatedCaptains = new Set();
+        let stratCaptainsDecretoBase = new Set();
 
         const cookieStorage = {
             getItem(key) {
@@ -1853,10 +1868,12 @@
                 
                 promotedIds.add(cap.id);
                 if (cap.agregado) {
-                    promotedSeniority.push(`${cap.name} (Agregado - não consome vaga)`);
+                    const rrBadge = cap.rr_status ? ` <span class="bg-amber-100 text-amber-800 px-1.5 py-0.2 rounded font-bold text-[9px] ml-1">🎖️ Apto RR (Estratégia Decreto Base)</span>` : "";
+                    promotedSeniority.push(`${cap.name} (Agregado - não consome vaga)${rrBadge}`);
                 } else {
                     seniorityVacsConsumed++;
-                    promotedSeniority.push(`${cap.name} (Consome vaga ${seniorityVacsConsumed}/${v_ant})`);
+                    const rrBadge = cap.rr_status ? ` <span class="bg-amber-100 text-amber-800 px-1.5 py-0.2 rounded font-bold text-[9px] ml-1">🎖️ Apto RR (Elegível p/ Decreto Base)</span>` : "";
+                    promotedSeniority.push(`${cap.name} (Consome vaga ${seniorityVacsConsumed}/${v_ant})${rrBadge}`);
                 }
             }
             
@@ -2052,7 +2069,9 @@
                 } else if (o.rank === "MAJ") {
                     rankCell = `<span class="text-slate-700">MAJ</span>`;
                 } else if (o.rank === "MAJ RR") {
-                    rankCell = `<span class="text-blue-600 font-semibold">MAJ (RR)</span>`;
+                    rankCell = `<span class="text-indigo-800 bg-indigo-50 border border-indigo-200 px-1.5 py-0.5 rounded font-bold whitespace-nowrap">MAJ RR</span>`;
+                } else if (o.rank === "CAP RR") {
+                    rankCell = `<span class="text-slate-700 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded font-bold whitespace-nowrap">CAP RR</span>`;
                 }
 
                 tr.innerHTML = `
@@ -2185,7 +2204,7 @@
                 });
             }
 
-            // 1.5. Render Captains RR List (only Apto RR)
+            // 1.5. Render Captains RR List (Estratégia Decreto Base)
             const captainsRrListEl = document.getElementById("strat-captains-rr-list");
             captainsRrListEl.innerHTML = "";
             let eligibleCaptainsForRR = officers.filter(o => o.rank === "CAP" && o.rr_status);
@@ -2194,18 +2213,24 @@
                 captainsRrListEl.innerHTML = "<p class='text-slate-500 text-xs italic p-3'>Nenhum Capitão ativo está elegível para a reserva (Apto RR: SIM) no momento.</p>";
             } else {
                 eligibleCaptainsForRR.forEach(c => {
-                    const isChecked = stratRetiredCaptains.has(c.id);
+                    const isChecked = stratCaptainsDecretoBase.has(c.id);
                     const div = document.createElement("div");
-                    div.className = `flex items-center justify-between p-3 rounded border text-xs ${isChecked ? 'bg-blue-50 border-blue-200' : 'bg-slate-50 border-slate-200'}`;
+                    div.className = `flex items-center justify-between p-3 rounded border text-xs transition ${isChecked ? 'bg-emerald-50 border-emerald-300 shadow-2xs' : 'bg-slate-50 border-slate-200'}`;
                     div.innerHTML = `
                         <div class="flex items-center gap-3">
-                            <input type="checkbox" id="strat-cap-rr-chk-${c.id}" ${isChecked ? 'checked' : ''} onchange="toggleStratCaptainRR(${c.id})" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                            <input type="checkbox" id="strat-cap-decreto-chk-${c.id}" ${isChecked ? 'checked' : ''} onchange="toggleStratCaptainDecretoBase(${c.id})" class="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500 cursor-pointer">
                             <div>
-                                <span class="font-bold text-slate-800">${c.name}</span>
-                                <span class="text-slate-400 block">ID: ${c.id} • Entrada: ${c.entry_date} • Tempo Total: ${formatYmd(c.total_time)}</span>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <span class="font-bold text-slate-800">${c.name}</span>
+                                    ${isChecked ? '<span class="text-[9px] font-bold bg-emerald-600 text-white px-1.5 py-0.2 rounded uppercase">Decreto Base</span>' : ''}
+                                </div>
+                                <span class="text-slate-500 block text-[11px] mt-0.5">ID: ${c.id} • Entrada: ${c.entry_date} • Tempo Total: ${formatYmd(c.total_time)} • Destino: <strong class="${isChecked ? 'text-emerald-700' : 'text-slate-600'}">${isChecked ? 'MAJOR RR (sem consumir vaga)' : 'Permanecer no Quadro'}</strong></span>
                             </div>
                         </div>
-                        <span class="text-[10px] font-bold text-blue-600 uppercase bg-blue-100 px-2 py-0.5 rounded">Apto RR</span>
+                        <div class="flex flex-col items-end gap-1 shrink-0">
+                            <span class="text-[10px] font-bold text-emerald-700 uppercase bg-emerald-100 px-2 py-0.5 rounded">Apto RR</span>
+                            <span class="text-[9px] text-slate-400 font-medium">Arts. 53/54</span>
+                        </div>
                     `;
                     captainsRrListEl.appendChild(div);
                 });
@@ -2219,6 +2244,11 @@
                 }
                 if (o.rank === "MAJ" && stratAggregatedMajors.has(o.id)) {
                     o.agregado = true;
+                }
+                if (o.rank === "CAP" && stratCaptainsDecretoBase.has(o.id)) {
+                    // Under Decreto Base: Captain is aggregated for promotion by seniority without occupying vacancy
+                    o.agregado = true;
+                    o.decreto_base = true;
                 }
                 if (o.rank === "CAP" && stratRetiredCaptains.has(o.id)) {
                     o.rank = "CAP RR";
@@ -2268,6 +2298,7 @@
             // Process Promotions in Simulation
             let promotedIds = new Set();
             let promotedSeniority = [];
+            let promotedDecretoBase = [];
             let ineligiblesList = [];
 
             let eligibleQueue = captains.filter(c => c.within_limit && c.intersticio_ok);
@@ -2284,20 +2315,28 @@
 
             let seniorityVacsConsumed = 0;
             for (let cap of eligibleQueue) {
-                if (seniorityVacsConsumed >= v_ant) break;
+                const isDecretoBase = stratCaptainsDecretoBase.has(cap.id) || cap.decreto_base;
+                
+                // If not aggregated and not decreto base, stop if seniority vacancies exhausted
+                if (!cap.agregado && !isDecretoBase && seniorityVacsConsumed >= v_ant) break;
                 
                 promotedIds.add(cap.id);
-                if (cap.agregado) {
-                    promotedSeniority.push({ id: cap.id, name: cap.name, agregado: true });
+                if (isDecretoBase) {
+                    promotedDecretoBase.push({ id: cap.id, name: cap.name, total_time: cap.total_time });
+                    promotedSeniority.push({ id: cap.id, name: cap.name, agregado: true, decreto_base: true });
+                } else if (cap.agregado) {
+                    promotedSeniority.push({ id: cap.id, name: cap.name, agregado: true, decreto_base: false });
                 } else {
                     seniorityVacsConsumed++;
-                    promotedSeniority.push({ id: cap.id, name: cap.name, agregado: false, num: seniorityVacsConsumed });
+                    promotedSeniority.push({ id: cap.id, name: cap.name, agregado: false, decreto_base: false, num: seniorityVacsConsumed });
                 }
             }
 
             let remainingForMerit = eligibleQueue.filter(c => !promotedIds.has(c.id));
             const totalPromotedCount = promotedSeniority.length + Math.min(v_mer, remainingForMerit.length);
             document.getElementById("strat-kpi-promoted").innerText = totalPromotedCount;
+            const kpiDecretoBase = document.getElementById("strat-kpi-decreto-base");
+            if (kpiDecretoBase) kpiDecretoBase.innerText = promotedDecretoBase.length;
 
             // Render Captains Checkboxes
             const captainsListEl = document.getElementById("strat-captains-list");
@@ -2305,13 +2344,17 @@
 
             captains.forEach(c => {
                 const isAggregatedSim = stratAggregatedCaptains.has(c.id);
+                const isDecretoBase = stratCaptainsDecretoBase.has(c.id);
                 const isPromoSeniority = promotedSeniority.some(ps => ps.id === c.id);
                 const isPromoMeritCandidate = remainingForMerit.some(pm => pm.id === c.id);
                 
                 let statusText = "Aguardando";
                 let statusClass = "text-slate-500 bg-slate-100 border-slate-200";
                 
-                if (isPromoSeniority) {
+                if (isDecretoBase) {
+                    statusText = "Decreto Base ➔ MAJ RR";
+                    statusClass = "text-emerald-800 bg-emerald-100 border-emerald-300 font-bold";
+                } else if (isPromoSeniority) {
                     statusText = "Promovido (Antiguidade)";
                     statusClass = "text-emerald-700 bg-emerald-100 border-emerald-300 font-semibold";
                 } else if (isPromoMeritCandidate) {
@@ -2327,21 +2370,23 @@
                 }
 
                 const div = document.createElement("div");
-                div.className = `flex items-center justify-between p-2.5 rounded border text-xs ${isPromoSeniority ? 'bg-emerald-50/40 border-emerald-200' : 'bg-slate-50 border-slate-200'}`;
+                div.className = `flex items-center justify-between p-2.5 rounded border text-xs ${isDecretoBase ? 'bg-emerald-50/60 border-emerald-300' : isPromoSeniority ? 'bg-emerald-50/40 border-emerald-200' : 'bg-slate-50 border-slate-200'}`;
                 
-                // If they are originally aggregated, show checked & disabled checkbox. Otherwise show normal simulation checkbox.
+                // If they are originally aggregated or in decreto base, adapt checkbox
                 const originallyAggregated = officers.find(o => o.id === c.id).agregado;
                 
-                const checkboxHtml = originallyAggregated ? 
+                const checkboxHtml = isDecretoBase ? 
+                    `<input type="checkbox" checked disabled class="w-4 h-4 text-emerald-600 border-gray-300 rounded cursor-not-allowed bg-emerald-100 focus:outline-none" title="Oficial já incluído no Decreto Base acima">` :
+                    originallyAggregated ? 
                     `<input type="checkbox" checked disabled class="w-4 h-4 text-purple-600 border-gray-300 rounded cursor-not-allowed bg-purple-100 focus:outline-none">` : 
-                    `<input type="checkbox" id="strat-cap-chk-${c.id}" ${isAggregatedSim ? 'checked' : ''} onchange="toggleStratCaptain(${c.id})" class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">`;
+                    `<input type="checkbox" id="strat-cap-chk-${c.id}" ${isAggregatedSim ? 'checked' : ''} onchange="toggleStratCaptain(${c.id})" class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer">`;
 
                 div.innerHTML = `
                     <div class="flex items-center gap-3">
                         ${checkboxHtml}
                         <div>
                             <span class="font-bold text-slate-800">${c.name}</span>
-                            <span class="text-slate-400 block text-[10px]">ID: ${c.id} ${originallyAggregated ? '• <span class="text-purple-600 font-bold">Agregado Original</span>' : ''}</span>
+                            <span class="text-slate-400 block text-[10px]">ID: ${c.id} ${isDecretoBase ? '• <span class="text-emerald-700 font-bold">Destino MAJ RR (Decreto Base)</span>' : originallyAggregated ? '• <span class="text-purple-600 font-bold">Agregado Original</span>' : ''}</span>
                         </div>
                     </div>
                     <span class="text-[9px] font-bold px-1.5 py-0.2 rounded border uppercase ${statusClass}">${statusText}</span>
@@ -2353,8 +2398,8 @@
             const resultsEl = document.getElementById("strat-results-container");
             let resultsHtml = "";
 
-            if (totalVacancies === 0 && stratRetiredCaptains.size === 0) {
-                resultsHtml = "<p class='text-slate-500 italic p-4'>Defina vagas, aposente Majors ou envie Capitães para a reserva para iniciar a projeção.</p>";
+            if (totalVacancies === 0 && stratRetiredCaptains.size === 0 && stratCaptainsDecretoBase.size === 0) {
+                resultsHtml = "<p class='text-slate-500 italic p-4'>Defina vagas, aposente Majors ou selecione Capitães no Decreto Base para iniciar a projeção.</p>";
             } else {
                 resultsHtml += `
                     <div class="space-y-4">
@@ -2384,8 +2429,23 @@
                             }
                         </div>
 
+                        ${promotedDecretoBase.length > 0 ? `
+                        <div class="bg-gradient-to-r from-emerald-50 to-teal-50 p-3 rounded-lg border border-emerald-200">
+                            <h4 class="font-bold text-emerald-900 uppercase tracking-wider text-[10px] mb-2 border-b border-emerald-200 pb-1 flex items-center gap-1.5">
+                                <span>🎖️ Estratégia Decreto Base — Promovidos sem vaga e Transferidos p/ MAJ RR (${promotedDecretoBase.length}):</span>
+                            </h4>
+                            <ul class="space-y-1.5 text-xs text-emerald-900 font-medium">
+                                ${promotedDecretoBase.map(p => `
+                                    <li class="flex items-center justify-between bg-white/80 px-2.5 py-1.5 rounded border border-emerald-100 shadow-2xs">
+                                        <span><strong>CAP ${p.name}</strong> (ID: ${p.id})</span>
+                                        <span class="text-[9px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-200">➔ MAJ RR (0 vagas)</span>
+                                    </li>
+                                `).join("")}
+                            </ul>
+                        </div>` : ''}
+
                         <div>
-                            <h4 class="font-bold text-slate-700 uppercase tracking-wider text-[10px] mb-2 border-b pb-1">Capitães na Reserva (${stratRetiredCaptains.size}):</h4>
+                            <h4 class="font-bold text-slate-700 uppercase tracking-wider text-[10px] mb-2 border-b pb-1">Capitães na Reserva Comum (${stratRetiredCaptains.size}):</h4>
                             ${stratRetiredCaptains.size > 0 ? 
                                 `<ul class="list-disc pl-4 space-y-1 text-slate-600 font-medium">
                                     ${Array.from(stratRetiredCaptains).map(id => {
@@ -2393,7 +2453,7 @@
                                         return `<li>${c.name} (ID: ${c.id})</li>`;
                                     }).join("")}
                                 </ul>` : 
-                                `<p class="text-slate-400 italic">Nenhum Capitão transferido.</p>`
+                                `<p class="text-slate-400 italic">Nenhum Capitão transferido diretamente.</p>`
                             }
                         </div>
 
@@ -2402,7 +2462,7 @@
                             ${promotedSeniority.length > 0 ? 
                                 `<ul class="list-decimal pl-4 space-y-1 text-slate-700 font-medium">
                                     ${promotedSeniority.map(ps => {
-                                        const note = ps.agregado ? `<span class="text-purple-600 font-bold ml-1">(Agregado - não ocupa vaga)</span>` : `<span class="text-slate-400 ml-1">(Consome vaga ${ps.num}/${v_ant})</span>`;
+                                        const note = ps.decreto_base ? `<span class="text-emerald-700 font-bold ml-1">(Decreto Base ➔ MAJ RR)</span>` : ps.agregado ? `<span class="text-purple-600 font-bold ml-1">(Agregado - não ocupa vaga)</span>` : `<span class="text-slate-400 ml-1">(Consome vaga ${ps.num}/${v_ant})</span>`;
                                         return `<li>${ps.name}${note}</li>`;
                                     }).join("")}
                                 </ul>` : 
@@ -2458,6 +2518,7 @@
             } else {
                 stratRetiredCaptains.add(id);
                 stratAggregatedCaptains.delete(id);
+                stratCaptainsDecretoBase.delete(id);
             }
             renderStrategy();
         }
@@ -2468,7 +2529,34 @@
             } else {
                 stratAggregatedCaptains.add(id);
                 stratRetiredCaptains.delete(id);
+                stratCaptainsDecretoBase.delete(id);
             }
+            renderStrategy();
+        }
+
+        function toggleStratCaptainDecretoBase(id) {
+            if (stratCaptainsDecretoBase.has(id)) {
+                stratCaptainsDecretoBase.delete(id);
+            } else {
+                stratCaptainsDecretoBase.add(id);
+                stratRetiredCaptains.delete(id);
+                stratAggregatedCaptains.delete(id);
+            }
+            renderStrategy();
+        }
+
+        function selectAllCaptainsDecretoBase() {
+            let eligible = officers.filter(o => o.rank === "CAP" && o.rr_status);
+            eligible.forEach(c => {
+                stratCaptainsDecretoBase.add(c.id);
+                stratRetiredCaptains.delete(c.id);
+                stratAggregatedCaptains.delete(c.id);
+            });
+            renderStrategy();
+        }
+
+        function deselectAllCaptainsDecretoBase() {
+            stratCaptainsDecretoBase.clear();
             renderStrategy();
         }
 
@@ -2477,6 +2565,7 @@
             stratAggregatedMajors.clear();
             stratRetiredCaptains.clear();
             stratAggregatedCaptains.clear();
+            stratCaptainsDecretoBase.clear();
             renderStrategy();
         }
 
@@ -2492,15 +2581,21 @@
                 recs.push(`Aposentar os <strong>${unretiredMajors.length} Majors</strong> que já cumpriram os requisitos para a reserva (libera +${unretiredMajors.length} vagas).`);
             }
 
-            // Suggestion 2: Aggregate senior active captains being promoted by seniority
-            const activePromoted = promotedSeniority.filter(ps => !ps.agregado);
+            // Suggestion 2: Captains apt for RR under Decreto Base Strategy
+            let unappliedCaptainsRR = officers.filter(o => o.rank === "CAP" && o.rr_status && !stratCaptainsDecretoBase.has(o.id));
+            if (unappliedCaptainsRR.length > 0) {
+                recs.push(`🎖️ <strong>Estratégia Decreto Base:</strong> Há <strong>${unappliedCaptainsRR.length} Capitão(ães) aptos à reserva</strong>. Agregue-os para que sejam promovidos a Major sem consumir vagas ordinárias (Arts. 53/54) e transferidos para <strong>MAJ RR</strong>, abrindo espaço para os demais!`);
+            }
+
+            // Suggestion 3: Aggregate senior active captains being promoted by seniority
+            const activePromoted = promotedSeniority.filter(ps => !ps.agregado && !ps.decreto_base);
             if (activePromoted.length > 0) {
                 const names = activePromoted.map(ps => ps.name).slice(0, 2).join(" e ");
                 recs.push(`Simular a agregação de <strong>${names}</strong>. Por serem agregados, serão promovidos sem consumir vagas, permitindo promover outros capitães subsequentes.`);
             }
 
             if (recs.length === 0) {
-                recEl.innerHTML = "🎉 <strong>Configuração de Máximo Fluxo Atingida!</strong> O plano estratégico está otimizado al limite de vagas e agregações possíveis.";
+                recEl.innerHTML = "🎉 <strong>Configuração de Máximo Fluxo Atingida!</strong> O plano estratégico está otimizado ao limite de vagas e agregações possíveis.";
             } else {
                 recEl.innerHTML = recs.map(r => `• ${r}`).join("<br>");
             }
@@ -2512,6 +2607,7 @@
             stratAggregatedMajors.clear();
             stratRetiredCaptains.clear();
             stratAggregatedCaptains.clear();
+            stratCaptainsDecretoBase.clear();
 
             // 1. Auto-retire all Majors who are Apto RR
             officers.forEach(o => {
@@ -2520,7 +2616,14 @@
                 }
             });
 
-            // 2. Cascade aggregation logic
+            // 2. Auto-apply Decreto Base for all Captains who are Apto RR
+            officers.forEach(o => {
+                if (o.rank === "CAP" && o.rr_status) {
+                    stratCaptainsDecretoBase.add(o.id);
+                }
+            });
+
+            // 3. Cascade aggregation logic for remaining non-decreto active captains
             for (let run = 0; run < 15; run++) {
                 let tempOfficers = JSON.parse(JSON.stringify(officers));
                 tempOfficers.forEach(o => {
@@ -2529,6 +2632,10 @@
                     }
                     if (o.rank === "MAJ" && stratAggregatedMajors.has(o.id)) {
                         o.agregado = true;
+                    }
+                    if (o.rank === "CAP" && stratCaptainsDecretoBase.has(o.id)) {
+                        o.agregado = true;
+                        o.decreto_base = true;
                     }
                     if (o.rank === "CAP" && stratRetiredCaptains.has(o.id)) {
                         o.rank = "CAP RR";
@@ -2568,8 +2675,10 @@
                 let seniorityVacsConsumed = 0;
                 let newlyAggregated = false;
                 for (let cap of eligibleQueue) {
-                    if (seniorityVacsConsumed >= v_ant) break;
-                    if (!cap.agregado) {
+                    const isDecretoBase = stratCaptainsDecretoBase.has(cap.id) || cap.decreto_base;
+                    if (!cap.agregado && !isDecretoBase && seniorityVacsConsumed >= v_ant) break;
+                    
+                    if (!cap.agregado && !isDecretoBase) {
                         stratAggregatedCaptains.add(cap.id);
                         newlyAggregated = true;
                         seniorityVacsConsumed++;
@@ -2590,8 +2699,8 @@
             const baseVacancies = parseInt(document.getElementById("strat-base-vacancies").value) || 0;
             const totalVacancies = baseVacancies + stratRetiredMajors.size + stratAggregatedMajors.size;
             
-            if (totalVacancies === 0 && stratRetiredCaptains.size === 0 && stratAggregatedMajors.size === 0 && stratAggregatedCaptains.size === 0) {
-                alert("Nenhuma alteração de vagas ou reserva simulada neste plano!");
+            if (totalVacancies === 0 && stratRetiredCaptains.size === 0 && stratAggregatedMajors.size === 0 && stratAggregatedCaptains.size === 0 && stratCaptainsDecretoBase.size === 0) {
+                alert("Nenhuma alteração de vagas, agregações ou reserva simulada neste plano!");
                 return;
             }
 
@@ -2605,6 +2714,10 @@
                 }
                 if (o.rank === "MAJ" && stratAggregatedMajors.has(o.id)) {
                     o.agregado = true;
+                }
+                if (o.rank === "CAP" && stratCaptainsDecretoBase.has(o.id)) {
+                    o.agregado = true;
+                    o.decreto_base = true;
                 }
                 if (o.rank === "CAP" && stratRetiredCaptains.has(o.id)) {
                     o.rank = "CAP RR";
@@ -2640,14 +2753,16 @@
             let promotedAntiguidade = [];
             let seniorityVacsConsumed = 0;
             for (let cap of eligibleQueue) {
-                if (seniorityVacsConsumed >= v_ant) break;
+                const isDecretoBase = stratCaptainsDecretoBase.has(cap.id) || cap.decreto_base;
+                if (!cap.agregado && !isDecretoBase && seniorityVacsConsumed >= v_ant) break;
+                
                 promotedAntiguidade.push(cap.id);
-                if (!cap.agregado) {
+                if (!cap.agregado && !isDecretoBase) {
                     seniorityVacsConsumed++;
                 }
             }
 
-            if (promotedAntiguidade.length === 0 && stratRetiredMajors.size === 0 && stratAggregatedMajors.size === 0 && stratRetiredCaptains.size === 0 && stratAggregatedCaptains.size === 0) {
+            if (promotedAntiguidade.length === 0 && stratRetiredMajors.size === 0 && stratAggregatedMajors.size === 0 && stratRetiredCaptains.size === 0 && stratAggregatedCaptains.size === 0 && stratCaptainsDecretoBase.size === 0) {
                 alert("Nenhuma alteração simulada para ser efetivada.");
                 return;
             }
@@ -2655,19 +2770,31 @@
             // Convert captain/major IDs to names
             const retiredNames = Array.from(stratRetiredMajors).map(id => officers.find(o => o.id === id).name);
             const aggregatedMajorsNames = Array.from(stratAggregatedMajors).map(id => officers.find(o => o.id === id).name);
-            const promotedNames = promotedAntiguidade.map(id => officers.find(o => o.id === id).name);
+            const decretoBaseNames = Array.from(stratCaptainsDecretoBase).map(id => officers.find(o => o.id === id).name);
+            const regularPromotedIds = promotedAntiguidade.filter(id => !stratCaptainsDecretoBase.has(id));
+            const promotedNames = regularPromotedIds.map(id => officers.find(o => o.id === id).name);
             const aggregatedNames = Array.from(stratAggregatedCaptains).map(id => officers.find(o => o.id === id).name);
 
-            const confirmMsg = `Confirma a efetivação definitiva deste Plano Estratégico no banco local?\n\n` +
-                               `• ${stratRetiredMajors.size} Major(s) serão transferidos para a Reserva (MAJ RR):\n` +
-                               `${retiredNames.map(n => `  - MAJ ${n}`).join("\n")}\n\n` +
-                               `• ${stratAggregatedMajors.size} Major(s) serão agregados:\n` +
-                               `${aggregatedMajorsNames.map(n => `  - MAJ ${n}`).join("\n")}\n\n` +
-                               `• ${stratAggregatedCaptains.size} Capitão(ães) serão agregados:\n` +
-                               `${aggregatedNames.map(n => `  - CAP ${n}`).join("\n")}\n\n` +
-                               `• ${promotedAntiguidade.length} Capitão(ães) serão PROMOVIDOS a Major (MAJ):\n` +
-                               `${promotedNames.map(n => `  - CAP ${n}`).join("\n")}\n\n` +
-                               `Esta ação modificará os registros permanentemente. Deseja continuar?`;
+            let summarySections = [];
+            if (stratRetiredMajors.size > 0) {
+                summarySections.push(`• ${stratRetiredMajors.size} Major(s) serão transferidos para a Reserva (MAJ RR):\n${retiredNames.map(n => `  - MAJ ${n}`).join("\n")}`);
+            }
+            if (stratAggregatedMajors.size > 0) {
+                summarySections.push(`• ${stratAggregatedMajors.size} Major(s) serão agregados:\n${aggregatedMajorsNames.map(n => `  - MAJ ${n}`).join("\n")}`);
+            }
+            if (stratCaptainsDecretoBase.size > 0) {
+                summarySections.push(`• ${stratCaptainsDecretoBase.size} Capitão(ães) com tempo serão agregados, PROMOVIDOS a Major sem ocupar vaga e transferidos para a Reserva (MAJ RR) pelo Decreto Base:\n${decretoBaseNames.map(n => `  - CAP ${n} ➔ MAJ RR`).join("\n")}`);
+            }
+            if (stratAggregatedCaptains.size > 0) {
+                summarySections.push(`• ${stratAggregatedCaptains.size} Capitão(ães) serão agregados na ativa:\n${aggregatedNames.map(n => `  - CAP ${n}`).join("\n")}`);
+            }
+            if (regularPromotedIds.length > 0) {
+                summarySections.push(`• ${regularPromotedIds.length} Capitão(ães) da ativa serão PROMOVIDOS a Major (MAJ):\n${promotedNames.map(n => `  - CAP ${n}`).join("\n")}`);
+            }
+
+            const confirmMsg = `Confirma a efetivação definitiva deste Plano Estratégico no banco de dados?\n\n` +
+                               summarySections.join("\n\n") +
+                               `\n\nEsta ação modificará os registros permanentemente. Deseja continuar?`;
 
             if (confirm(confirmMsg)) {
                 // Apply changes to the real database
@@ -2680,7 +2807,11 @@
                         }
                     }
                     if (o.rank === "CAP") {
-                        if (stratRetiredCaptains.has(o.id)) {
+                        if (stratCaptainsDecretoBase.has(o.id)) {
+                            o.rank = "MAJ RR";
+                            o.agregado = false;
+                            o.promotion_date = currentDateStr;
+                        } else if (stratRetiredCaptains.has(o.id)) {
                             o.rank = "CAP RR";
                         } else {
                             if (stratAggregatedCaptains.has(o.id)) {
@@ -2701,8 +2832,9 @@
                 stratAggregatedMajors.clear();
                 stratRetiredCaptains.clear();
                 stratAggregatedCaptains.clear();
+                stratCaptainsDecretoBase.clear();
 
-                alert("Plano Estratégico efetivado com sucesso!");
+                alert("Plano Estratégico efetivado com sucesso! As alterações foram gravadas.");
                 switchPage('dashboard');
             }
         }
